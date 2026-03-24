@@ -58,9 +58,9 @@ try {
 
             case 'consultas':
                 // Auto-generar ID consulta
-                $stmt = $pdo->query("SELECT COUNT(*) FROM consultas");
-                $count = $stmt->fetchColumn();
-                $nuevo_id = 'SAG-' . str_pad($count + 1, 6, '0', STR_PAD_LEFT);
+                $stmt = $pdo->query("SELECT MAX(CAST(SUBSTRING(id_consulta, 5) AS UNSIGNED)) FROM consultas WHERE id_consulta LIKE 'SAG-%'");
+                $max = $stmt->fetchColumn();
+                $nuevo_id = 'SAG-' . str_pad(($max ?: 0) + 1, 6, '0', STR_PAD_LEFT);
                 $sql = "INSERT INTO consultas
                     (id_consulta,canal,nombre,empresa,telefono,mail,calificada,estado,prenda,consulta_texto,observaciones)
                     VALUES (:id_consulta,:canal,:nombre,:empresa,:telefono,:mail,:calificada,:estado,:prenda,:consulta_texto,:observaciones)";
