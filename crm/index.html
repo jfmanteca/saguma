@@ -1,0 +1,2916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAGUMA — CRM / ERP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f0f2f5;--surface:#ffffff;--surface2:#f7f8fa;--border:#dde1e9;
+    --accent:#1a3a6b;--accent2:#2563b0;--accent3:#4a90d9;
+    --text:#1a2333;--muted:#6b7a99;--red:#d93025;--blue:#2563b0;
+    --accent-light:#e8eef7;--white:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
+  .layout{display:flex;height:100vh;overflow:hidden;}
+  .sidebar{width:220px;background:#0f2447;border-right:none;display:flex;flex-direction:column;flex-shrink:0;}
+  .logo{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08);}
+  .logo-name{font-family:'DM Serif Display',serif;font-size:22px;color:#ffffff;letter-spacing:2px;}
+  .logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+  .nav{flex:1;padding:12px 0;overflow-y:auto;}
+  .nav-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);padding:8px 20px 4px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:rgba(255,255,255,.55);font-size:13px;border-left:2px solid transparent;transition:all .15s;}
+  .nav-item:hover{color:#ffffff;background:rgba(255,255,255,.06);}
+  .nav-item.active{color:#ffffff;border-left-color:#4a90d9;background:rgba(74,144,217,.15);font-weight:500;}
+  .nav-icon{font-size:14px;width:18px;text-align:center;}
+  .sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.3);}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .topbar{background:#ffffff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .page-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);}
+  .page-subtitle{font-size:12px;color:var(--muted);margin-top:1px;}
+  .topbar-actions{display:flex;gap:10px;align-items:center;}
+  .badge{background:rgba(26,58,107,.08);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:3px;border:1px solid rgba(26,58,107,.2);}
+  .content{flex:1;overflow-y:auto;padding:24px 28px;}
+  .page{display:none;} .page.active{display:block;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px;position:relative;overflow:hidden;}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-card.yellow::before{background:var(--accent);} .kpi-card.green::before{background:#16a34a;}
+  .kpi-card.orange::before{background:var(--accent3);} .kpi-card.red::before{background:var(--red);}
+  .kpi-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+  .kpi-value{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);line-height:1;}
+  .kpi-sub{font-size:11px;color:var(--muted);margin-top:6px;}
+  .kpi-change{font-size:11px;margin-top:4px;} .kpi-change.up{color:#16a34a;} .kpi-change.down{color:var(--red);}
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+  .table-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .table-title{font-size:13px;font-weight:600;color:var(--text);}
+  table{width:100%;border-collapse:collapse;}
+  thead th{background:#f5f7fb;padding:10px 16px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+  tbody td{padding:10px 16px;border-bottom:1px solid rgba(42,45,56,.6);font-size:13px;color:var(--text);}
+  tbody tr:last-child td{border-bottom:none;} tbody tr:hover{background:rgba(26,58,107,.03);}
+  .mono{font-family:'DM Mono',monospace;font-size:12px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif;}
+  .btn-primary{background:var(--accent);color:#ffffff;} .btn-primary:hover{background:#1e4d8c;}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+  .btn-ghost:hover{color:var(--text);border-color:var(--muted);}
+  .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red);}
+  .btn-danger:hover{background:rgba(240,74,110,.1);}
+  .btn-sm{padding:4px 10px;font-size:11px;}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
+  .pill-green{background:rgba(22,163,74,.1);color:#16a34a;border:1px solid rgba(22,163,74,.2);}
+  .pill-yellow{background:rgba(232,200,74,.1);color:var(--accent);border:1px solid rgba(232,200,74,.2);}
+  .pill-orange{background:rgba(240,122,74,.1);color:var(--accent3);border:1px solid rgba(240,122,74,.2);}
+  .pill-red{background:rgba(240,74,110,.1);color:var(--red);border:1px solid rgba(240,74,110,.2);}
+  .pill-blue{background:rgba(74,158,240,.1);color:var(--blue);border:1px solid rgba(74,158,240,.2);}
+  .pill-muted{background:rgba(107,114,128,.1);color:var(--muted);border:1px solid rgba(107,114,128,.2);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+  .search-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center;}
+  .search-input{flex:1;background:#ffffff;border:1.5px solid var(--border);color:var(--text);padding:8px 14px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;}
+  .search-input:focus{border-color:var(--accent);}
+  .search-input::placeholder{color:var(--muted);}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;} .form-group.full{grid-column:1/-1;}
+  .form-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+  .form-input,.form-select,.form-textarea{background:#f7f8fa;border:1.5px solid var(--border);color:var(--text);padding:8px 12px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;}
+  .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);}
+  .form-select option{background:var(--surface2);}
+  .form-textarea{resize:vertical;min-height:80px;}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+  .modal-backdrop.open{display:flex;}
+  .modal{background:#ffffff;border:1px solid var(--border);border-radius:10px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.15);}
+  .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .modal-title{font-family:'DM Serif Display',serif;font-size:18px;}
+  .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:2px 6px;}
+  .modal-close:hover{color:var(--text);}
+  .modal-body{padding:24px;} .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;}
+  .chart-title{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--text);}
+  .bar-chart{display:flex;flex-direction:column;gap:10px;}
+  .bar-row{display:flex;align-items:center;gap:12px;}
+  .bar-label{width:140px;font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bar-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+  .bar-val{width:80px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+  .pipeline-col{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .pipeline-head{padding:10px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+  .pipeline-count{background:var(--surface2);border-radius:10px;padding:1px 7px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+  .pipeline-cards{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:120px;}
+  .p-card{background:#f5f7fb;border:1px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;transition:border-color .15s;}
+  .p-card:hover{border-color:var(--accent2);}
+  .p-card-name{font-size:12px;font-weight:500;margin-bottom:4px;}
+  .p-card-meta{font-size:10px;color:var(--muted);}
+  .p-card-amount{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2);margin-top:5px;}
+  .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .product-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;transition:border-color .15s;}
+  .product-card:hover{border-color:var(--accent2);}
+  .product-cat{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .product-name{font-size:13px;font-weight:600;margin-bottom:4px;}
+  .product-prices{display:flex;justify-content:space-between;align-items:flex-end;}
+  .price-cost{font-size:11px;color:var(--muted);}
+  .price-val{font-family:'DM Mono',monospace;font-size:14px;color:var(--accent2);}
+  .margin-tag{font-size:10px;background:rgba(37,99,176,.1);color:var(--accent2);padding:2px 6px;border-radius:3px;font-family:'DM Mono',monospace;}
+  .cf-positive{color:#16a34a;font-family:'DM Mono',monospace;font-size:12px;}
+  .cf-negative{color:var(--red);font-family:'DM Mono',monospace;font-size:12px;}
+  .cf-neutral{color:var(--accent2);font-family:'DM Mono',monospace;font-size:12px;}
+  .loading{text-align:center;padding:40px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;}
+  .empty{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+  ::-webkit-scrollbar{width:5px;height:5px;} ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#ffffff;padding:12px 20px;border-radius:6px;font-weight:600;font-size:13px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:999;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.error{background:var(--red);color:#fff;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .alert-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:20px;overflow:hidden;}
+  .alert-section-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);background:#fafbfc;}
+  .alert-section-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .alert-count{background:#ef4444;color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:2px 7px;min-width:20px;text-align:center;}
+  .alert-count.orange{background:#ea580c;}
+  .alert-dias{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+  .alert-dias input{width:48px;border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:12px;text-align:center;background:var(--bg);color:var(--text);}
+  .alert-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .alert-table th{background:#f0f3f8;padding:7px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--border);}
+  .alert-table td{padding:8px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+  .alert-table tr:last-child td{border-bottom:none;}
+  .dias-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;}
+  .dias-red{color:#dc2626;background:rgba(239,68,68,.1);}
+  .dias-orange{color:#ea580c;background:rgba(251,146,60,.1);}
+  .dias-yellow{color:#d97706;background:rgba(250,204,21,.15);}
+  .btn-wa{background:#25d366;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;}
+  .btn-wa:hover{background:#1da851;}
+  .alert-empty{text-align:center;padding:16px;color:var(--muted);font-size:12px;}
+
+  .cotiz-table-wrap::-webkit-scrollbar{height:10px;}
+  .cotiz-table-wrap::-webkit-scrollbar-track{background:#f0f3f8;border-radius:5px;}
+  .cotiz-table-wrap::-webkit-scrollbar-thumb{background:#a0aec0;border-radius:5px;}
+  .cotiz-table-wrap::-webkit-scrollbar-thumb:hover{background:#718096;}
+
+  .prod-input{width:100%;background:transparent;border:1px solid transparent;color:var(--text);padding:4px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;text-align:right;outline:none;transition:border .15s;}
+  .prod-input:hover{border-color:var(--border);}
+  .prod-input:focus{border-color:var(--accent2);background:var(--surface);}
+  .prod-price-final{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--accent2);text-align:right;padding:4px 6px;}
+  .prod-price-iva{font-family:'DM Mono',monospace;font-size:12px;color:#7c3aed;text-align:right;padding:4px 6px;}
+  .prod-saved{color:#16a34a;font-size:10px;opacity:0;transition:opacity .3s;}
+  .prod-saved.show{opacity:1;}
+
+  .prenda-checkbox-list{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#f7f8fa;border:1.5px solid var(--border);border-radius:5px;padding:10px 12px;max-height:200px;overflow-y:auto;}
+  .prenda-checkbox-list label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;padding:4px 6px;border-radius:4px;transition:background .12s;user-select:none;}
+  .prenda-checkbox-list label:hover{background:rgba(26,58,107,.07);}
+  .prenda-checkbox-list input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+  .prenda-hint{font-size:10px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;}
+  @media(max-width:768px){.prenda-checkbox-list{grid-template-columns:1fr;max-height:240px;}}
+
+  /* ── RESPONSIVE MOBILE ─────────────────────────────────── */
+  .hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:49;}
+  @media(max-width:768px){
+    .app{flex-direction:column;}
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;z-index:300;
+      transform:translateX(-100%);transition:transform .25s ease;
+      width:240px;
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;}
+    .hamburger{display:flex;align-items:center;justify-content:center;}
+    .main{width:100%;min-width:0;}
+    .topbar{padding:10px 14px;}
+    .main-content{padding:12px;}
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .grid2,.grid3{grid-template-columns:1fr;}
+    .form-grid{grid-template-columns:1fr;}
+    .form-group.full{grid-column:1;}
+    .modal{width:95vw!important;max-width:95vw!important;margin:10px;}
+    .modal-body{padding:14px;}
+    .table-wrap{overflow-x:auto;}
+    table{min-width:600px;}
+    .search-bar{flex-wrap:wrap;gap:8px;}
+    .search-input{width:100%!important;min-width:0;}
+    .cotiz-items-table{font-size:11px;}
+  .cotiz-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .page-title{font-size:15px;}
+    .topbar-actions gap{gap:6px;}
+    #topbar-user{display:none;}
+  }
+  @media(max-width:480px){
+    .kpi-grid{grid-template-columns:1fr;}
+    .kpi-value{font-size:20px;}
+    .btn{padding:6px 10px;font-size:12px;}
+  }
+
+  /* MULTI-SELECT PRENDA */
+  select[multiple].form-select {
+
+  /* ── AUTOMATION BUTTONS ──────────────────────────────── */
+  .btn-auto{font-size:10px;padding:3px 8px;border-radius:4px;border:none;cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;}
+  .btn-auto:hover{filter:brightness(1.1);transform:translateY(-1px);}
+  .auto-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .auto-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,176,.08);color:var(--accent2);font-size:10px;padding:2px 8px;border-radius:3px;font-family:'DM Mono',monospace;border:1px solid rgba(37,99,176,.15);}
+
+  /* MULTI-SELECT PRENDA */
+  select[multiple].form-select {
+    height: auto;
+    min-height: 130px;
+    padding: 6px 4px;
+  }
+  select[multiple].form-select option {
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin: 1px 4px;
+    cursor: pointer;
+  }
+  select[multiple].form-select option:checked {
+    background: var(--accent) linear-gradient(0deg, var(--accent) 0%, var(--accent) 100%);
+    color: #fff;
+  }
+  .prenda-hint { font-size:10px; color:var(--muted); margin-top:3px; font-family:'DM Mono',monospace; }
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#0f2447 0%,#1a3a6b 60%,#2563b0 100%);display:flex;align-items:center;justify-content:center;z-index:9999">
+  <div style="background:#fff;border-radius:12px;padding:40px 44px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.35)">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:26px;font-weight:900;letter-spacing:3px;color:#1a3a6b">SAGUMA</div>
+      <div style="font-size:11px;color:#888;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px">CRM / ERP · 2026</div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Usuario</label>
+      <input id="login-user" type="text" autocomplete="username" style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box" placeholder="usuario">
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Contraseña</label>
+      <input id="login-pass" type="password" autocomplete="current-password" style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box" placeholder="••••••••">
+    </div>
+    <div id="login-error" style="color:#e53e3e;font-size:12px;min-height:18px;margin-bottom:10px;text-align:center"></div>
+    <button onclick="doLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1a3a6b,#2563b0);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.5px">Ingresar</button>
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-name">SAGUMA</div>
+      <div class="logo-sub">CRM / ERP · 2026</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active" onclick="goTo('dashboard')"><span class="nav-icon">◈</span>Dashboard</div>
+      <div class="nav-label" style="margin-top:8px">CRM</div>
+      <div class="nav-item" onclick="goTo('consultas')"><span class="nav-icon">✉</span>Consultas</div>
+      <div class="nav-item" onclick="goTo('cotizaciones')"><span class="nav-icon">📄</span>Cotizaciones</div>
+      <div class="nav-item" onclick="goTo('pipeline')"><span class="nav-icon">◎</span>Pipeline</div>
+      <div class="nav-label" style="margin-top:8px">ERP</div>
+      <div class="nav-item" onclick="goTo('productos')"><span class="nav-icon">◈</span>Productos y Precios</div>
+      <div class="nav-item" onclick="goTo('pedidos')"><span class="nav-icon">◻</span>Órdenes de Pedido</div>
+      <div class="nav-item" onclick="goTo('ventas')"><span class="nav-icon">↑</span>Ventas</div>
+      <div class="nav-item" onclick="goTo('cashflow')"><span class="nav-icon">∿</span>Cash Flow</div>
+    </nav>
+    <div class="sidebar-footer">www.saguma.com.ar<br>CUIT 30-70949492-5</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Menú">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="page-title" id="page-title">Dashboard General</div>
+          <div class="page-subtitle" id="page-subtitle">Resumen ejecutivo · Marzo 2026</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="badge" id="db-status">● Conectando...</span>
+        <span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;padding:0 4px" id="topbar-user"></span>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()" style="display:flex;align-items:center;gap:5px;color:var(--muted)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Salir
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card yellow">
+            <div class="kpi-label">Ventas Netas</div>
+            <div class="kpi-value" id="kpi-ventas">—</div>
+            <div class="kpi-sub" id="kpi-ventas-sub">cargando...</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Consultas Totales</div>
+            <div class="kpi-value" id="kpi-consultas">—</div>
+            <div class="kpi-sub" id="kpi-consultas-sub">cargando...</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-label">Cotizaciones</div>
+            <div class="kpi-value" id="kpi-cotiz">—</div>
+            <div class="kpi-sub" id="kpi-cotiz-sub">cargando...</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label">Balance Cashflow</div>
+            <div class="kpi-value" id="kpi-cf">—</div>
+            <div class="kpi-sub" id="kpi-cf-sub">cargando...</div>
+          </div>
+        </div>
+          <!-- ALERTAS DE SEGUIMIENTO -->
+          <div class="alert-section">
+            <div class="alert-section-head">
+              <div class="alert-section-title">
+                🟠 Cotizaciones sin respuesta
+                <span class="alert-count orange" id="alert-cotiz-count">0</span>
+              </div>
+              <div class="alert-dias">
+                Enviadas hace más de
+                <input type="number" id="alert-cotiz-dias" value="7" min="1" max="60" onchange="renderAlertas()">
+                días
+              </div>
+            </div>
+            <table class="alert-table">
+              <thead><tr><th>N° Cotización</th><th>Cliente</th><th>Contacto / Mail</th><th>Monto</th><th>Días</th><th>Estado</th><th></th></tr></thead>
+              <tbody id="alert-cotiz-tbody"><tr><td colspan="7" class="alert-empty">Calculando...</td></tr></tbody>
+            </table>
+          </div>
+
+        <div class="grid2">
+          <div class="chart-card">
+            <div class="chart-title">Consultas por Canal</div>
+            <div id="chart-canales" class="bar-chart"><div class="loading">Cargando...</div></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Estado de Consultas</div>
+            <div id="chart-estados" class="bar-chart"><div class="loading">Cargando...</div></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">Últimas Ventas</div>
+            <button class="btn btn-ghost btn-sm" onclick="goTo('ventas')">Ver todas →</button>
+          </div>
+          <table><thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Ingreso Neto</th><th>Estado</th></tr></thead>
+          <tbody id="dash-ventas-tbody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- CONSULTAS -->
+      <div class="page" id="page-consultas">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="consultas-search" placeholder="🔍  Buscar por cliente, canal, prenda..." oninput="filterConsultas()">
+          <select class="form-select" id="consultas-filter-estado" onchange="filterConsultas()" style="width:180px">
+            <option value="">Todos los estados</option>
+            <option>Pendiente</option><option>Respondido</option><option>Sin respuesta</option><option>Cotizado</option><option>Venta</option>
+          </select>
+          <select class="form-select" id="consultas-filter-cal" onchange="filterConsultas()" style="width:160px">
+            <option value="">Calificación</option>
+            <option value="SI">Calificadas</option><option value="No">No calificadas</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-consulta')">+ Nueva</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">Registro de Consultas</div>
+            <div id="consultas-count" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)"></div>
+          </div>
+          <table><thead><tr><th>ID</th><th>Fecha</th><th>Canal</th><th>Cliente / Empresa</th><th>Calificada</th><th>Estado</th><th>Prenda</th><th>Acciones</th></tr></thead>
+          <tbody id="consultas-tbody"><tr><td colspan="9" class="loading">Cargando desde base de datos...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- PIPELINE -->
+      <div class="page" id="page-pipeline">
+        <p style="color:var(--muted);font-size:12px;margin-bottom:16px">Pipeline generado automáticamente desde consultas y cotizaciones.</p>
+        <div class="pipeline" id="pipeline-board"></div>
+      </div>
+
+      <!-- COTIZACIONES -->
+      <div class="page" id="page-cotizaciones">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="cotiz-search" placeholder="🔍  Buscar cotización..." oninput="filterCotiz()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-cotizacion')">+ Nueva Cotización</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Cotizaciones Emitidas</div></div>
+          <table><thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Estado</th><th>Monto</th><th>Notas</th><th>Acciones</th></tr></thead>
+          <tbody id="cotiz-tbody"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- VENTAS -->
+      <div class="page" id="page-ventas">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="ventas-search" placeholder="🔍  Buscar venta..." oninput="filterVentas()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-venta')">+ Registrar Venta</button>
+        </div>
+        <div class="kpi-grid" style="margin-bottom:20px">
+          <div class="kpi-card yellow"><div class="kpi-label">Ingreso Neto Total</div><div class="kpi-value" id="v-neto">—</div></div>
+          <div class="kpi-card red"><div class="kpi-label">Costo Total Neto</div><div class="kpi-value" id="v-costo">—</div></div>
+          <div class="kpi-card green"><div class="kpi-label">Ganancia Bruta Neta</div><div class="kpi-value" id="v-ganancia">—</div><div class="kpi-sub" id="v-margen">Margen: —</div></div>
+          <div class="kpi-card orange"><div class="kpi-label">Total con IVA</div><div class="kpi-value" id="v-total">—</div></div>
+          <div class="kpi-card blue"><div class="kpi-label">IVA Neto a AFIP</div><div class="kpi-value" id="v-iva-neto">—</div><div class="kpi-sub" id="v-ops">— operaciones</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Registro de Ventas</div></div>
+          <div style="overflow-x:auto">
+          <table style="table-layout:fixed;width:100%;min-width:1100px"><thead><tr><th style="width:45px">N°</th><th style="width:72px">Fecha</th><th style="width:110px">Cliente</th><th>Producto</th><th style="width:40px;text-align:center">Cant.</th><th style="width:95px">Ingreso Neto</th><th style="width:80px">Costo Neto</th><th style="width:80px">Ganancia</th><th style="width:50px">Margen</th><th style="width:95px">Total c/IVA</th><th style="width:75px">Estado</th><th style="width:150px">Acciones</th></tr></thead>
+          <tbody id="ventas-tbody"><tr><td colspan="12" class="loading">Cargando...</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div class="page" id="page-pedidos">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="pedidos-search" placeholder="🔍  Buscar orden..." oninput="filterPedidos()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-orden')">+ Nueva Orden</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Órdenes de Trabajo</div></div>
+          <div style="overflow-x:auto">
+          <table style="table-layout:fixed;width:100%;min-width:1000px"><thead><tr><th style="width:70px">N° Orden</th><th style="width:130px">Proveedor</th><th style="width:70px">Fecha</th><th>Prendas / Descripción</th><th style="width:90px">Subtotal s/IVA</th><th style="width:90px">Total c/IVA</th><th style="width:70px">Anticipo</th><th style="width:110px">Estado</th><th style="width:160px">Acciones</th></tr></thead>
+          <tbody id="pedidos-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTOS -->
+      <div class="page" id="page-productos">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="prod-search" placeholder="🔍  Buscar producto, tela, categoría..." oninput="filterProductos()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-producto')">+ Nuevo Producto</button>
+          <select class="form-select" id="prod-cat" onchange="filterProductos()" style="width:180px">
+            <option value="">Todas las categorías</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">Productos y Precios</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Todos los valores son <strong>sin IVA</strong>. Editá margen o costo directamente en la tabla.</div>
+          </div>
+          <table>
+            <thead><tr>
+              <th>Categoría</th>
+              <th>Producto / Tela</th>
+              <th>Marca</th>
+              <th style="width:100px">Costo s/IVA</th>
+              <th style="width:90px;text-align:center">Margen %</th>
+              <th style="width:120px;text-align:center">Precio s/IVA</th>
+              <th style="width:120px;text-align:center">Precio c/IVA</th>
+              <th style="width:60px;text-align:center">Web</th>
+              <th style="width:90px"></th>
+            </tr></thead>
+            <tbody id="productos-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CASHFLOW -->
+      <div class="page" id="page-cashflow">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="cf-search" placeholder="🔍  Buscar transacción..." oninput="filterCF()">
+          <select class="form-select" id="cf-tipo" onchange="filterCF()" style="width:140px">
+            <option value="">Todos</option><option value="INGRESO">Ingresos</option><option value="EGRESO">Egresos</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-transaccion')">+ Transacción</button>
+        </div>
+        <div class="kpi-grid" style="margin-bottom:20px">
+          <div class="kpi-card green"><div class="kpi-label">Total Ingresos</div><div class="kpi-value" id="cf-ingresos">—</div></div>
+          <div class="kpi-card red"><div class="kpi-label">Total Egresos</div><div class="kpi-value" id="cf-egresos">—</div></div>
+          <div class="kpi-card orange"><div class="kpi-label">Balance Neto</div><div class="kpi-value" id="cf-balance">—</div></div>
+          <div class="kpi-card yellow"><div class="kpi-label">Transacciones</div><div class="kpi-value" id="cf-count">—</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Libro de Transacciones 2026</div></div>
+          <table><thead><tr><th>#</th><th>Fecha</th><th>Mes</th><th>Concepto</th><th>Categoría</th><th>Tipo</th><th>Monto</th><th>Notas</th><th></th></tr></thead>
+          <tbody id="cf-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODALES -->
+
+<!-- Nueva Consulta -->
+<div class="modal-backdrop" id="modal-nueva-consulta">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Nueva Consulta</div><button class="modal-close" onclick="closeModal('nueva-consulta')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Nombre del Cliente *</label><input class="form-input" id="nc-nombre" type="text" placeholder="Nombre y apellido"></div>
+        <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="nc-empresa" type="text"></div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="nc-tel" type="text"></div>
+        <div class="form-group"><label class="form-label">Mail</label><input class="form-input" id="nc-mail" type="email"></div>
+        <div class="form-group"><label class="form-label">Canal</label>
+          <select class="form-select" id="nc-canal"><option>Mail</option><option>WhatsApp</option></select></div>
+        <div class="form-group"><label class="form-label">Estado</label>
+          <select class="form-select" id="nc-estado"><option>Pendiente</option><option>Respondido</option><option>Sin respuesta</option><option>Cotizado</option><option>Venta</option></select></div>
+        <div class="form-group"><label class="form-label">¿Calificada?</label>
+          <select class="form-select" id="nc-cal"><option value="Pendiente de evaluar">Pendiente de evaluar</option><option value="SI">SÍ</option><option value="No">No</option></select></div>
+        <div class="form-group"><label class="form-label">Prenda</label>
+          <div class="prenda-checkbox-list" id="nc-prenda-list">
+          <label><input type="checkbox" name="nc-prenda-chk" value="Ambos"><span>Ambos</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Pantalones"><span>Pantalones</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Camisas"><span>Camisas</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Chombas"><span>Chombas</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Buzos"><span>Buzos</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Camperas"><span>Camperas</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Chalecos"><span>Chalecos</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Remeras"><span>Remeras</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Mameluco"><span>Mameluco</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Bombacha de campo"><span>Bombacha de campo</span></label>
+          <label><input type="checkbox" name="nc-prenda-chk" value="Otro"><span>Otro</span></label>
+          </div>
+          <div class="prenda-hint">Seleccioná una o más prendas</div></div>
+        <div class="form-group full"><label class="form-label">Consulta Exacta</label><textarea class="form-textarea" id="nc-texto"></textarea></div>
+        <div class="form-group full"><label class="form-label">Observaciones Internas</label><textarea class="form-textarea" id="nc-obs" style="min-height:60px"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nueva-consulta')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-consulta" onclick="guardarConsulta()">Guardar Consulta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nueva Venta -->
+<div class="modal-backdrop" id="modal-nueva-venta">
+  <div class="modal" style="width:880px;max-width:98vw">
+    <div class="modal-head"><div class="modal-title">Registrar Venta</div><button class="modal-close" onclick="closeModal('nueva-venta')">✕</button></div>
+    <div class="modal-body">
+      <!-- VENTA -->
+      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Datos de la Venta</div>
+      <div class="form-grid" style="margin-bottom:18px">
+        <div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" id="nv-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Cliente *</label><input class="form-input" id="nv-cliente" type="text"></div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Ítems de la Venta</div>
+      <div class="cotiz-table-wrap">
+      <table class="cotiz-items-table">
+        <thead><tr>
+          <th style="width:24px">#</th><th style="min-width:160px">Producto / Descripción</th>
+          <th style="width:55px">Talle</th><th style="width:65px">Color</th>
+          <th style="width:50px">Cant.</th><th style="width:95px">P. Unit. s/IVA</th>
+          <th style="width:95px">Subtotal s/IVA</th><th style="width:75px">IVA 21%</th>
+          <th style="width:95px">Total c/IVA</th><th style="width:20px"></th>
+        </tr></thead>
+        <tbody id="nv-items-tbody"></tbody>
+      </table>
+      </div>
+      <button class="cotiz-add-row" onclick="agregarItemVenta()">+ Agregar ítem</button>
+      <div class="cotiz-totals" style="margin-top:14px">
+        <div class="cotiz-total-row"><span class="lbl">Subtotal s/IVA</span><span class="val" id="nv-neto">$0</span></div>
+        <div class="cotiz-total-row"><span class="lbl">IVA 21%</span><span class="val" id="nv-iva">$0</span></div>
+        <div class="cotiz-total-row grand"><span class="lbl">TOTAL c/IVA</span><span class="val" id="nv-total">$0</span></div>
+      </div>
+      <div class="form-grid" style="margin-top:18px">
+        <div class="form-group"><label class="form-label">Forma de Pago</label>
+          <select class="form-select" id="nv-pago"><option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Mercado Pago</option></select></div>
+        <div class="form-group"><label class="form-label">Estado</label>
+          <select class="form-select" id="nv-estado"><option>Pendiente</option><option>En producción</option><option>Entregado</option><option>Cancelado</option></select></div>
+        <div class="form-group"><label class="form-label">N° Orden Fabricante</label><input class="form-input" id="nv-orden" type="text" placeholder="OP-001"></div>
+        <div class="form-group"><label class="form-label">N° Factura</label><input class="form-input" id="nv-factura" type="text"></div>
+        <div class="form-group full"><label class="form-label">Observaciones</label><textarea class="form-textarea" id="nv-obs" style="min-height:50px"></textarea></div>
+      </div>
+      <!-- COSTOS -->
+      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;padding-top:14px;border-top:1px solid var(--border)">Costos y Rentabilidad</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Fabricante</label>
+          <select class="form-select" id="nv-fab-tipo" onchange="calcVentaCostos()">
+            <option value="RI">RI — Responsable Inscripto</option>
+            <option value="Mono">Monotributista</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Costo Fab. Neto ($) <span style="font-size:9px;color:var(--muted)">(sin IVA si es RI)</span></label>
+          <input class="form-input" id="nv-costo-fab" type="number" placeholder="0" oninput="calcVentaCostos()"></div>
+        <div class="form-group"><label class="form-label">IVA Crédito Fiscal — auto</label>
+          <input class="form-input" id="nv-cred-fiscal" readonly style="color:#7c3aed;font-size:12px"></div>
+        <div class="form-group"><label class="form-label">Flete / Envío ($)</label>
+          <input class="form-input" id="nv-flete" type="number" placeholder="0" oninput="calcVentaCostos()"></div>
+        <div class="form-group"><label class="form-label">Comisiones ($)</label>
+          <input class="form-input" id="nv-comisiones" type="number" placeholder="0" oninput="calcVentaCostos()"></div>
+        <div class="form-group"><label class="form-label">Otros Costos ($)</label>
+          <input class="form-input" id="nv-otros" type="number" placeholder="0" oninput="calcVentaCostos()"></div>
+        <div class="form-group"><label class="form-label">Costo Total Neto — auto</label>
+          <input class="form-input" id="nv-costo-total" readonly style="color:var(--red);font-weight:600"></div>
+        <div class="form-group"><label class="form-label">Ganancia Bruta Neta — auto</label>
+          <input class="form-input" id="nv-ganancia" readonly style="color:#16a34a;font-weight:600"></div>
+        <div class="form-group"><label class="form-label">Margen Bruto — auto</label>
+          <input class="form-input" id="nv-margen" readonly style="font-weight:600"></div>
+        <div class="form-group"><label class="form-label">IVA Neto a AFIP — auto</label>
+          <input class="form-input" id="nv-iva-neto" readonly style="color:#7c3aed;font-size:12px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nueva-venta')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-venta" onclick="guardarVenta()">Guardar Venta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nueva Cotización -->
+<div class="modal-backdrop" id="modal-nueva-cotizacion">
+  <div class="modal" style="width:880px;max-width:98vw">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Nueva Cotización</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px" id="nco-num-display"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('nueva-cotizacion')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="margin-bottom:18px">
+        <div class="form-group full"><label class="form-label">Empresa / Cliente *</label><input class="form-input" id="nco-cliente" type="text" placeholder="Razón social del cliente"></div>
+        <div class="form-group"><label class="form-label">Contacto / Cargo</label><input class="form-input" id="nco-contacto" type="text"></div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="nco-tel" type="text"></div>
+        <div class="form-group"><label class="form-label">Mail</label><input class="form-input" id="nco-mail" type="email"></div>
+        <div class="form-group"><label class="form-label">Fecha Envío</label><input class="form-input" id="nco-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Válida Hasta</label><input class="form-input" id="nco-valida" type="date"></div>
+        <div class="form-group"><label class="form-label">Plazo de Entrega</label><input class="form-input" id="nco-plazo" type="text" placeholder="30 días hábiles"></div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Ítems de la Cotización</div>
+      <div class="cotiz-table-wrap">
+      <table class="cotiz-items-table">
+        <thead><tr>
+          <th style="width:24px">#</th><th style="min-width:180px">Descripción / Prenda</th>
+          <th style="width:55px">Talle</th><th style="width:65px">Color</th>
+          <th style="width:50px">Cant.</th><th style="width:95px">P. Unit. s/IVA</th>
+          <th style="width:95px">Subtotal s/IVA</th><th style="width:75px">IVA 21%</th>
+          <th style="width:95px">Total c/IVA</th><th style="width:20px"></th>
+        </tr></thead>
+        <tbody id="nco-items-tbody"></tbody>
+      </table>
+      </div><!-- /cotiz-table-wrap -->
+      <button class="cotiz-add-row" onclick="agregarItemCotiz()">+ Agregar ítem</button>
+      <div class="cotiz-totals" style="margin-top:14px">
+        <div class="cotiz-total-row"><span class="lbl">Subtotal s/IVA</span><span class="val" id="nco-t-sub">$0</span></div>
+        <div class="cotiz-total-row"><span class="lbl">IVA 21%</span><span class="val" id="nco-t-iva">$0</span></div>
+        <div class="cotiz-total-row grand"><span class="lbl">TOTAL c/IVA</span><span class="val" id="nco-t-total">$0</span></div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="form-group"><label class="form-label">Notas / Observaciones</label>
+        <textarea class="form-textarea" id="nco-notas" style="min-height:48px"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nueva-cotizacion')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-cotiz" onclick="guardarCotizacion()">Guardar Cotización</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nueva Orden -->
+<div class="modal-backdrop" id="modal-nueva-orden">
+  <div class="modal" style="width:820px;max-width:98vw">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Nueva Orden de Pedido</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px" id="no-num-display"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('nueva-orden')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="no-num">
+      <div class="form-grid" style="margin-bottom:18px">
+        <div class="form-group"><label class="form-label">Proveedor / Taller *</label><input class="form-input" id="no-prov" type="text" placeholder="Nombre del fabricante o taller"></div>
+        <div class="form-group"><label class="form-label">Dirección Proveedor</label><input class="form-input" id="no-dir-prov" type="text" placeholder="Calle, localidad"></div>
+        <div class="form-group"><label class="form-label">Fecha Orden</label><input class="form-input" id="no-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Fecha Entrega Estimada</label><input class="form-input" id="no-fecha-entrega" type="date"></div>
+        <div class="form-group"><label class="form-label">N° Venta Relacionada</label><input class="form-input" id="no-venta-ref" type="text" placeholder="Ej: #001"></div>
+        <div class="form-group"><label class="form-label">Estado</label>
+          <select class="form-select" id="no-estado"><option>En producción</option><option>Entregado</option><option>Cancelado</option></select></div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Prendas / Ítems del Pedido</div>
+      <div class="cotiz-table-wrap">
+      <table class="cotiz-items-table">
+        <thead><tr>
+          <th style="width:24px">#</th>
+          <th style="width:45px">Cód.</th>
+          <th style="min-width:160px">Descripción / Prenda</th>
+          <th style="width:55px">Talle</th>
+          <th style="width:65px">Color</th>
+          <th style="width:55px">Cant.</th>
+          <th style="width:105px">P. Unit. s/IVA</th>
+          <th style="width:105px">Subtotal s/IVA</th>
+          <th style="width:20px"></th>
+        </tr></thead>
+        <tbody id="no-items-tbody"></tbody>
+      </table>
+      </div>
+      <button class="cotiz-add-row" onclick="agregarItemOrden()">+ Agregar ítem</button>
+      <div class="cotiz-totals" style="margin-top:14px">
+        <div class="cotiz-total-row"><span class="lbl">Subtotal s/IVA</span><span class="val" id="no-t-sub">$0</span></div>
+        <div class="cotiz-total-row"><span class="lbl">IVA 21%</span><span class="val" id="no-t-iva">$0</span></div>
+        <div class="cotiz-total-row grand"><span class="lbl">TOTAL c/IVA</span><span class="val" id="no-t-total">$0</span></div>
+      </div>
+      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label class="form-label">Anticipo ($)</label><input class="form-input" id="no-anticipo" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Notas / Condiciones</label><textarea class="form-textarea" id="no-notas" style="min-height:44px"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nueva-orden')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-orden" onclick="guardarOrden()">Guardar Orden</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nueva Transacción -->
+<div class="modal-backdrop" id="modal-nueva-transaccion">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Nueva Transacción</div><button class="modal-close" onclick="closeModal('nueva-transaccion')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" id="nt-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Mes</label>
+          <select class="form-select" id="nt-mes"><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></div>
+        <div class="form-group full"><label class="form-label">Concepto *</label><input class="form-input" id="nt-concepto" type="text"></div>
+        <div class="form-group"><label class="form-label">Categoría</label>
+          <select class="form-select" id="nt-cat"><option>Anticipos</option><option>Cobros directos</option><option>E-commerce</option><option>Otros ingresos</option><option>Producción / Taller</option><option>Telas y materias primas</option><option>Publicidad digital</option><option>Gestión publicidad</option><option>Hosting + Dominio</option><option>Avíos</option><option>Otros egresos</option></select></div>
+        <div class="form-group"><label class="form-label">Tipo</label>
+          <select class="form-select" id="nt-tipo"><option>INGRESO</option><option>EGRESO</option></select></div>
+        <div class="form-group"><label class="form-label">Monto (ARS $) *</label><input class="form-input" id="nt-monto" type="number" placeholder="0"></div>
+        <div class="form-group full"><label class="form-label">Notas / Referencia</label><input class="form-input" id="nt-notas" type="text"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nueva-transaccion')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-trans" onclick="guardarTransaccion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  CONFIGURACIÓN — EDITÁ ESTA URL CON TU DOMINIO
+// ============================================================
+const API = 'https://saguma.com.ar/crm/api.php';
+// ============================================================
+
+// Cache de datos
+let _data = { consultas:[], cotizaciones:[], ventas:[], pedidos:[], cashflow:[], productos:[] };
+const _cotizDismissed = new Set();
+
+// ── API helpers ──────────────────────────────────────────────
+async function apiGet(tabla) {
+  const r = await fetch(`${API}?tabla=${tabla}`);
+  return r.json();
+}
+async function apiPost(tabla, body) {
+  const r = await fetch(`${API}?tabla=${tabla}`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  return r.json();
+}
+async function apiPut(tabla, id, campo, valor) {
+  const r = await fetch(`${API}?tabla=${tabla}&id=${id}`, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({campo,valor})
+  });
+  return r.json();
+}
+async function apiDelete(tabla, id) {
+  const r = await fetch(`${API}?tabla=${tabla}&id=${id}`, { method:'DELETE' });
+  return r.json();
+}
+
+// ── Navigation ───────────────────────────────────────────────
+const pageInfo = {
+  dashboard:   ['Dashboard General','Resumen ejecutivo · Marzo 2026'],
+  consultas:   ['Consultas & Seguimiento','CRM · Gestión de contactos entrantes'],
+  pipeline:    ['Pipeline Comercial','CRM · Estado del proceso de ventas'],
+  cotizaciones:['Cotizaciones','CRM · Cotizaciones emitidas'],
+  ventas:      ['Ventas & Rentabilidad','ERP · Registro de ventas y margen'],
+  pedidos:     ['Órdenes de Pedido','ERP · Producción con talleres'],
+  productos:   ['Catálogo de Productos','ERP · Precios, costos y margen'],
+  cashflow:    ['Cash Flow 2026','ERP · Movimientos financieros'],
+};
+
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+// Close sidebar on nav click (mobile)
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.addEventListener('click', ()=>{
+    if(window.innerWidth<=768){
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+  });
+});
+
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pg = document.getElementById('page-'+page);
+  if(pg) pg.classList.add('active');
+  if(pageInfo[page]){
+    document.getElementById('page-title').textContent = pageInfo[page][0];
+    document.getElementById('page-subtitle').textContent = pageInfo[page][1];
+  }
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')?.includes("'"+page+"'")) n.classList.add('active');
+  });
+  renderPage(page);
+}
+
+// ── Modals ───────────────────────────────────────────────────
+function openModal(id){
+  document.getElementById('modal-'+id).classList.add('open');
+  if(id==='nueva-cotizacion') { if(window._editingCotizacion){window._editingCotizacion=false;}else{initNuevaCotiz();} }
+  if(id==='nueva-venta' && !window._skipVentaInit) initNuevaVenta();
+  window._skipVentaInit = false;
+  if(id==='nuevo-producto'){ if(window._editingProducto){window._editingProducto=false;}else{document.getElementById('prod-modal-title').textContent='Nuevo Producto'; document.getElementById('np-id').value=''; ['np-categoria','np-tela','np-marca','np-costo','np-margen','np-precio','np-precio-iva'].forEach(x=>{const el=document.getElementById(x);if(el) el.value='';});} }
+  if(id==='nueva-orden') initNuevaOrden();
+  if(id==='nueva-consulta') clearFormConsulta && clearFormConsulta();
+}
+function closeModal(id){
+  document.getElementById('modal-'+id).classList.remove('open');
+  if(id==='nueva-cotizacion'){
+    const editInput=document.getElementById('nco-edit-id');
+    if(editInput) editInput.value='';
+    document.querySelector('#modal-nueva-cotizacion .modal-title').textContent='Nueva Cotización';
+    document.getElementById('btn-guardar-cotiz').textContent='Guardar Cotización';
+  }
+}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  if(m.id==='modal-nueva-consulta' || m.id==='modal-nueva-cotizacion') return;
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+
+// ── Toast ────────────────────────────────────────────────────
+function toast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError?' error':'') + ' show';
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+const fmtARS = v => v!=null && v!=='' ? '$'+Math.round(v).toLocaleString('es-AR') : '—';
+const fmtDate = s => s ? s.toString().substring(0,10).split('-').reverse().join('/') : '—';
+function statusPill(s){
+  const m={'Respondido':'pill-green','Pendiente':'pill-yellow','Sin respuesta':'pill-red',
+    'SI':'pill-green','No':'pill-muted','Pendiente de evaluar':'pill-orange',
+    'Cotizado':'pill-blue','Venta':'pill-green',
+    'Entregado':'pill-green','En producción':'pill-orange','Cancelado':'pill-red',
+    'Enviada':'pill-blue','Aceptada':'pill-green','Rechazada':'pill-red','En negociación':'pill-orange','Reclamada':'pill-yellow',
+    'INGRESO':'pill-green','EGRESO':'pill-red','Mail':'pill-blue','WhatsApp':'pill-green',
+    'Web':'pill-blue','Instagram':'pill-orange','Web / Formulario':'pill-yellow','Teléfono':'pill-muted','Referido':'pill-muted'};
+  return `<span class="pill ${m[s]||'pill-muted'}">${s||'—'}</span>`;
+}
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading ? '<span class="spinner"></span> Guardando...' : btn.dataset.label||'Guardar';
+}
+
+// ── RENDER FUNCTIONS ─────────────────────────────────────────
+
+// ── PAGINADO CONSULTAS ─────────────────────────────────────────
+let _consultasPag = { data:[], page:1, perPage:15 };
+
+function renderConsultas(data) {
+  _consultasPag.data = data;
+  _consultasPag.page = 1;
+  renderConsultasPage();
+}
+
+function renderConsultasPage() {
+  const { data, page, perPage } = _consultasPag;
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const start = (page - 1) * perPage;
+  const slice = data.slice(start, start + perPage);
+
+  document.getElementById('consultas-count').textContent = `${total} registros · página ${page} de ${totalPages}`;
+
+  document.getElementById('consultas-tbody').innerHTML = slice.length ? slice.map(c=>`
+    <tr>
+      <td class="mono" style="color:var(--muted);font-size:11px">${c.id_consulta}</td>
+      <td>${fmtDate(c.fecha)}</td>
+      <td>${statusPill(c.canal)}</td>
+      <td><b>${c.nombre}</b>${c.empresa?`<br><span style="font-size:11px;color:var(--muted)">${c.empresa}</span>`:''}</td>
+      <td>${statusPill(c.calificada)}</td>
+      <td>${statusPill(c.estado)}</td>
+      <td style="font-size:12px">${c.prenda||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="verConsulta(${c.id})" style="margin-right:4px">✏ Ver / Editar</button><button class="btn btn-danger btn-sm" onclick="eliminar('consultas',${c.id})">✕</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="8" class="empty">No hay consultas registradas.</td></tr>';
+
+  // Pagination controls
+  let pag = `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--border);justify-content:flex-end;">`;
+  pag += `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-right:8px">${start+1}–${Math.min(start+perPage,total)} de ${total}</span>`;
+  pag += `<button class="btn btn-ghost btn-sm" onclick="cambiarPagConsultas(-1)" ${page<=1?'disabled':''}>← Anterior</button>`;
+  for(let i=1;i<=totalPages;i++){
+    if(totalPages<=7 || i===1 || i===totalPages || Math.abs(i-page)<=1){
+      pag += `<button class="btn btn-sm" onclick="irPagConsultas(${i})" style="${i===page?'background:var(--accent);color:#fff':'background:transparent;border:1px solid var(--border);color:var(--muted)'}">${i}</button>`;
+    } else if(Math.abs(i-page)===2){
+      pag += `<span style="color:var(--muted)">…</span>`;
+    }
+  }
+  pag += `<button class="btn btn-ghost btn-sm" onclick="cambiarPagConsultas(1)" ${page>=totalPages?'disabled':''}>Siguiente →</button>`;
+  pag += `</div>`;
+
+  // Append pagination after tbody
+  const wrap = document.getElementById('consultas-tbody').closest('.table-wrap');
+  let oldPag = wrap.querySelector('.pag-controls');
+  if(oldPag) oldPag.remove();
+  const div = document.createElement('div');
+  div.className = 'pag-controls';
+  div.innerHTML = pag;
+  wrap.appendChild(div);
+}
+
+function cambiarPagConsultas(dir) {
+  const total = Math.ceil(_consultasPag.data.length / _consultasPag.perPage);
+  _consultasPag.page = Math.max(1, Math.min(total, _consultasPag.page + dir));
+  renderConsultasPage();
+}
+function irPagConsultas(p) { _consultasPag.page = p; renderConsultasPage(); }
+
+function filterConsultas() {
+  const q = document.getElementById('consultas-search').value.toLowerCase();
+  const es = document.getElementById('consultas-filter-estado').value;
+  const cal = document.getElementById('consultas-filter-cal').value;
+  renderConsultas(_data.consultas.filter(c=>{
+    const txt = [c.nombre,c.empresa,c.canal,c.prenda,c.mail,c.consulta_texto].join(' ').toLowerCase();
+    return txt.includes(q) && (!es||c.estado===es) && (!cal||c.calificada===cal);
+  }));
+}
+
+function verConsulta(id) {
+  const c = _data.consultas.find(x=>x.id==id);
+  if(!c) return;
+  // Populate edit modal
+  document.getElementById('ec-id').value = c.id;
+  document.getElementById('ec-id-consulta').textContent = c.id_consulta || '';
+  document.getElementById('ec-nombre').value = c.nombre || '';
+  document.getElementById('ec-empresa').value = c.empresa || '';
+  document.getElementById('ec-tel').value = c.telefono || '';
+  document.getElementById('ec-mail').value = c.mail || '';
+  setSelectVal('ec-canal', c.canal);
+  setSelectVal('ec-estado', c.estado);
+  setSelectVal('ec-cal', c.calificada);
+  setSelectVal('ec-prenda', c.prenda);
+  document.getElementById('ec-texto').value = c.consulta_texto || '';
+  document.getElementById('ec-obs').value = c.observaciones || '';
+  openModal('editar-consulta');
+}
+
+function setSelectVal(id, val) {
+  const sel = document.getElementById(id);
+  if(!sel || val==null) return;
+  if(sel.multiple) {
+    // Handle multi-select: val is comma-separated string
+    const vals = String(val).split(',').map(v=>v.trim()).filter(Boolean);
+    for(let o of sel.options){ o.selected = vals.includes(o.value) || vals.includes(o.text); }
+  } else {
+    for(let o of sel.options){ if(o.value===val||o.text===val){ sel.value=o.value; return; } }
+    if(val){ const o=document.createElement('option'); o.value=val; o.text=val; sel.appendChild(o); sel.value=val; }
+  }
+}
+
+async function guardarEdicionConsulta() {
+  const id = document.getElementById('ec-id').value;
+  const nombre = document.getElementById('ec-nombre').value.trim();
+  if(!nombre){ toast('El nombre es obligatorio.', true); return; }
+  const btn = document.getElementById('btn-guardar-edicion');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
+
+  // Update each field via PUT
+  const fields = {
+    nombre, empresa: document.getElementById('ec-empresa').value,
+    telefono: document.getElementById('ec-tel').value,
+    mail: document.getElementById('ec-mail').value,
+    canal: document.getElementById('ec-canal').value,
+    estado: document.getElementById('ec-estado').value,
+    calificada: document.getElementById('ec-cal').value,
+    prenda: Array.from(document.getElementById('ec-prenda').selectedOptions).map(o=>o.value).join(', '),
+    consulta_texto: document.getElementById('ec-texto').value,
+    observaciones: document.getElementById('ec-obs').value,
+  };
+
+  // Send all fields in one PUT (api needs to support multi-field update)
+  const res = await fetch(`${API}?tabla=consultas&id=${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ multi: true, fields })
+  });
+  const data = await res.json();
+  btn.disabled = false; btn.innerHTML = 'Guardar Cambios';
+  if(data.ok){
+    // Update local cache
+    const idx = _data.consultas.findIndex(x=>x.id==id);
+    if(idx>=0) Object.assign(_data.consultas[idx], fields);
+    closeModal('editar-consulta');
+    filterConsultas();
+    toast('✓ Consulta actualizada');
+  } else { toast('Error: '+data.error, true); }
+}
+
+function renderVentas(data) {
+  const neto     = data.reduce((s,v)=>s+(parseFloat(v.ingreso_neto)||0),0);
+  const tot      = data.reduce((s,v)=>s+(parseFloat(v.total_con_iva)||0),0);
+  const costo    = data.reduce((s,v)=>s+(parseFloat(v.costo_total_neto)||0),0);
+  const ganancia = neto - costo;
+  const margen   = neto>0 ? ganancia/neto : 0;
+  const ivaDebit = data.reduce((s,v)=>s+(parseFloat(v.iva)||0),0);
+  const ivaCredit= data.reduce((s,v)=>{
+    if(v.fab_tipo==='RI'&&v.costo_fab_neto) return s+(parseFloat(v.costo_fab_neto)||0)*0.21;
+    return s;
+  },0);
+  document.getElementById('v-neto').textContent    = fmtARS(neto);
+  document.getElementById('v-costo').textContent   = fmtARS(costo);
+  document.getElementById('v-ganancia').textContent= fmtARS(ganancia);
+  document.getElementById('v-margen').textContent  = 'Margen: '+(neto>0?(margen*100).toFixed(1)+'%':'—');
+  document.getElementById('v-total').textContent   = fmtARS(tot);
+  document.getElementById('v-iva-neto').textContent= fmtARS(ivaDebit-ivaCredit);
+  document.getElementById('v-ops').textContent     = data.length+' operaciones';
+  document.getElementById('ventas-tbody').innerHTML = data.length ? data.map(v=>{
+    const gan = parseFloat(v.ganancia_bruta)||0;
+    const mar = parseFloat(v.margen_bruto)||0;
+    const cant = parseFloat(v.cantidad)||0;
+    const marColor = mar>=0.2?'#16a34a':mar>=0.1?'#d97706':mar>0?'var(--red)':'var(--muted)';
+    return `<tr>
+      <td class="mono" style="font-size:11px">#${String(v.numero||v.id).padStart(3,'0')}</td>
+      <td style="font-size:12px">${fmtDate(v.fecha)}</td>
+      <td style="font-size:12px"><b>${v.cliente}</b></td>
+      <td style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.producto}">${v.producto}</td>
+      <td class="mono" style="text-align:center">${cant>0?cant:'—'}</td>
+      <td class="mono" style="color:var(--accent)">${fmtARS(v.ingreso_neto)}</td>
+      <td class="mono" style="color:var(--muted);font-size:11px">${v.costo_total_neto?fmtARS(v.costo_total_neto):'—'}</td>
+      <td class="mono" style="color:${gan>0?'#16a34a':'var(--red)'};font-weight:600">${gan?fmtARS(gan):'—'}</td>
+      <td class="mono" style="font-weight:600;color:${marColor}">${mar?(mar*100).toFixed(1)+'%':'—'}</td>
+      <td class="mono" style="color:var(--accent2)">${fmtARS(v.total_con_iva)}</td>
+      <td>${statusPill(v.estado)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="verDetalleVenta(${v.id})" title="Ver detalle" style="font-size:11px">👁</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarVenta(${v.id})" title="Editar costos" style="font-size:11px;margin-left:2px">✏️</button>
+        <button class="btn btn-sm" style="background:#2563b0;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="generarOrdenDesdeVenta(${v.id})" title="Generar orden de pedido al taller">⚡OP</button>
+        <button class="btn btn-sm" style="background:#16a34a;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="registrarCobroDesdeVenta(${v.id})" title="Registrar cobro en cashflow">💰</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('ventas',${v.id})" style="margin-left:2px">✕</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="12" class="empty">No hay ventas registradas.</td></tr>';
+}
+
+
+
+function editarVenta(id) {
+  const v = _data.ventas.find(x=>x.id==id);
+  if(!v) return;
+  // Reset items
+  _ventaItems = [];
+  document.getElementById('nv-items-tbody').innerHTML = '';
+  // Fill modal fields
+  document.getElementById('nv-fecha').value     = v.fecha||'';
+  document.getElementById('nv-cliente').value   = v.cliente||'';
+  // Try to load items from items_json, fallback to single-line
+  let items = [];
+  try { items = v.items_json ? JSON.parse(v.items_json) : []; } catch(e){}
+  if(items.length > 0) {
+    items.filter(Boolean).forEach(it => agregarItemVenta(it));
+  } else {
+    // Legacy: single-item venta, reconstruct from flat fields
+    agregarItemVenta({desc: v.producto||'', color: v.color||'', talle: v.talle||'', cant: v.cantidad||'', precio: v.precio_neto||''});
+  }
+  document.getElementById('nv-pago').value      = v.forma_pago||'Transferencia';
+  document.getElementById('nv-orden').value     = v.orden_fabricante||'';
+  document.getElementById('nv-factura').value   = v.factura||'';
+  document.getElementById('nv-obs').value       = v.observaciones||'';
+  setSelectVal('nv-estado', v.estado);
+  setSelectVal('nv-fab-tipo', v.fab_tipo||'RI');
+  document.getElementById('nv-costo-fab').value  = v.costo_fab_neto||'';
+  document.getElementById('nv-flete').value      = v.flete||'';
+  document.getElementById('nv-comisiones').value = v.comisiones||'';
+  document.getElementById('nv-otros').value      = v.otros_costos||'';
+  recalcVenta();
+  // Change save button to update
+  const btn = document.getElementById('btn-guardar-venta');
+  btn.textContent = 'Actualizar Venta';
+  btn.onclick = () => actualizarVenta(id);
+  document.querySelector('#modal-nueva-venta .modal-title').textContent = 'Editar Venta #'+String(v.numero||v.id).padStart(3,'0');
+  window._skipVentaInit = true;
+  openModal('nueva-venta');
+}
+
+async function actualizarVenta(id) {
+  const cliente = document.getElementById('nv-cliente').value.trim();
+  if(!cliente){ toast('Ingresá el cliente.', true); return; }
+  const btn = document.getElementById('btn-guardar-venta');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const items = _ventaItems.filter(Boolean);
+  const totalCant = items.reduce((s,it)=>s+(parseFloat(it.cant)||0),0);
+  const totalNeto = items.reduce((s,it)=>s+(parseFloat(it.cant)||0)*(parseFloat(it.precio)||0),0);
+  const avgPrecio = totalCant>0 ? totalNeto/totalCant : 0;
+  const prodDesc = items.map(it=>{
+    let parts = [it.desc||''];
+    if(it.color) parts.push(it.color);
+    if(it.talle) parts.push('T.'+it.talle);
+    if(parseFloat(it.cant)>0) parts.push('x'+it.cant);
+    return parts.join(' ');
+  }).join(' + ');
+  const colorConcat = items.map(it=>it.color).filter(Boolean).join(', ');
+  const talleConcat = items.map(it=>it.talle).filter(Boolean).join(', ');
+  const costoFab  = parseFloat(document.getElementById('nv-costo-fab').value)||0;
+  const flete     = parseFloat(document.getElementById('nv-flete').value)||0;
+  const comision  = parseFloat(document.getElementById('nv-comisiones').value)||0;
+  const otros     = parseFloat(document.getElementById('nv-otros').value)||0;
+  const fabTipo   = document.getElementById('nv-fab-tipo').value;
+  const costoTotal= costoFab+flete+comision+otros;
+  const ganancia  = totalNeto - costoTotal;
+  const margen    = totalNeto > 0 ? ganancia/totalNeto : 0;
+  const fields = {
+    multi: true,
+    fields: {
+      fecha: document.getElementById('nv-fecha').value,
+      cliente,
+      producto: prodDesc,
+      color: colorConcat,
+      talle: talleConcat,
+      cantidad: totalCant, precio_neto: Math.round(avgPrecio*100)/100,
+      ingreso_neto: totalNeto, iva: totalNeto*0.21, total_con_iva: totalNeto*1.21,
+      forma_pago: document.getElementById('nv-pago').value,
+      estado: document.getElementById('nv-estado').value,
+      orden_fabricante: document.getElementById('nv-orden').value,
+      factura: document.getElementById('nv-factura').value,
+      observaciones: document.getElementById('nv-obs').value,
+      fab_tipo: fabTipo,
+      costo_fab_neto: costoFab||null, flete: flete||null,
+      comisiones: comision||null, otros_costos: otros||null,
+      costo_total_neto: costoTotal||null,
+      ganancia_bruta: ganancia||null, margen_bruto: margen||null,
+      items_json: JSON.stringify(items),
+    }
+  };
+  const res = await fetch(`${API}?tabla=ventas&id=${id}`, {
+    method: 'PUT', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(fields)
+  });
+  const data = await res.json();
+  btn.disabled = false;
+  btn.textContent = 'Guardar Venta';
+  btn.onclick = guardarVenta;
+  document.querySelector('#modal-nueva-venta .modal-title').textContent = 'Registrar Venta';
+  if(data.ok){ closeModal('nueva-venta'); await loadAll(); toast('✓ Venta actualizada'); }
+  else toast('Error: '+data.error, true);
+}
+
+function verDetalleVenta(id) {
+  const v = _data.ventas.find(x=>x.id==id);
+  if(!v) return;
+  const fmtN = n => n ? fmtARS(parseFloat(n)) : '—';
+  const fmtPct = n => n ? (parseFloat(n)*100).toFixed(1)+'%' : '—';
+  const gan = parseFloat(v.ganancia_bruta)||0;
+  const mar = parseFloat(v.margen_bruto)||0;
+  const marColor = mar>=0.2?'#16a34a':mar>=0.1?'#d97706':mar>0?'var(--red)':'var(--muted)';
+  const ivaCredFiscal = v.fab_tipo==='RI' && v.costo_fab_neto ? parseFloat(v.costo_fab_neto)*0.21 : 0;
+  const ivaNeto = (parseFloat(v.iva)||0) - ivaCredFiscal;
+
+  const row = (label, val, style='') =>
+    `<tr><td style="color:var(--muted);font-size:12px;padding:7px 10px;border-bottom:1px solid var(--border)">${label}</td>
+         <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:right;padding:7px 10px;border-bottom:1px solid var(--border);${style}">${val}</td></tr>`;
+
+  document.getElementById('detalle-venta-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px">
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Cliente</div>
+        <div style="font-weight:600">${v.cliente}</div>
+        ${v.fecha?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${fmtDate(v.fecha)}</div>`:''}
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px">
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Producto</div>
+        <div style="font-weight:600;font-size:13px">${v.producto}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${[v.color,v.talle].filter(Boolean).join(' · ')}</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Venta</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+      ${row('Cantidad', v.cantidad+' u.')}
+      ${row('Precio Neto Unit.', fmtN(v.precio_neto))}
+      ${row('Ingreso Neto', fmtN(v.ingreso_neto), 'color:var(--accent);font-weight:600')}
+      ${row('IVA 21% (Débito Fiscal)', fmtN(v.iva), 'color:#7c3aed')}
+      ${row('Total c/IVA', fmtN(v.total_con_iva), 'color:var(--accent2);font-weight:600')}
+      ${row('Forma de Pago', v.forma_pago||'—')}
+      ${v.factura?row('N° Factura', v.factura):''}
+      ${v.orden_fabricante?row('N° Orden Fabricante', v.orden_fabricante):''}
+    </table>
+
+    ${v.costo_total_neto || v.costo_fab_neto ? `
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Costos y Rentabilidad</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+      ${v.fab_tipo?row('Tipo Fabricante', v.fab_tipo):''}
+      ${row('Costo Fab. Neto', fmtN(v.costo_fab_neto))}
+      ${ivaCredFiscal?row('IVA Crédito Fiscal', fmtN(ivaCredFiscal), 'color:#7c3aed'):''}
+      ${v.flete?row('Flete / Envío', fmtN(v.flete)):''}
+      ${v.comisiones?row('Comisiones', fmtN(v.comisiones)):''}
+      ${v.otros_costos?row('Otros Costos', fmtN(v.otros_costos)):''}
+      ${row('Costo Total Neto', fmtN(v.costo_total_neto), 'color:var(--red);font-weight:600')}
+      <tr style="background:${gan>0?'rgba(22,163,74,.06)':'rgba(220,38,38,.06)'}">
+        <td style="padding:8px 10px;font-weight:700;font-size:13px">Ganancia Bruta Neta</td>
+        <td style="text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-weight:700;font-size:14px;color:${gan>0?'#16a34a':'var(--red)'}">${fmtN(v.ganancia_bruta)}</td>
+      </tr>
+      <tr>
+        <td style="padding:7px 10px;color:var(--muted);font-size:12px">Margen Bruto</td>
+        <td style="text-align:right;padding:7px 10px;font-family:'DM Mono',monospace;font-weight:700;font-size:13px;color:${marColor}">${fmtPct(v.margen_bruto)}</td>
+      </tr>
+      ${row('IVA Neto a AFIP', fmtN(ivaNeto), 'color:#7c3aed')}
+    </table>` : ''}
+
+    ${v.observaciones?`<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:4px;padding:10px 14px;font-size:12px;color:var(--muted)"><strong style="color:var(--text)">Observaciones:</strong> ${v.observaciones}</div>`:''}
+
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;font-family:'DM Mono',monospace">⚡ Acciones Rápidas</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" style="background:#2563b0;color:#fff;font-size:11px;padding:6px 12px" onclick="closeModal('detalle-venta');generarOrdenDesdeVenta(${v.id})">⚡ Generar Orden de Pedido</button>
+        <button class="btn btn-sm" style="background:#16a34a;color:#fff;font-size:11px;padding:6px 12px" onclick="closeModal('detalle-venta');registrarCobroDesdeVenta(${v.id})">💰 Registrar Cobro</button>
+        <button class="btn btn-sm" style="background:var(--accent);color:#fff;font-size:11px;padding:6px 12px" onclick="closeModal('detalle-venta');editarVenta(${v.id})">✏️ Editar Venta</button>
+      </div>
+    </div>
+  `;
+  openModal('detalle-venta');
+}
+
+function filterVentas() {
+  const q = document.getElementById('ventas-search').value.toLowerCase();
+  renderVentas(_data.ventas.filter(v=>[v.cliente,v.producto,v.color].join(' ').toLowerCase().includes(q)));
+}
+
+let _cotizSort={col:'id',dir:'desc'};
+function sortCotiz(col){
+  if(_cotizSort.col===col){_cotizSort.dir=_cotizSort.dir==='asc'?'desc':'asc';}
+  else{_cotizSort.col=col;_cotizSort.dir='desc';}
+  filterCotiz();
+  document.querySelectorAll('.cotiz-th').forEach(th=>{
+    th.classList.remove('asc','desc');
+    if(th.dataset.col===col) th.classList.add(_cotizSort.dir);
+  });
+}
+function renderCotizaciones(data) {
+  const col=_cotizSort.col,dir=_cotizSort.dir;
+  data=[...data].sort((a,b)=>{
+    let va=a[col]||'',vb=b[col]||'';
+    if(col==='monto'||col==='id'){va=parseFloat(va)||0;vb=parseFloat(vb)||0;}
+    else{va=String(va).toLowerCase();vb=String(vb).toLowerCase();}
+    if(va<vb) return dir==='asc'?-1:1;
+    if(va>vb) return dir==='asc'?1:-1;
+    return 0;
+  });
+  const thead=document.querySelector('#page-cotizaciones thead tr');
+  if(thead) thead.innerHTML=[['numero','N°'],['fecha','Fecha'],['cliente','Cliente'],['estado','Estado'],['monto','Monto'],['observaciones','Seguimiento'],[null,'Acciones']].map(([col,label])=>col?`<th class="sortable cotiz-th ${_cotizSort.col===col?_cotizSort.dir:''}" data-col="${col}" onclick="sortCotiz('${col}')">${label}<span class="sort-arrow"></span></th>`:`<th>${label}</th>`).join('');
+  document.getElementById('cotiz-tbody').innerHTML = data.length ? data.map(co=>`
+    <tr>
+      <td class="mono">${co.numero}</td>
+      <td>${fmtDate(co.fecha)}</td>
+      <td><b>${co.cliente}</b>${co.contacto?`<br><span style="font-size:11px;color:var(--muted)">${co.contacto}</span>`:''}</td>
+      <td>${statusPill(co.estado)}</td>
+      <td class="mono">${co.monto?fmtARS(co.monto):'—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:180px">${co.observaciones ? co.observaciones.split(' | ').pop() : '—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="abrirSeguimiento(${co.id})" style="font-size:11px;padding:3px 6px" title="Seguimiento">📝</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarCotizacion(${co.id})" style="margin-left:2px;font-size:11px;padding:3px 6px" title="Editar">✏️</button>
+        ${co.estado==='Aceptada'?`<button class="btn btn-sm" style="background:#16a34a;color:#fff;margin-left:2px;font-size:10px;padding:3px 8px" onclick="generarVentaDesdeCotiz(${co.id})" title="Generar venta">⚡ Venta</button>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="exportarCotizPDF(${co.id})" style="margin-left:2px;font-size:11px;padding:3px 6px" title="PDF">📄</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('cotizaciones',${co.id})" style="margin-left:2px;font-size:11px;padding:3px 6px">✕</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="7" class="empty">No hay cotizaciones.</td></tr>';
+}
+function filterCotiz(){
+  const q=document.getElementById('cotiz-search').value.toLowerCase();
+  renderCotizaciones(_data.cotizaciones.filter(c=>[c.cliente,c.numero].join(' ').toLowerCase().includes(q)));
+}
+
+async function cambiarEstadoCotiz(id, val) {
+  await apiPut('cotizaciones', id, 'estado', val);
+  const c = _data.cotizaciones.find(x=>x.id==id);
+  if(c) c.estado = val;
+  toast('Estado actualizado');
+}
+
+async function agregarObsCotiz(id) {
+  // legacy - redirigir al nuevo modal
+  abrirSeguimiento(id);
+}
+
+function abrirSeguimiento(id) {
+  const co = _data.cotizaciones.find(x=>x.id==id);
+  if(!co) return;
+  const obs = co.observaciones || '';
+  const entradas = obs ? obs.split(' | ').map(e => {
+    const match = e.match(/^\[([^\]]+)\]\s*(.*)$/);
+    return match ? { fecha: match[1], texto: match[2] } : { fecha: '', texto: e };
+  }) : [];
+
+  const entriesHtml = entradas.length ? entradas.map(e =>
+    `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06);">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);white-space:nowrap;padding-top:1px;">${e.fecha}</div>
+      <div style="font-size:13px;color:var(--text);">${e.texto}</div>
+    </div>`
+  ).join('') : '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Sin observaciones todavía</div>';
+
+  const html = `
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;">Cotización</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text);">${co.numero||'—'}</div>
+        <div style="font-size:13px;color:var(--muted);">${co.cliente||''} ${co.contacto ? '· '+co.contacto : ''}</div>
+      </div>
+      <div>${statusPill(co.estado)}</div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Estado</label>
+      <select class="form-select" id="seg-estado" style="width:100%;padding:8px 12px;font-size:13px;">
+        <option ${co.estado==='Pendiente'?'selected':''}>Pendiente</option>
+        <option ${co.estado==='Enviada'?'selected':''}>Enviada</option>
+        <option ${co.estado==='Aceptada'?'selected':''}>Aceptada</option>
+        <option ${co.estado==='En negociación'?'selected':''}>En negociación</option>
+        <option ${co.estado==='Reclamada'?'selected':''}>Reclamada</option>
+        <option ${co.estado==='Rechazada'?'selected':''}>Rechazada</option>
+      </select>
+    </div>
+  </div>
+  <div style="margin-bottom:16px;">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Bitácora de seguimiento</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px 14px;max-height:200px;overflow-y:auto;">
+      ${entriesHtml}
+    </div>
+  </div>
+  <div>
+    <label style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Nueva observación</label>
+    <textarea class="form-textarea" id="seg-nueva-obs" placeholder="Ej: Se reclamó por mail..." style="min-height:60px;font-size:13px;"></textarea>
+  </div>`;
+
+  document.getElementById('seg-modal-body').innerHTML = html;
+  document.getElementById('seg-modal-id').value = id;
+  openModal('seguimiento-cotiz');
+}
+
+async function guardarSeguimiento() {
+  const id = document.getElementById('seg-modal-id').value;
+  const co = _data.cotizaciones.find(x=>x.id==id);
+  if(!co) return;
+
+  const nuevoEstado = document.getElementById('seg-estado').value;
+  const nuevaObs = document.getElementById('seg-nueva-obs').value.trim();
+
+  // Actualizar estado si cambió
+  if(nuevoEstado !== co.estado) {
+    await apiPut('cotizaciones', id, 'estado', nuevoEstado);
+    co.estado = nuevoEstado;
+  }
+
+  // Agregar observación si hay texto
+  if(nuevaObs) {
+    const hoy = new Date();
+    const fecha = String(hoy.getDate()).padStart(2,'0')+'/'+String(hoy.getMonth()+1).padStart(2,'0')+'/'+hoy.getFullYear();
+    const obsActual = co.observaciones || '';
+    const nueva = (obsActual ? obsActual + ' | ' : '') + '[' + fecha + '] ' + nuevaObs;
+    await apiPut('cotizaciones', id, 'observaciones', nueva);
+    co.observaciones = nueva;
+  }
+
+  closeModal('seguimiento-cotiz');
+  renderCotizaciones(_data.cotizaciones);
+  toast(nuevaObs ? 'Seguimiento actualizado' : 'Estado actualizado');
+}
+
+function renderPedidos(data) {
+  document.getElementById('pedidos-tbody').innerHTML = data.length ? data.map(p=>{
+    let items=[];
+    try{ items=p.items_json?JSON.parse(p.items_json):[]; }catch(e){}
+    const totalCant = items.reduce((s,it)=>s+(parseInt(it.cant)||0),0);
+    const resumen = items.length
+      ? items.slice(0,2).map(it=>`${it.desc||'—'} ×${it.cant||0}`).join(', ')+(items.length>2?` +${items.length-2} más`:'')
+      : (p.notas||'—');
+    const estadoOpts = ['En producción','Entregado','Cancelado'].map(e=>
+      `<option value="${e}" ${p.estado===e?'selected':''}>${e}</option>`).join('');
+    return `<tr>
+      <td class="mono" style="color:var(--accent);font-weight:600;font-size:12px">${p.numero}</td>
+      <td style="font-size:12px"><b>${p.proveedor}</b>${p.direccion_proveedor?`<br><span style="font-size:10px;color:var(--muted)">${p.direccion_proveedor}</span>`:''}</td>
+      <td style="font-size:12px">${fmtDate(p.fecha)}</td>
+      <td style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)" title="${resumen}">${resumen}${totalCant?` <span style="color:var(--muted);font-size:10px">(${totalCant} u.)</span>`:''}</td>
+      <td class="mono" style="font-size:12px">${fmtARS(p.subtotal)}</td>
+      <td class="mono" style="color:var(--accent2);font-weight:600;font-size:12px">${fmtARS(p.total)}</td>
+      <td class="mono" style="color:var(--muted);font-size:11px">${p.anticipo?fmtARS(p.anticipo):'—'}</td>
+      <td>
+        <select class="form-select" style="font-size:11px;padding:3px 6px;border-radius:4px" onchange="actualizarEstadoPedido(${p.id},this.value)">
+          ${estadoOpts}
+        </select>
+      </td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="exportarPedidoPDF(${p.id})" title="Descargar PDF" style="font-size:11px">📄</button>
+        <button class="btn btn-sm" style="background:#ea580c;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="registrarAnticipoDesdePedido(${p.id})" title="Registrar anticipo en cashflow">💸 Ant.</button>
+        <button class="btn btn-sm" style="background:#7c3aed;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="registrarSaldoPedido(${p.id})" title="Registrar pago saldo en cashflow">💸 Saldo</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('pedidos',${p.id})" style="margin-left:2px">✕</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="9" class="empty">No hay órdenes.</td></tr>';
+}
+
+
+async function actualizarEstadoPedido(id, estado) {
+  const res = await fetch(`${API}?tabla=pedidos&id=${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({estado})
+  });
+  const data = await res.json();
+  if(data.ok) {
+    const p = _data.pedidos.find(x=>x.id==id);
+    if(p) p.estado = estado;
+    toast('✓ Estado actualizado');
+  } else {
+    toast('Error al actualizar estado', true);
+    await loadAll();
+  }
+}
+
+function filterPedidos() {
+  const q = document.getElementById('pedidos-search').value.toLowerCase();
+  renderPedidos(_data.pedidos.filter(p=>[p.numero,p.proveedor].join(' ').toLowerCase().includes(q)));
+}
+
+function calcPrecioProducto(costo, margenPct) {
+  // margenPct = 20 means 20% markup over cost → precio = costo * 1.20
+  const c = parseFloat(costo)||0;
+  const m = parseFloat(margenPct)||0;
+  return c * (1 + m / 100);
+}
+
+function renderProductos(data) {
+  const tbody = document.getElementById('productos-tbody');
+  if(!tbody) return;
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="9" class="empty">No hay productos.</td></tr>'; return; }
+  // Poblar filtro de categorías
+  const cats = [...new Set(data.map(p=>p.categoria).filter(Boolean))].sort();
+  const catSelect = document.getElementById('prod-cat');
+  if(catSelect) {
+    const currentVal = catSelect.value;
+    catSelect.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option value="${c}" ${c===currentVal?'selected':''}>${c}</option>`).join('');
+  }
+  tbody.innerHTML = data.map(p => {
+    const costo     = parseFloat(p.costo)||0;
+    const margenRaw = parseFloat(p.margen)||0;
+    const margenPct = margenRaw > 1 ? margenRaw.toFixed(1) : (margenRaw * 100).toFixed(1);
+    const precio    = costo * (1 + parseFloat(margenPct) / 100);
+    const precioIVA = precio * 1.21;
+    const isAdicional = (p.categoria||'').toLowerCase() === 'adicionales';
+    const visWeb = parseInt(p.visible_web) === 1;
+    const rowOpacity = (!isAdicional && !visWeb) ? 'style="opacity:.45;"' : '';
+    const toggleHtml = isAdicional
+      ? '<span style="font-size:10px;color:var(--muted);">—</span>'
+      : `<label style="position:relative;display:inline-block;width:36px;height:20px;"><input type="checkbox" ${visWeb?'checked':''} onchange="toggleVisibleWeb(${p.id},this.checked)" style="opacity:0;width:0;height:0;"><span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:${visWeb?'var(--accent2)':'#ccc'};border-radius:20px;transition:.2s;"></span><span style="position:absolute;height:16px;width:16px;left:${visWeb?'18px':'2px'};bottom:2px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></span></label>`;
+    return `<tr id="prod-row-${p.id}" ${rowOpacity}>
+      <td style="font-size:11px;color:var(--muted)">${p.categoria||'—'}</td>
+      <td><strong>${p.tela||'—'}</strong></td>
+      <td style="font-size:12px;color:var(--muted)">${p.marca||'—'}</td>
+      <td>
+        <input class="prod-input" type="number" id="pc-${p.id}" value="${costo||''}"
+          placeholder="0" title="Costo s/IVA"
+          oninput="recalcProd(${p.id})">
+      </td>
+      <td style="text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:3px">
+          <input class="prod-input" type="number" id="pm-${p.id}" value="${margenPct}"
+            placeholder="0" min="0" max="999" title="Margen %"
+            oninput="recalcProd(${p.id})" style="width:55px">
+          <span style="font-size:11px;color:var(--muted)">%</span>
+        </div>
+      </td>
+      <td style="text-align:center">
+        <span class="prod-price-final" id="pp-${p.id}">${fmtARS(precio)}</span>
+      </td>
+      <td style="text-align:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--accent);" id="piva-${p.id}">${fmtARS(precioIVA)}</td>
+      <td style="text-align:center">${toggleHtml}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="guardarPrecioProducto(${p.id})" title="Guardar" style="font-size:11px;padding:3px 6px">💾</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarProducto(${p.id})" title="Editar" style="font-size:11px;padding:3px 6px;margin-left:2px">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('productos',${p.id})" title="Eliminar" style="margin-left:2px">✕</button>
+        <span class="prod-saved" id="psaved-${p.id}">✓</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function recalcProd(id) {
+  const costo     = parseFloat(document.getElementById('pc-'+id).value)||0;
+  const margenPct = parseFloat(document.getElementById('pm-'+id).value)||0;
+  const precio    = costo * (1 + margenPct / 100);
+  const precioIVA = precio * 1.21;
+  document.getElementById('pp-'+id).textContent   = fmtARS(precio);
+  document.getElementById('piva-'+id).textContent = fmtARS(precioIVA);
+}
+
+async function guardarPrecioProducto(id) {
+  const costo     = parseFloat(document.getElementById('pc-'+id).value)||0;
+  const margenPct = parseFloat(document.getElementById('pm-'+id).value)||0;
+  const precio    = costo * (1 + margenPct / 100);
+  const res = await fetch(API+'?tabla=productos&id='+id, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ costo, margen: margenPct / 100, precio })
+  });
+  if(res.ok) {
+    const p = _data.productos.find(x=>x.id==id);
+    if(p){ p.costo=costo; p.margen=margenDec; p.precio=precio; }
+    const el = document.getElementById('psaved-'+id);
+    if(el){ el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
+  } else {
+    toast('Error al guardar', true);
+  }
+}
+
+
+function recalcNuevoProd() {
+  const costo     = parseFloat(document.getElementById('np-costo').value)||0;
+  const margenPct = parseFloat(document.getElementById('np-margen').value)||0;
+  const precio    = costo * (1 + margenPct / 100);
+  document.getElementById('np-precio').value     = precio > 0 ? Math.round(precio).toLocaleString('es-AR') : '';
+  document.getElementById('np-precio-iva').value = precio > 0 ? Math.round(precio * 1.21).toLocaleString('es-AR') : '';
+}
+
+function editarProducto(id) {
+  const p = _data.productos.find(x=>x.id==id);
+  if(!p) return;
+  const margenRaw = parseFloat(p.margen)||0;
+  const margenPct = margenRaw > 1 ? margenRaw : margenRaw * 100;
+  window._editingProducto = true;
+  document.getElementById('prod-modal-title').textContent = 'Editar Producto';
+  document.getElementById('np-id').value        = p.id;
+  document.getElementById('np-categoria').value = p.categoria||'';
+  document.getElementById('np-tela').value      = p.tela||'';
+  document.getElementById('np-marca').value     = p.marca||'';
+  document.getElementById('np-costo').value     = parseFloat(p.costo)||'';
+  document.getElementById('np-margen').value    = margenPct.toFixed(1);
+  recalcNuevoProd();
+  openModal('nuevo-producto');
+}
+
+async function guardarProducto() {
+  const cat  = document.getElementById('np-categoria').value.trim();
+  const tela = document.getElementById('np-tela').value.trim();
+  if(!cat || !tela){ toast('Completá categoría y producto.', true); return; }
+  const costo     = parseFloat(document.getElementById('np-costo').value)||0;
+  const margenPct = parseFloat(document.getElementById('np-margen').value)||0;
+  const precio    = costo * (1 + margenPct / 100);
+  const id        = document.getElementById('np-id').value;
+  setLoading('btn-guardar-producto', true);
+  let res;
+  if(id) {
+    const r = await fetch(API+'?tabla=productos&id='+id, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ categoria: cat, tela, marca: document.getElementById('np-marca').value, costo, margen: margenPct/100, precio })
+    });
+    res = await r.json();
+  } else {
+    res = await apiPost('productos', { categoria: cat, tela, marca: document.getElementById('np-marca').value, costo, margen: margenPct/100, precio });
+  }
+  setLoading('btn-guardar-producto', false);
+  if(res.ok) { closeModal('nuevo-producto'); await loadAll(); toast(id ? '✓ Producto actualizado' : '✓ Producto agregado'); }
+  else toast('Error al guardar', true);
+}
+
+function filterProductos() {
+  const q = document.getElementById('prod-search').value.toLowerCase();
+  const cat = document.getElementById('prod-cat').value;
+  renderProductos(_data.productos.filter(p=>{
+    return [p.categoria,p.tela,p.marca].join(' ').toLowerCase().includes(q) && (!cat||p.categoria===cat);
+  }));
+}
+
+async function toggleVisibleWeb(id, checked) {
+  const val = checked ? 1 : 0;
+  await fetch(API+'?tabla=productos&id='+id, {
+    method:'PUT', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({campo:'visible_web', valor:val})
+  });
+  const p = _data.productos.find(x=>x.id==id);
+  if(p) p.visible_web = val;
+  renderProductos(_data.productos.filter(p=>{
+    const q = document.getElementById('prod-search').value.toLowerCase();
+    const cat = document.getElementById('prod-cat').value;
+    return [p.categoria,p.tela,p.marca].join(' ').toLowerCase().includes(q) && (!cat||p.categoria===cat);
+  }));
+  toast(checked ? 'Producto visible en la web' : 'Producto oculto de la web');
+}
+
+function renderCF(data) {
+  const ing = data.filter(t=>t.tipo==='INGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
+  const eg  = data.filter(t=>t.tipo==='EGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
+  document.getElementById('cf-ingresos').textContent = fmtARS(ing);
+  document.getElementById('cf-egresos').textContent  = fmtARS(eg);
+  const bal = ing - eg;
+  const balEl = document.getElementById('cf-balance');
+  balEl.textContent = fmtARS(Math.abs(bal));
+  balEl.style.color = bal >= 0 ? 'var(--accent2)' : 'var(--red)';
+  document.getElementById('cf-count').textContent = data.length;
+  document.getElementById('cf-tbody').innerHTML = data.length ? data.map(t=>`
+    <tr>
+      <td class="mono">${t.id}</td>
+      <td>${fmtDate(t.fecha)}</td>
+      <td style="color:var(--muted)">${t.mes}</td>
+      <td>${t.concepto}</td>
+      <td style="font-size:12px;color:var(--muted)">${t.categoria}</td>
+      <td>${statusPill(t.tipo)}</td>
+      <td class="${t.tipo==='INGRESO'?'cf-positive':'cf-negative'}">${t.tipo==='INGRESO'?'+':'-'}${fmtARS(t.monto)}</td>
+      <td style="font-size:11px;color:var(--muted)">${t.notas||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="eliminar('cashflow',${t.id})">✕</button></td>
+    </tr>`).join('') : '<tr><td colspan="9" class="empty">No hay transacciones.</td></tr>';
+}
+
+function filterCF() {
+  const q = document.getElementById('cf-search').value.toLowerCase();
+  const tipo = document.getElementById('cf-tipo').value;
+  renderCF(_data.cashflow.filter(t=>{
+    return [t.concepto,t.categoria,t.notas].join(' ').toLowerCase().includes(q) && (!tipo||t.tipo===tipo);
+  }));
+}
+
+function renderPipeline() {
+  const consultas = _data.consultas;
+  const cotiz = _data.cotizaciones;
+  const ventas = _data.ventas;
+  const cols = {
+    'Nueva Consulta': { color:'var(--muted)', cards: consultas.filter(c=>c.estado==='Pendiente'||c.estado==='Sin respuesta').slice(0,8).map(c=>({nombre:c.nombre,meta:c.prenda||c.canal,monto:''})) },
+    'Calificada':     { color:'var(--blue)',  cards: consultas.filter(c=>c.calificada==='SI'&&c.estado==='Respondido').slice(0,8).map(c=>({nombre:c.nombre,meta:c.prenda||'',monto:''})) },
+    'Cotiz. Enviada': { color:'var(--accent)', cards: cotiz.filter(c=>c.estado==='Enviada').map(c=>({nombre:c.cliente,meta:'Cot. #'+c.numero,monto:c.monto?fmtARS(c.monto):''})) },
+    'Negociación':    { color:'var(--accent3)',cards: cotiz.filter(c=>c.estado==='En negociación').map(c=>({nombre:c.cliente,meta:'Cot. #'+c.numero,monto:c.monto?fmtARS(c.monto):''})) },
+    'Cerrado ✓':      { color:'var(--accent2)',cards: ventas.map(v=>({nombre:v.cliente,meta:v.producto.substring(0,30),monto:fmtARS(v.ingreso_neto)})) },
+  };
+  document.getElementById('pipeline-board').innerHTML = Object.entries(cols).map(([col,{color,cards}])=>`
+    <div class="pipeline-col">
+      <div class="pipeline-head" style="border-top:2px solid ${color}">
+        <span style="color:${color}">${col}</span>
+        <span class="pipeline-count">${cards.length}</span>
+      </div>
+      <div class="pipeline-cards">
+        ${cards.length ? cards.map(c=>`
+          <div class="p-card">
+            <div class="p-card-name">${c.nombre}</div>
+            <div class="p-card-meta">${c.meta}</div>
+            ${c.monto?`<div class="p-card-amount">${c.monto}</div>`:''}
+          </div>`).join('') : '<div style="font-size:11px;color:var(--muted);padding:8px 4px">Sin registros</div>'}
+      </div>
+    </div>`).join('');
+}
+
+function renderAlertas() {
+  if(!_data.consultas || !_data.cotizaciones) return;
+  const hoy = new Date();
+  const diasC  = parseInt(document.getElementById('alert-consultas-dias')?.value)||3;
+  const diasCo = parseInt(document.getElementById('alert-cotiz-dias')?.value)||7;
+  const dClr = d => d>=10?'dias-red':d>=5?'dias-orange':'dias-yellow';
+
+  // Consultas: calificadas SI, estado NO es Venta ni Cotizado
+  const consultasAlert = _data.consultas.filter(c=>{
+    if(c.calificada!=='SI' && c.calificada!=='Si') return false;
+    if(['Venta','Cotizado'].includes(c.estado)) return false;
+    const fecha = new Date(c.fecha||c.created_at);
+    const diff = Math.floor((hoy-fecha)/(1000*60*60*24));
+    c._dias = diff;
+    return diff >= diasC;
+  }).sort((a,b)=>b._dias-a._dias);
+
+  const countEl = document.getElementById('alert-consultas-count');
+  const tbodyC  = document.getElementById('alert-consultas-tbody');
+  if(countEl) countEl.textContent = consultasAlert.length;
+  if(tbodyC) tbodyC.innerHTML = consultasAlert.length
+    ? consultasAlert.map(c=>`<tr>
+        <td class="mono" style="font-size:11px;color:var(--muted)">${c.id_consulta||('#'+c.id)}</td>
+        <td><strong>${c.nombre}</strong>${c.empresa?`<br><span style="font-size:10px;color:var(--muted)">${c.empresa}</span>`:''}</td>
+        <td>${statusPill(c.canal)}</td>
+        <td style="font-size:11px;color:var(--muted)">${c.prenda||'—'}</td>
+        <td><span class="dias-num ${dClr(c._dias)}">${c._dias}d</span></td>
+        <td>${statusPill(c.estado)}</td>
+        <td style="white-space:nowrap">
+          ${c.telefono?`<button class="btn-wa" onclick="window.open('https://wa.me/54${c.telefono.replace(/[^0-9]/g,'')}','_blank')" title="WhatsApp">💬</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="goTo('consultas')" style="font-size:11px;margin-left:4px">→ Ver</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" class="alert-empty">✅ Sin consultas pendientes hace más de ${diasC} días</td></tr>`;
+
+  // Cotizaciones: estado Enviada, sin cambiar hace N días
+  const cotizAlert = _data.cotizaciones.filter(co=>{
+    if(_cotizDismissed.has(co.id)) return false;
+    if(co.estado!=='Enviada') return false;
+    const fecha = new Date(co.fecha);
+    const diff = Math.floor((hoy-fecha)/(1000*60*60*24));
+    co._dias = diff;
+    return diff >= diasCo;
+  }).sort((a,b)=>b._dias-a._dias);
+
+  const countCo = document.getElementById('alert-cotiz-count');
+  const tbodyCo = document.getElementById('alert-cotiz-tbody');
+  if(countCo) countCo.textContent = cotizAlert.length;
+  if(tbodyCo) tbodyCo.innerHTML = cotizAlert.length
+    ? cotizAlert.map(co=>`<tr>
+        <td class="mono" style="font-weight:600;color:var(--accent)">${co.numero}</td>
+        <td><strong>${co.cliente}</strong></td>
+        <td style="font-size:11px;color:var(--muted)">${co.contacto||''}${co.mail?`<br>${co.mail}`:''}</td>
+        <td class="mono" style="color:var(--accent2)">${co.monto?fmtARS(co.monto):'—'}</td>
+        <td><span class="dias-num ${dClr(co._dias)}">${co._dias}d</span></td>
+        <td>${statusPill(co.estado)}</td>
+        <td style="white-space:nowrap">
+          ${co.mail?`<button class="btn btn-ghost btn-sm" onclick="window.open('mailto:${co.mail}?subject=Seguimiento Cotización ${co.numero}')" style="font-size:11px">✉</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="exportarCotizPDF(${co.id})" style="font-size:11px;margin-left:4px">📄</button>
+          <button class="btn btn-danger btn-sm" onclick="descartarAlertaCotiz(${co.id})" style="margin-left:4px" title="Quitar de esta lista">✕</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" class="alert-empty">✅ Sin cotizaciones sin respuesta hace más de ${diasCo} días</td></tr>`;
+}
+
+function renderDashboard() {
+  renderAlertas();
+  const v = _data.ventas;
+  const c = _data.consultas;
+  const co= _data.cotizaciones;
+  const cf= _data.cashflow;
+  const netoTotal = v.reduce((s,x)=>s+(parseFloat(x.ingreso_neto)||0),0);
+  document.getElementById('kpi-ventas').textContent = fmtARS(netoTotal);
+  document.getElementById('kpi-ventas-sub').textContent = `${v.length} operación${v.length!==1?'es':''} registrada${v.length!==1?'s':''}`;
+  document.getElementById('kpi-consultas').textContent = c.length;
+  const calificadas = c.filter(x=>x.calificada==='SI').length;
+  document.getElementById('kpi-consultas-sub').textContent = `${calificadas} calificadas`;
+  document.getElementById('kpi-cotiz').textContent = co.length;
+  const acept = co.filter(x=>x.estado==='Aceptada').length;
+  document.getElementById('kpi-cotiz-sub').textContent = `${acept} aceptadas`;
+  const ing = cf.filter(t=>t.tipo==='INGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
+  const eg  = cf.filter(t=>t.tipo==='EGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
+  const bal = ing - eg;
+  document.getElementById('kpi-cf').textContent = fmtARS(Math.abs(bal));
+  document.getElementById('kpi-cf-sub').textContent = bal >= 0 ? '↑ Saldo positivo' : '↓ Saldo negativo';
+
+  // Canales chart
+  const canales = {};
+  c.forEach(x=>{ canales[x.canal]=(canales[x.canal]||0)+1; });
+  const maxC = Math.max(...Object.values(canales),1);
+  const colors = ['var(--accent)','var(--accent2)','var(--accent3)','var(--blue)','var(--muted)'];
+  document.getElementById('chart-canales').innerHTML = Object.entries(canales).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`
+    <div class="bar-row">
+      <div class="bar-label">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxC*100).toFixed(0)}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="bar-val">${v} consultas</div>
+    </div>`).join('');
+
+  // Estados chart
+  const estados = {};
+  c.forEach(x=>{ estados[x.estado]=(estados[x.estado]||0)+1; });
+  const maxE = Math.max(...Object.values(estados),1);
+  const eColors = {'Respondido':'var(--accent2)','Pendiente':'var(--accent)','Sin respuesta':'var(--red)'};
+  document.getElementById('chart-estados').innerHTML = Object.entries(estados).sort((a,b)=>b[1]-a[1]).map(([k,val])=>`
+    <div class="bar-row">
+      <div class="bar-label">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/maxE*100).toFixed(0)}%;background:${eColors[k]||'var(--muted)'}"></div></div>
+      <div class="bar-val">${val}</div>
+    </div>`).join('');
+
+  // Últimas ventas
+  document.getElementById('dash-ventas-tbody').innerHTML = v.slice(0,5).map(x=>`
+    <tr>
+      <td class="mono">#${String(x.numero||x.id).padStart(3,'0')}</td>
+      <td>${fmtDate(x.fecha)}</td>
+      <td><b>${x.cliente}</b></td>
+      <td style="font-size:12px">${x.producto}</td>
+      <td class="mono" style="color:var(--accent)">${fmtARS(x.ingreso_neto)}</td>
+      <td>${statusPill(x.estado)}</td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty">Sin ventas</td></tr>';
+}
+
+// ── CRUD ─────────────────────────────────────────────────────
+async function guardarConsulta() {
+  const nombre = document.getElementById('nc-nombre').value.trim();
+  if(!nombre){ toast('Ingresá el nombre del cliente.', true); return; }
+  const btn = document.getElementById('btn-guardar-consulta');
+  btn.dataset.label = 'Guardar Consulta'; setLoading('btn-guardar-consulta', true);
+  const res = await apiPost('consultas',{
+    canal: document.getElementById('nc-canal').value,
+    nombre,
+    empresa: document.getElementById('nc-empresa').value,
+    telefono: document.getElementById('nc-tel').value,
+    mail: document.getElementById('nc-mail').value,
+    calificada: document.getElementById('nc-cal').value,
+    estado: document.getElementById('nc-estado').value,
+    prenda: Array.from(document.querySelectorAll('#nc-prenda-list input[type=checkbox]:checked')).map(o=>o.value).join(', '),
+    consulta_texto: document.getElementById('nc-texto').value,
+    observaciones: document.getElementById('nc-obs').value,
+  });
+  setLoading('btn-guardar-consulta', false);
+  if(res.ok){ closeModal('nueva-consulta'); await loadAll(); toast('✓ Consulta '+res.id+' guardada'); }
+  else toast('Error: '+res.error, true);
+}
+
+let _ventaItems = [];
+function initNuevaVenta() {
+  _ventaItems = [];
+  document.getElementById('nv-items-tbody').innerHTML = '';
+  ['nv-cliente','nv-orden','nv-factura','nv-obs','nv-costo-fab','nv-flete','nv-comisiones','nv-otros'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+  document.getElementById('nv-neto').textContent = '$0';
+  document.getElementById('nv-iva').textContent = '$0';
+  document.getElementById('nv-total').textContent = '$0';
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('nv-fecha').value = hoy;
+  document.getElementById('nv-estado').value = 'Pendiente';
+  document.getElementById('nv-fab-tipo').value = 'RI';
+  const btn = document.getElementById('btn-guardar-venta');
+  btn.textContent = 'Guardar Venta';
+  btn.onclick = guardarVenta;
+  document.querySelector('#modal-nueva-venta .modal-title').textContent = 'Registrar Venta';
+  agregarItemVenta();
+}
+function agregarItemVenta(data) {
+  const idx = _ventaItems.length;
+  _ventaItems.push({desc:data?.desc||'', talle:data?.talle||'', color:data?.color||'', cant:data?.cant||'', precio:data?.precio||''});
+  const tbody = document.getElementById('nv-items-tbody');
+  const tr = document.createElement('tr');
+  tr.id = 'venta-row-'+idx;
+  const it = _ventaItems[idx];
+  tr.innerHTML = `
+    <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;text-align:center">${idx+1}</td>
+    <td><input type="text" placeholder="Ej: Campera Trucker" value="${(it.desc||'').replace(/"/g,'&quot;')}" oninput="_ventaItems[${idx}].desc=this.value"></td>
+    <td><input type="text" placeholder="XL" value="${(it.talle||'').replace(/"/g,'&quot;')}" oninput="_ventaItems[${idx}].talle=this.value"></td>
+    <td><input type="text" placeholder="Negro" value="${(it.color||'').replace(/"/g,'&quot;')}" oninput="_ventaItems[${idx}].color=this.value"></td>
+    <td><input type="number" placeholder="0" value="${it.cant||''}" oninput="_ventaItems[${idx}].cant=this.value;recalcVenta()"></td>
+    <td><input type="number" placeholder="0.00" value="${it.precio||''}" oninput="_ventaItems[${idx}].precio=this.value;recalcVenta()"></td>
+    <td class="td-calc" id="venta-sub-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td class="td-calc" id="venta-iva-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td class="td-calc" id="venta-tot-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td><button class="cotiz-del-btn" onclick="eliminarItemVenta(${idx})">✕</button></td>`;
+  tbody.appendChild(tr);
+  if(!data) tr.querySelector('input').focus();
+  recalcVenta();
+}
+function eliminarItemVenta(idx) {
+  const tr = document.getElementById('venta-row-'+idx); if(tr) tr.remove();
+  _ventaItems[idx] = null; recalcVenta();
+}
+function recalcVenta() {
+  let ts=0, ti=0, tt=0;
+  const fn = n => n>0 ? '$'+Math.round(n).toLocaleString('es-AR') : '—';
+  _ventaItems.forEach((it,idx)=>{
+    if(!it) return;
+    const cant = parseFloat(it.cant)||0, precio = parseFloat(it.precio)||0;
+    const sub = cant*precio, iva = sub*0.21, tot = sub+iva;
+    ts+=sub; ti+=iva; tt+=tot;
+    const eSub = document.getElementById('venta-sub-'+idx);
+    const eIva = document.getElementById('venta-iva-'+idx);
+    const eTot = document.getElementById('venta-tot-'+idx);
+    if(eSub) eSub.innerHTML = `<span style="font-family:'DM Mono',monospace;font-size:11px">${fn(sub)}</span>`;
+    if(eIva) eIva.innerHTML = `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${fn(iva)}</span>`;
+    if(eTot) eTot.innerHTML = `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2);font-weight:600">${fn(tot)}</span>`;
+  });
+  document.getElementById('nv-neto').textContent = fn(ts);
+  document.getElementById('nv-iva').textContent = fn(ti);
+  document.getElementById('nv-total').textContent = fn(tt);
+  calcVentaCostos();
+}
+function calcVentaCostos() {
+  const fmt = n => n ? '$'+Math.round(n).toLocaleString('es-AR') : '';
+  const fmtPct = n => n ? (n*100).toFixed(1)+'%' : '';
+  const neto = _ventaItems.filter(Boolean).reduce((s,it)=>s+(parseFloat(it.cant)||0)*(parseFloat(it.precio)||0),0);
+  const ivaDebito = neto*0.21;
+  const fabTipo = document.getElementById('nv-fab-tipo').value;
+  const costoFab  = parseFloat(document.getElementById('nv-costo-fab').value)||0;
+  const flete     = parseFloat(document.getElementById('nv-flete').value)||0;
+  const comision  = parseFloat(document.getElementById('nv-comisiones').value)||0;
+  const otros     = parseFloat(document.getElementById('nv-otros').value)||0;
+  const ivaCredFiscal = fabTipo==='RI' ? costoFab*0.21 : 0;
+  const costoTotal = costoFab + flete + comision + otros;
+  const ganancia   = neto - costoTotal;
+  const margen     = neto>0 ? ganancia/neto : 0;
+  const ivaNeto    = ivaDebito - ivaCredFiscal;
+  document.getElementById('nv-cred-fiscal').value = ivaCredFiscal>0 ? fmt(ivaCredFiscal) : '';
+  document.getElementById('nv-costo-total').value = fmt(costoTotal);
+  document.getElementById('nv-ganancia').value    = fmt(ganancia);
+  const margenEl = document.getElementById('nv-margen');
+  margenEl.value = fmtPct(margen);
+  margenEl.style.color = margen>=0.2?'#16a34a':margen>=0.1?'#d97706':'var(--red)';
+  document.getElementById('nv-iva-neto').value = ivaNeto>0 ? fmt(ivaNeto) : '';
+}
+function calcVenta() { recalcVenta(); }
+
+async function guardarVenta() {
+  const cliente = document.getElementById('nv-cliente').value.trim();
+  if(!cliente){ toast('Ingresá el cliente.', true); return; }
+  const items = _ventaItems.filter(Boolean);
+  if(!items.length || !items.some(it=>(parseFloat(it.cant)||0)>0)){ toast('Agregá al menos un ítem con cantidad.', true); return; }
+  document.getElementById('btn-guardar-venta').dataset.label = 'Guardar Venta';
+  setLoading('btn-guardar-venta', true);
+  const totalCant = items.reduce((s,it)=>s+(parseFloat(it.cant)||0),0);
+  const totalNeto = items.reduce((s,it)=>s+(parseFloat(it.cant)||0)*(parseFloat(it.precio)||0),0);
+  const avgPrecio = totalCant>0 ? totalNeto/totalCant : 0;
+  const prodDesc = items.map(it=>{
+    let parts = [it.desc||''];
+    if(it.color) parts.push(it.color);
+    if(it.talle) parts.push('T.'+it.talle);
+    if(parseFloat(it.cant)>0) parts.push('x'+it.cant);
+    return parts.join(' ');
+  }).join(' + ');
+  const colorConcat = items.map(it=>it.color).filter(Boolean).join(', ');
+  const talleConcat = items.map(it=>it.talle).filter(Boolean).join(', ');
+  const costoFab2  = parseFloat(document.getElementById('nv-costo-fab').value)||0;
+  const flete2     = parseFloat(document.getElementById('nv-flete').value)||0;
+  const comision2  = parseFloat(document.getElementById('nv-comisiones').value)||0;
+  const otros2     = parseFloat(document.getElementById('nv-otros').value)||0;
+  const fabTipo2   = document.getElementById('nv-fab-tipo').value;
+  const costoTotal2= costoFab2+flete2+comision2+otros2;
+  const ganancia2  = totalNeto-costoTotal2;
+  const margen2    = totalNeto>0 ? ganancia2/totalNeto : 0;
+  const res = await apiPost('ventas',{
+    numero: _data.ventas.length+1,
+    fecha: document.getElementById('nv-fecha').value,
+    cliente,
+    producto: prodDesc,
+    color: colorConcat,
+    talle: talleConcat,
+    cantidad: totalCant,
+    precio_neto: Math.round(avgPrecio*100)/100,
+    ingreso_neto: totalNeto,
+    iva: totalNeto*0.21,
+    total_con_iva: totalNeto*1.21,
+    forma_pago: document.getElementById('nv-pago').value,
+    estado: document.getElementById('nv-estado').value,
+    orden_fabricante: document.getElementById('nv-orden').value,
+    factura: document.getElementById('nv-factura').value,
+    observaciones: document.getElementById('nv-obs').value,
+    fab_tipo: fabTipo2,
+    costo_fab_neto: costoFab2||null,
+    flete: flete2||null,
+    comisiones: comision2||null,
+    otros_costos: otros2||null,
+    costo_total_neto: costoTotal2||null,
+    ganancia_bruta: ganancia2||null,
+    margen_bruto: margen2||null,
+    items_json: JSON.stringify(items),
+  });
+  setLoading('btn-guardar-venta', false);
+  if(res.ok){ closeModal('nueva-venta'); await loadAll(); toast('✓ Venta registrada'); }
+  else toast('Error: '+res.error, true);
+}
+
+function generarNumeroCotiz(){
+  const n=200+(_data.cotizaciones.length||0);
+  return 'C01-00'+String(n).padStart(3,'0');
+}
+let _cotizItems=[];
+function agregarItemCotiz(){
+  const idx=_cotizItems.length;
+  _cotizItems.push({desc:'',talle:'',color:'',cant:'',precio:'',obs:''});
+  const tbody=document.getElementById('nco-items-tbody');
+  const tr=document.createElement('tr');
+  tr.id='cotiz-row-'+idx;
+  tr.innerHTML=`
+    <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;text-align:center">${idx+1}</td>
+    <td><input type="text" placeholder="Ej: Campera Trucker" oninput="_cotizItems[${idx}].desc=this.value"></td>
+    <td><input type="text" placeholder="XL" oninput="_cotizItems[${idx}].talle=this.value"></td>
+    <td><input type="text" placeholder="Negro" oninput="_cotizItems[${idx}].color=this.value"></td>
+    <td><input type="number" placeholder="0" oninput="_cotizItems[${idx}].cant=this.value;recalcCotiz()"></td>
+    <td><input type="number" placeholder="0.00" oninput="_cotizItems[${idx}].precio=this.value;recalcCotiz()"></td>
+    <td class="td-calc" id="cotiz-sub-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td class="td-calc" id="cotiz-iva-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td class="td-calc" id="cotiz-tot-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td><button class="cotiz-del-btn" onclick="eliminarItemCotiz(${idx})">✕</button></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').focus();
+}
+function eliminarItemCotiz(idx){
+  const tr=document.getElementById('cotiz-row-'+idx); if(tr) tr.remove();
+  _cotizItems[idx]=null; recalcCotiz();
+}
+function recalcCotiz(){
+  let ts=0,ti=0,tt=0;
+  const fn=n=>n>0?'$'+Math.round(n).toLocaleString('es-AR'):'—';
+  _cotizItems.forEach((it,idx)=>{
+    if(!it) return;
+    const cant=parseFloat(it.cant)||0,precio=parseFloat(it.precio)||0;
+    const sub=cant*precio,iva=sub*0.21,tot=sub+iva;
+    ts+=sub;ti+=iva;tt+=tot;
+    const el=id=>document.getElementById(id);
+    if(el('cotiz-sub-'+idx)) el('cotiz-sub-'+idx).innerHTML=sub>0?fn(sub):'<span style="color:var(--muted);font-size:10px">—</span>';
+    if(el('cotiz-iva-'+idx)) el('cotiz-iva-'+idx).innerHTML=iva>0?fn(iva):'<span style="color:var(--muted);font-size:10px">—</span>';
+    if(el('cotiz-tot-'+idx)) el('cotiz-tot-'+idx).innerHTML=tot>0?'<strong>'+fn(tot)+'</strong>':'<span style="color:var(--muted);font-size:10px">—</span>';
+  });
+  const fb=n=>'$'+Math.round(n).toLocaleString('es-AR');
+  document.getElementById('nco-t-sub').textContent=ts>0?fb(ts):'$0';
+  document.getElementById('nco-t-iva').textContent=ti>0?fb(ti):'$0';
+  const tel=document.getElementById('nco-t-total');
+  tel.textContent=tt>0?fb(tt):'$0';
+  tel.style.color=tt>0?'var(--accent)':'var(--muted)';
+}
+function initNuevaCotiz(){
+  _cotizItems=[];
+  document.getElementById('nco-items-tbody').innerHTML='';
+  ['nco-cliente','nco-contacto','nco-tel','nco-mail','nco-plazo','nco-notas'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+  const editInput = document.getElementById('nco-edit-id');
+  if(editInput) editInput.value='';
+  document.querySelector('#modal-nueva-cotizacion .modal-title').textContent = 'Nueva Cotización';
+  document.getElementById('btn-guardar-cotiz').textContent = 'Guardar Cotización';
+  document.getElementById('nco-t-sub').textContent='$0';
+  document.getElementById('nco-t-iva').textContent='$0';
+  document.getElementById('nco-t-total').textContent='$0';
+  const num=generarNumeroCotiz();
+  document.getElementById('nco-num-display').textContent='N° '+num;
+  const hoy=new Date().toISOString().split('T')[0];
+  document.getElementById('nco-fecha').value=hoy;
+  const v=new Date(); v.setDate(v.getDate()+7);
+  document.getElementById('nco-valida').value=v.toISOString().split('T')[0];
+  document.getElementById('nco-plazo').value='30 días hábiles';
+  agregarItemCotiz();
+}
+async function guardarCotizacion(){
+  const cliente=document.getElementById('nco-cliente').value.trim();
+  if(!cliente){toast('Ingresá el cliente.',true);return;}
+  document.getElementById('btn-guardar-cotiz').dataset.label='Guardar Cotización';
+  setLoading('btn-guardar-cotiz',true);
+  const items=_cotizItems.filter(Boolean);
+  const totalMonto=items.reduce((s,it)=>s+(parseFloat(it.cant)||0)*(parseFloat(it.precio)||0)*1.21,0);
+  const editId = document.getElementById('nco-edit-id')?.value;
+  const numero = editId ? document.getElementById('nco-num-display').textContent.replace('N° ','') : generarNumeroCotiz();
+  const payload = {
+    numero,
+    fecha:document.getElementById('nco-fecha').value,
+    cliente,
+    contacto:document.getElementById('nco-contacto').value,
+    telefono:document.getElementById('nco-tel').value,
+    mail:document.getElementById('nco-mail').value,
+    fecha_sol:document.getElementById('nco-fecha').value,
+    valida:document.getElementById('nco-valida').value,
+    plazo:document.getElementById('nco-plazo').value,
+    estado: editId ? (_data.cotizaciones.find(c=>c.id==editId)?.estado||'Enviada') : 'Enviada',
+    monto:totalMonto||null,
+    notas:document.getElementById('nco-notas').value,
+    items_json:JSON.stringify(items),
+  };
+  let res;
+  if(editId) {
+    // Actualizar cotización existente
+    res = await fetch(API+'?tabla=cotizaciones&id='+editId, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({multi:true, fields:payload})
+    });
+    res = await res.json();
+  } else {
+    res=await apiPost('cotizaciones', payload);
+  }
+  setLoading('btn-guardar-cotiz',false);
+  if(res.ok){closeModal('nueva-cotizacion');_cotizItems=[];await loadAll();toast(editId ? '✓ Cotización actualizada' : '✓ Cotización '+numero+' guardada');}
+  else toast('Error: '+res.error,true);
+}
+
+function editarCotizacion(id) {
+  const co = _data.cotizaciones.find(x=>x.id==id);
+  if(!co) return;
+  window._editingCotizacion = true;
+  // Llenar campos
+  document.getElementById('nco-cliente').value = co.cliente||'';
+  document.getElementById('nco-contacto').value = co.contacto||'';
+  document.getElementById('nco-tel').value = co.telefono||'';
+  document.getElementById('nco-mail').value = co.mail||'';
+  document.getElementById('nco-fecha').value = co.fecha ? co.fecha.substring(0,10) : '';
+  document.getElementById('nco-valida').value = co.valida ? co.valida.substring(0,10) : '';
+  document.getElementById('nco-plazo').value = co.plazo||'30 días hábiles';
+  document.getElementById('nco-notas').value = co.notas||'';
+  document.getElementById('nco-num-display').textContent = 'N° '+(co.numero||'');
+  // Agregar hidden field para edit ID
+  let editInput = document.getElementById('nco-edit-id');
+  if(!editInput){
+    editInput = document.createElement('input');
+    editInput.type='hidden'; editInput.id='nco-edit-id';
+    document.querySelector('#modal-nueva-cotizacion .modal-body').appendChild(editInput);
+  }
+  editInput.value = id;
+  // Cargar items
+  _cotizItems = [];
+  try { _cotizItems = co.items_json ? JSON.parse(co.items_json) : []; } catch(e){}
+  document.getElementById('nco-items-tbody').innerHTML='';
+  if(_cotizItems.length) {
+    _cotizItems.forEach((it,i)=>renderItemCotizRow(i, it));
+  } else {
+    agregarItemCotiz();
+  }
+  recalcCotiz();
+  // Cambiar título del modal
+  document.querySelector('#modal-nueva-cotizacion .modal-title').textContent = 'Editar Cotización';
+  document.getElementById('btn-guardar-cotiz').textContent = 'Guardar Cambios';
+  openModal('nueva-cotizacion');
+}
+
+function renderItemCotizRow(idx, it) {
+  const tbody = document.getElementById('nco-items-tbody');
+  const tr = document.createElement('tr');
+  tr.id = 'cotiz-row-'+idx;
+  tr.innerHTML = `
+    <td style="text-align:center;color:var(--muted);font-size:11px">${idx+1}</td>
+    <td><input class="form-input" style="font-size:12px;padding:4px 8px" value="${it.desc||''}" onchange="_cotizItems[${idx}].desc=this.value"></td>
+    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:50px" value="${it.talle||''}" onchange="_cotizItems[${idx}].talle=this.value"></td>
+    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:60px" value="${it.color||''}" onchange="_cotizItems[${idx}].color=this.value"></td>
+    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:45px;text-align:center" type="number" value="${it.cant||0}" onchange="_cotizItems[${idx}].cant=parseFloat(this.value)||0;recalcCotiz()"></td>
+    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:85px;text-align:right" type="number" value="${it.precio||0}" onchange="_cotizItems[${idx}].precio=parseFloat(this.value)||0;recalcCotiz()"></td>
+    <td class="mono" style="font-size:12px;text-align:right" id="cotiz-sub-${idx}">$0</td>
+    <td class="mono" style="font-size:12px;text-align:right" id="cotiz-iva-${idx}">$0</td>
+    <td class="mono" style="font-size:12px;text-align:right" id="cotiz-tot-${idx}">$0</td>
+    <td><button class="cotiz-del-btn" onclick="eliminarItemCotiz(${idx})">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function calcOrden() {
+  // kept for compatibility
+}
+
+// ── ORDEN ITEMS SYSTEM ──────────────────────────────────────
+let _ordenItems = [];
+
+function generarNumeroOrden(){
+  const n = 100 + (_data.pedidos.length||0);
+  return 'OP-' + String(n).padStart(3,'0');
+}
+
+function initNuevaOrden(){
+  _ordenItems = [];
+  document.getElementById('no-items-tbody').innerHTML = '';
+  ['no-prov','no-dir-prov','no-venta-ref','no-notas'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('no-t-sub').textContent = '$0';
+  document.getElementById('no-t-iva').textContent = '$0';
+  document.getElementById('no-t-total').textContent = '$0';
+  document.getElementById('no-anticipo').value = '';
+  const num = generarNumeroOrden();
+  const numEl = document.getElementById('no-num-display');
+  if(numEl) numEl.textContent = 'N° ' + num;
+  const numInput = document.getElementById('no-num');
+  if(numInput) numInput.value = num;
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('no-fecha').value = hoy;
+  document.getElementById('no-fecha-entrega').value = '';
+  document.getElementById('no-estado').value = 'En producción';
+  document.querySelector('#modal-nueva-orden .modal-title').textContent = 'Nueva Orden de Pedido';
+  agregarItemOrden();
+}
+
+function agregarItemOrden(){
+  const idx = _ordenItems.length;
+  _ordenItems.push({cod:'',desc:'',talle:'',color:'',cant:'',precio:''});
+  const tbody = document.getElementById('no-items-tbody');
+  const tr = document.createElement('tr');
+  tr.id = 'orden-row-' + idx;
+  tr.innerHTML = `
+    <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;text-align:center">${idx+1}</td>
+    <td><input type="text" placeholder="Cód." style="width:100%" oninput="_ordenItems[${idx}].cod=this.value"></td>
+    <td><input type="text" placeholder="Descripción" style="width:100%" oninput="_ordenItems[${idx}].desc=this.value"></td>
+    <td><input type="text" placeholder="XL" style="width:100%" oninput="_ordenItems[${idx}].talle=this.value"></td>
+    <td><input type="text" placeholder="Color" style="width:100%" oninput="_ordenItems[${idx}].color=this.value"></td>
+    <td><input type="number" placeholder="0" style="width:100%" oninput="_ordenItems[${idx}].cant=this.value;recalcOrden()"></td>
+    <td><input type="number" placeholder="0" style="width:100%" oninput="_ordenItems[${idx}].precio=this.value;recalcOrden()"></td>
+    <td class="td-calc" id="orden-sub-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td><button class="cotiz-del-btn" onclick="eliminarItemOrden(${idx})">✕</button></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').focus();
+}
+
+function eliminarItemOrden(idx){
+  const tr = document.getElementById('orden-row-'+idx);
+  if(tr) tr.remove();
+  _ordenItems[idx] = null;
+  recalcOrden();
+}
+
+function recalcOrden(){
+  let ts=0;
+  const fn = n => n>0 ? '$'+Math.round(n).toLocaleString('es-AR') : '—';
+  _ordenItems.forEach((it,idx)=>{
+    if(!it) return;
+    const cant=parseFloat(it.cant)||0, precio=parseFloat(it.precio)||0;
+    const sub=cant*precio;
+    ts+=sub;
+    const el=document.getElementById('orden-sub-'+idx);
+    if(el) el.innerHTML = sub>0 ? fn(sub) : '<span style="color:var(--muted);font-size:10px">—</span>';
+  });
+  const iva = ts*0.21;
+  const tot = ts+iva;
+  document.getElementById('no-t-sub').textContent = ts>0 ? fn(ts) : '$0';
+  document.getElementById('no-t-iva').textContent = iva>0 ? fn(iva) : '$0';
+  document.getElementById('no-t-total').textContent = tot>0 ? fn(tot) : '$0';
+}
+
+// ── CLEAR CONSULTA FORM ─────────────────────────────────────
+function clearFormConsulta(){
+  ['nc-nombre','nc-empresa','nc-tel','nc-mail','nc-texto','nc-obs'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('nc-canal').value = 'Mail';
+  document.getElementById('nc-estado').value = 'Pendiente';
+  document.getElementById('nc-cal').value = 'Pendiente de evaluar';
+  document.querySelectorAll('#nc-prenda-list input[type=checkbox]').forEach(cb=>cb.checked=false);
+}
+
+async function guardarOrden() {
+  const prov = document.getElementById('no-prov').value.trim();
+  if(!prov){ toast('Ingresá el proveedor.', true); return; }
+  document.getElementById('btn-guardar-orden').dataset.label = 'Guardar';
+  setLoading('btn-guardar-orden', true);
+  const items = _ordenItems.filter(Boolean);
+  const sub = items.reduce((s,it)=>s+(parseFloat(it.cant)||0)*(parseFloat(it.precio)||0),0);
+  const num = document.getElementById('no-num')?.value || generarNumeroOrden();
+  const res = await apiPost('pedidos',{
+    numero: num,
+    proveedor: prov,
+    direccion_proveedor: document.getElementById('no-dir-prov').value,
+    fecha: document.getElementById('no-fecha').value,
+    fecha_entrega: document.getElementById('no-fecha-entrega').value,
+    venta_ref: document.getElementById('no-venta-ref').value,
+    subtotal: sub||null, iva21: sub?sub*0.21:null, total: sub?sub*1.21:null,
+    anticipo: parseFloat(document.getElementById('no-anticipo').value)||null,
+    estado: document.getElementById('no-estado').value,
+    notas: document.getElementById('no-notas').value,
+    items_json: JSON.stringify(items),
+  });
+  setLoading('btn-guardar-orden', false);
+  if(res.ok){ closeModal('nueva-orden'); _ordenItems=[]; await loadAll(); toast('✓ Orden guardada'); }
+  else toast('Error: '+res.error, true);
+}
+
+async function guardarTransaccion() {
+  const concepto = document.getElementById('nt-concepto').value.trim();
+  if(!concepto){ toast('Ingresá el concepto.', true); return; }
+  document.getElementById('btn-guardar-trans').dataset.label = 'Guardar';
+  setLoading('btn-guardar-trans', true);
+  const res = await apiPost('cashflow',{
+    fecha: document.getElementById('nt-fecha').value,
+    mes: document.getElementById('nt-mes').value,
+    concepto,
+    categoria: document.getElementById('nt-cat').value,
+    tipo: document.getElementById('nt-tipo').value,
+    monto: parseFloat(document.getElementById('nt-monto').value)||0,
+    notas: document.getElementById('nt-notas').value,
+  });
+  setLoading('btn-guardar-trans', false);
+  if(res.ok){ closeModal('nueva-transaccion'); await loadAll(); toast('✓ Transacción guardada'); }
+  else toast('Error: '+res.error, true);
+}
+
+async function eliminar(tabla, id) {
+  if(!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  const res = await apiDelete(tabla, id);
+  if(res.ok){ await loadAll(); toast('Registro eliminado'); }
+  else toast('Error al eliminar', true);
+}
+
+
+
+function exportarPedidoPDF(id) {
+  const p = _data.pedidos.find(x=>x.id==id);
+  if(!p){ toast('Orden no encontrada', true); return; }
+  let items = [];
+  try { items = p.items_json ? JSON.parse(p.items_json) : []; } catch(e){}
+  const fmtN = n => n ? '$'+parseFloat(n).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+  const fmtD = s => s ? s.toString().substring(0,10).split('-').reverse().join('/') : '—';
+  let totalCant=0, totalSub=0;
+  const itemRows = items.map((it,i)=>{
+    const cant=parseFloat(it.cant)||0, precio=parseFloat(it.precio)||0;
+    const sub=cant*precio;
+    totalCant+=cant; totalSub+=sub;
+    return `<tr><td style="text-align:center">${i+1}</td><td style="text-align:center;color:#666">${it.cod||''}</td><td>${it.desc||''}</td><td>${it.talle||''}</td><td>${it.color||''}</td><td style="text-align:center">${cant||''}</td><td style="text-align:right">${precio?fmtN(precio):''}</td><td style="text-align:right">${sub?fmtN(sub):''}</td></tr>`;
+  }).join('');
+  const emptyRows = Math.max(0, 18-items.length);
+  const emptyHtml = Array(emptyRows).fill(`<tr><td colspan="7" style="height:22px"></td></tr>`).join('');
+  const saldo = (parseFloat(p.total)||0) - (parseFloat(p.anticipo)||0);
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Orden ${p.numero||''}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff;}
+  #pdf-content{width:210mm;margin:0 auto;background:#fff;}
+  .pdf-header{background:linear-gradient(135deg,#0f2447 0%,#1a3a6b 60%,#2563b0 100%)!important;color:#fff;padding:18px 28px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .brand{font-size:22px;font-weight:900;letter-spacing:3px;color:#fff;}
+  .tagline{font-size:9px;color:rgba(255,255,255,.65);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+  .contact{text-align:right;font-size:9.5px;color:rgba(255,255,255,.88);line-height:1.7;}
+  .pdf-sub{background:#e8eef7!important;border-bottom:3px solid #1a3a6b;padding:7px 28px;display:flex;justify-content:space-between;align-items:center;}
+  .pdf-sub-title{font-size:11px;font-weight:700;color:#1a3a6b;letter-spacing:.5px;text-transform:uppercase;}
+  .pdf-sub-num{font-family:monospace;font-size:12px;font-weight:700;color:#0f2447;}
+  .body{padding:16px 28px 20px;}
+  .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:14px;}
+  .hcell{padding:5px 8px;border:1px solid #d0d8e8;font-size:10.5px;background:#fff;}
+  .hcell:nth-child(odd){background:#f7f9fc!important;}
+  .hcell .lbl{color:#1a3a6b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px;}
+  table.items{width:100%;border-collapse:collapse;margin-bottom:12px;}
+  table.items thead th{background:#1a3a6b!important;color:#fff!important;padding:8px 6px;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;text-align:left;}
+  table.items tbody td{padding:5px 6px;border-bottom:1px solid #e8ecf0;font-size:10.5px;vertical-align:middle;}
+  table.items tbody tr:nth-child(even) td{background:#f4f7fb!important;}
+  .tfoot td{background:#0f2447!important;color:#fff!important;font-weight:700;padding:7px 6px;}
+  .totbox{display:flex;justify-content:flex-end;margin-bottom:14px;}
+  .tbox{border:1px solid #d0d8e8;border-radius:4px;overflow:hidden;min-width:280px;}
+  .trow{display:flex;justify-content:space-between;padding:6px 14px;font-size:11px;border-bottom:1px solid #eee;}
+  .trow.g{background:#1a3a6b!important;color:#fff!important;font-weight:700;font-size:13px;border:none;}
+  .trow.saldo{background:#f0f9ff!important;color:#0f2447;font-weight:700;}
+  .cond{padding:10px 14px;background:#f5f7fb!important;border:1px solid #d0d8e8;border-left:3px solid #1a3a6b;font-size:10px;line-height:1.75;margin-bottom:16px;}
+  .cond b{display:block;color:#1a3a6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+  .firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px;}
+  .fbox{border-top:2px solid #1a3a6b;padding-top:8px;font-size:10px;color:#555;}
+  .nota{text-align:center;font-size:9px;color:#aaa;margin-top:16px;padding-top:10px;border-top:1px solid #eee;}
+  .dl-bar{background:#f0f3f8;padding:10px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d0d8e8;}
+  .dl-btn{background:linear-gradient(135deg,#0f2447,#2563b0);color:#fff;border:none;padding:8px 20px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;}
+  .dl-btn:hover{filter:brightness(1.15);}
+  .dl-info{font-size:11px;color:#666;}
+  @media print{.dl-bar{display:none!important;}@page{size:A4;margin:0;}body{margin:0!important;}}
+</style></head><body>
+<div class="dl-bar">
+  <div class="dl-info">Orden de Pedido <strong>${p.numero||'—'}</strong> — ${p.proveedor||''}</div>
+  <button class="dl-btn" onclick="descargarPDF()">⬇ Descargar PDF</button>
+</div>
+<div id="pdf-content">
+<div class="pdf-header">
+  <div><div class="brand">SAGUMA</div><div class="tagline">Indumentaria Laboral · Mayorista</div></div>
+  <div class="contact">Organización Crima SA &nbsp;·&nbsp; CUIT 30-70949492-5<br>Av. Córdoba 391 9°B – CABA<br>ventas@saguma.com.ar &nbsp;·&nbsp; +54 11 6112-5719</div>
+</div>
+<div class="pdf-sub">
+  <span class="pdf-sub-title">Orden de Pedido a Fabricante</span>
+  <span class="pdf-sub-num">${p.numero||'—'}</span>
+</div>
+<div class="body">
+  <div class="hgrid">
+    <div class="hcell"><span class="lbl">Proveedor / Taller</span><strong>${p.proveedor||'—'}</strong>${p.direccion_proveedor?`<br><span style="font-size:9px;color:#555">${p.direccion_proveedor}</span>`:''}</div>
+    <div class="hcell"><span class="lbl">N° Orden</span><strong>${p.numero||'—'}</strong></div>
+    <div class="hcell"><span class="lbl">Fecha Orden</span>${fmtD(p.fecha)}</div>
+    <div class="hcell"><span class="lbl">Fecha Entrega Estimada</span>${fmtD(p.fecha_entrega)}</div>
+    <div class="hcell"><span class="lbl">Venta Relacionada</span>${p.venta_ref||'—'}</div>
+    <div class="hcell"><span class="lbl">Estado</span>${p.estado||''}</div>
+  </div>
+
+  <table class="items">
+    <thead><tr>
+      <th style="width:28px;text-align:center">#</th>
+      <th style="width:40px;text-align:center">Cód.</th>
+      <th>Descripción / Prenda</th>
+      <th style="width:60px">Talle</th>
+      <th style="width:65px">Color</th>
+      <th style="width:50px;text-align:center">Cant.</th>
+      <th style="width:100px;text-align:right">P. Unit. s/IVA</th>
+      <th style="width:100px;text-align:right">Subtotal s/IVA</th>
+    </tr></thead>
+    <tbody>
+      ${itemRows}${emptyHtml}
+      <tr class="tfoot">
+        <td colspan="5" style="text-align:right;padding-right:8px">TOTAL</td>
+        <td style="text-align:center">${totalCant||''}</td>
+        <td></td>
+        <td style="text-align:right">${totalSub?fmtN(totalSub):''}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="totbox">
+    <div class="tbox">
+      <div class="trow"><span>Subtotal s/IVA</span><span>${fmtN(p.subtotal)}</span></div>
+      <div class="trow"><span>IVA 21%</span><span>${fmtN(p.iva21)}</span></div>
+      <div class="trow g"><span>TOTAL c/IVA</span><span>${fmtN(p.total)}</span></div>
+      ${p.anticipo?`<div class="trow"><span>Anticipo</span><span>${fmtN(p.anticipo)}</span></div><div class="trow saldo"><span>Saldo a Pagar</span><span>${fmtN(saldo)}</span></div>`:''}
+    </div>
+  </div>
+
+  ${p.notas?`<div class="cond"><b>Notas y Condiciones</b>${p.notas}</div>`:''}
+
+  <div class="firmas">
+    <div class="fbox">Firma y Sello del Proveedor &nbsp;·&nbsp; ${p.proveedor||''}</div>
+    <div class="fbox">Firma y Sello &nbsp;·&nbsp; Organización Crima SA</div>
+  </div>
+  <div class="nota">Documento interno — Orden de pedido a fabricante. No tiene valor fiscal.</div>
+</div>
+</div>
+<script>
+function descargarPDF(){
+  const el = document.getElementById('pdf-content');
+  const opt = {
+    margin: 0,
+    filename: 'Orden_${(p.numero||'SAGUMA').replace(/[^a-zA-Z0-9_-]/g,'_')}.pdf',
+    image: { type:'jpeg', quality:0.98 },
+    html2canvas: { scale:2, useCORS:true, backgroundColor:'#fff' },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+  };
+  html2pdf().set(opt).from(el).save();
+}
+window.addEventListener('load', ()=>{ setTimeout(descargarPDF, 800); });
+<\/script>
+</body></html>`;
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+}
+
+function exportarCotizPDF(id) {
+  const co = _data.cotizaciones.find(x=>x.id==id);
+  if(!co){ toast('Cotización no encontrada', true); return; }
+  let items = [];
+  try { items = co.items_json ? JSON.parse(co.items_json) : []; } catch(e){}
+  const fmtN = n => n ? '$'+parseFloat(n).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+  const fmtD = s => s ? s.toString().substring(0,10).split('-').reverse().join('/') : '—';
+  let totalCant=0,totalSub=0,totalIva=0,totalCon=0;
+  const itemRows = items.map((it,i)=>{
+    const cant=parseFloat(it.cant)||0, precio=parseFloat(it.precio)||0;
+    const sub=cant*precio, iva=sub*0.21, tot=sub+iva;
+    totalCant+=cant; totalSub+=sub; totalIva+=iva; totalCon+=tot;
+    return `<tr><td style="text-align:center">${i+1}</td><td>${it.desc||''}</td><td>${it.talle||''}</td><td>${it.color||''}</td><td style="text-align:center">${cant||''}</td><td style="text-align:right">${precio?fmtN(precio):''}</td><td style="text-align:right">${sub?fmtN(sub):''}</td><td style="text-align:right">${iva?fmtN(iva):''}</td><td style="text-align:right">${tot?fmtN(tot):''}</td></tr>`;
+  }).join('');
+
+  // If no items parsed, use monto from DB
+  if(!items.length && co.monto){
+    totalCon = parseFloat(co.monto)||0;
+    totalSub = totalCon / 1.21;
+    totalIva = totalCon - totalSub;
+  }
+
+  const emptyRows = Math.max(0,14-items.length);
+  const emptyHtml = Array(emptyRows).fill(`<tr><td colspan="9" style="height:22px"></td></tr>`).join('');
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Cotización ${co.numero||''}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff;}
+  #pdf-content{width:210mm;margin:0 auto;background:#fff;}
+  .pdf-header{background:linear-gradient(135deg,#0f2447 0%,#1a3a6b 60%,#2563b0 100%)!important;color:#fff;padding:18px 28px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .brand{font-size:22px;font-weight:900;letter-spacing:3px;color:#fff;}.tagline{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+  .contact{text-align:right;font-size:9.5px;color:rgba(255,255,255,.85);line-height:1.7;}
+  .pdf-sub{background:#e8eef7!important;border-bottom:3px solid #1a3a6b;padding:6px 28px;font-size:9px;color:#1a3a6b;display:flex;justify-content:space-between;}
+  .body{padding:16px 28px 20px;}.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:14px;}
+  .hcell{padding:5px 8px;border:1px solid #d0d8e8;font-size:10.5px;}.hcell:nth-child(odd){background:#f7f9fc!important;}
+  .hcell .lbl{color:#1a3a6b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px;}
+  table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+  thead th{background:#1a3a6b!important;color:#fff!important;padding:8px 6px;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;text-align:left;}
+  tbody td{padding:5px 6px;border-bottom:1px solid #e8ecf0;font-size:10.5px;}
+  tbody tr:nth-child(even) td{background:#f4f7fb!important;}
+  .tfoot td{background:#0f2447!important;color:#fff!important;font-weight:700;padding:7px 6px;}
+  .totbox{display:flex;justify-content:flex-end;margin-bottom:14px;}
+  .tbox{border:1px solid #d0d8e8;border-radius:4px;overflow:hidden;min-width:280px;}
+  .trow{display:flex;justify-content:space-between;padding:6px 14px;font-size:11px;border-bottom:1px solid #eee;}
+  .trow.g{background:#1a3a6b!important;color:#fff!important;font-weight:700;font-size:13px;border:none;}
+  .cond{padding:10px 14px;background:#f5f7fb!important;border:1px solid #d0d8e8;border-left:3px solid #1a3a6b;font-size:10px;line-height:1.75;}
+  .cond b{display:block;color:#1a3a6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+  .cond ul{padding-left:16px;}.firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:28px;}
+  .fbox{border-top:2px solid #1a3a6b;padding-top:8px;font-size:10px;color:#555;}
+  .nota{text-align:center;font-size:9px;color:#aaa;margin-top:18px;padding-top:10px;border-top:1px solid #eee;}
+  .dl-bar{background:#f0f3f8;padding:10px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d0d8e8;}
+  .dl-btn{background:linear-gradient(135deg,#0f2447,#2563b0);color:#fff;border:none;padding:8px 20px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;}
+  .dl-btn:hover{filter:brightness(1.15);}
+  .dl-info{font-size:11px;color:#666;}
+  @media print{.dl-bar{display:none!important;}@page{size:A4;margin:0;}body{margin:0!important;}}
+</style></head><body>
+<div class="dl-bar">
+  <div class="dl-info">Cotización <strong>${co.numero||'—'}</strong> — ${co.cliente||''}</div>
+  <button class="dl-btn" onclick="descargarPDF()">⬇ Descargar PDF</button>
+</div>
+<div id="pdf-content">
+<div class="pdf-header">
+  <div><div class="brand">SAGUMA</div><div class="tagline">Indumentaria Laboral · Mayorista</div></div>
+  <div class="contact">Organización Crima SA &nbsp;·&nbsp; CUIT 30-70949492-5<br>Av. Córdoba 391 9°B – CABA<br>ventas@saguma.com.ar &nbsp;·&nbsp; +54 11 6112-5719</div>
+</div>
+<div class="pdf-sub"><span>COTIZACIÓN MAYORISTA — N° ${co.numero||'—'}</span><span>www.saguma.com.ar</span></div>
+<div class="body">
+<div class="hgrid">
+  <div class="hcell"><span class="lbl">Empresa / Cliente</span><strong>${co.cliente||'—'}</strong></div>
+  <div class="hcell"><span class="lbl">N° Cotización</span><strong>${co.numero||'—'}</strong></div>
+  <div class="hcell"><span class="lbl">Contacto</span>${co.contacto||'—'}</div>
+  <div class="hcell"><span class="lbl">Fecha Envío</span>${fmtD(co.fecha)}</div>
+  <div class="hcell"><span class="lbl">Teléfono</span>${co.telefono||'—'}</div>
+  <div class="hcell"><span class="lbl">Válida Hasta</span>${fmtD(co.valida)}</div>
+  <div class="hcell"><span class="lbl">Mail</span>${co.mail||'—'}</div>
+  <div class="hcell"><span class="lbl">Plazo de entrega</span>${co.plazo||'30 días hábiles'}</div>
+</div>
+<table>
+  <thead><tr>
+    <th style="width:28px;text-align:center">#</th><th>Descripción</th>
+    <th style="width:80px">Talle</th><th style="width:60px">Color</th>
+    <th style="width:45px;text-align:center">Cant.</th>
+    <th style="width:95px;text-align:right">P.Unit s/IVA</th>
+    <th style="width:95px;text-align:right">Subtotal</th>
+    <th style="width:80px;text-align:right">IVA 21%</th>
+    <th style="width:95px;text-align:right">Total c/IVA</th>
+  </tr></thead>
+  <tbody>${itemRows}${emptyHtml}
+    <tr class="tfoot">
+      <td colspan="4" style="text-align:right;padding-right:8px">TOTAL GENERAL</td>
+      <td style="text-align:center">${totalCant||''}</td>
+      <td></td>
+      <td style="text-align:right">${totalSub?fmtN(totalSub):''}</td>
+      <td style="text-align:right">${totalIva?fmtN(totalIva):''}</td>
+      <td style="text-align:right">${totalCon?fmtN(totalCon):''}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="totbox">
+  <div class="tbox">
+    <div class="trow"><span>Subtotal s/IVA</span><span>${fmtN(totalSub)}</span></div>
+    <div class="trow"><span>IVA 21%</span><span>${fmtN(totalIva)}</span></div>
+    <div class="trow g"><span>TOTAL c/IVA</span><span>${fmtN(totalCon)}</span></div>
+  </div>
+</div>
+
+<div class="cond"><b>Condiciones Comerciales</b><ul>
+  <li>Pedido mínimo: 30 unidades</li>
+  <li>Plazo de entrega: 30 días hábiles desde confirmación</li>
+  <li>Anticipo: 50% al confirmar | Saldo: 50% contra entrega</li>
+  <li>Validez: 7 días corridos desde fecha de envío</li>
+  <li>Talle XXXL: +12% sobre precio unitario</li>
+</ul>${co.notas?`<div style="margin-top:6px"><strong>Obs:</strong> ${co.notas}</div>`:''}</div>
+<div class="firmas">
+  <div class="fbox">Aclaración y Firma del Cliente</div>
+  <div class="fbox">Firma y Sello · Organización Crima SA</div>
+</div>
+<div class="nota">Cotización sin valor fiscal. Precios válidos por el período indicado.</div>
+</div>
+</div>
+<script>
+function descargarPDF(){
+  const el = document.getElementById('pdf-content');
+  const opt = {
+    margin: 0,
+    filename: 'Cotizacion_${(co.numero||'SAGUMA').replace(/[^a-zA-Z0-9_-]/g,'_')}.pdf',
+    image: { type:'jpeg', quality:0.98 },
+    html2canvas: { scale:2, useCORS:true, backgroundColor:'#fff' },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+  };
+  html2pdf().set(opt).from(el).save();
+}
+// Auto-download after a moment
+window.addEventListener('load', ()=>{ setTimeout(descargarPDF, 800); });
+<\/script>
+</body></html>`;
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+}
+
+// ── AUTOMATIZACIONES DE FLUJO ─────────────────────────────────
+
+// ── 1) COTIZACIÓN ACEPTADA → GENERAR VENTA ──────────────────
+function generarVentaDesdeCotiz(id) {
+  const co = _data.cotizaciones.find(x=>x.id==id);
+  if(!co){ toast('Cotización no encontrada', true); return; }
+  let items = [];
+  try { items = co.items_json ? JSON.parse(co.items_json) : []; } catch(e){}
+
+  // Reset the venta form
+  _ventaItems = [];
+  document.getElementById('nv-items-tbody').innerHTML = '';
+  const btn = document.getElementById('btn-guardar-venta');
+  btn.textContent = 'Guardar Venta';
+  btn.onclick = guardarVenta;
+  document.querySelector('#modal-nueva-venta .modal-title').textContent = 'Nueva Venta desde Cotización ' + co.numero;
+
+  // Pre-fill fields
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('nv-fecha').value = hoy;
+  document.getElementById('nv-cliente').value = co.cliente || '';
+
+  // Add each cotización item as a venta item line
+  if(items.length > 0) {
+    items.filter(Boolean).forEach(it => {
+      agregarItemVenta({desc: it.desc||'', talle: it.talle||'', color: it.color||'', cant: it.cant||'', precio: it.precio||''});
+    });
+  } else {
+    agregarItemVenta();
+  }
+
+  document.getElementById('nv-estado').value = 'Pendiente';
+  document.getElementById('nv-obs').value = 'Generada desde Cotización ' + co.numero;
+
+  // Clear cost fields
+  ['nv-costo-fab','nv-flete','nv-comisiones','nv-otros','nv-orden','nv-factura'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('nv-fab-tipo').value = 'RI';
+
+  recalcVenta();
+  window._skipVentaInit = true;
+  openModal('nueva-venta');
+  toast('📋 Datos pre-cargados desde cotización ' + co.numero);
+}
+
+// ── 2) VENTA → GENERAR ORDEN DE PEDIDO ──────────────────────
+function generarOrdenDesdeVenta(id) {
+  const v = _data.ventas.find(x=>x.id==id);
+  if(!v){ toast('Venta no encontrada', true); return; }
+
+  // Init the order form
+  initNuevaOrden();
+  document.querySelector('#modal-nueva-orden .modal-title').textContent = 'Orden de Pedido desde Venta #' + String(v.numero||v.id).padStart(3,'0');
+
+  // Pre-fill
+  document.getElementById('no-venta-ref').value = '#' + String(v.numero||v.id).padStart(3,'0');
+  document.getElementById('no-notas').value = 'Pedido para venta a ' + v.cliente;
+
+  // Set delivery date 30 days from now
+  const entrega = new Date();
+  entrega.setDate(entrega.getDate() + 30);
+  document.getElementById('no-fecha-entrega').value = entrega.toISOString().split('T')[0];
+
+  // Pre-fill the first item row with sale product
+  setTimeout(() => {
+    const firstRow = document.querySelector('#no-items-tbody tr');
+    if(firstRow) {
+      const inputs = firstRow.querySelectorAll('input');
+      // inputs: [cod, desc, talle, color, cant, precio]
+      if(inputs[1]) inputs[1].value = v.producto || '';
+      if(inputs[2]) inputs[2].value = v.talle || '';
+      if(inputs[3]) inputs[3].value = v.color || '';
+      if(inputs[4]) inputs[4].value = v.cantidad || '';
+      // Trigger _ordenItems update
+      if(_ordenItems && _ordenItems[0]) {
+        _ordenItems[0].desc = v.producto || '';
+        _ordenItems[0].talle = v.talle || '';
+        _ordenItems[0].color = v.color || '';
+        _ordenItems[0].cant = v.cantidad || '';
+      }
+      recalcOrden && recalcOrden();
+    }
+  }, 100);
+
+  openModal('nueva-orden');
+  toast('📋 Datos pre-cargados desde venta #' + String(v.numero||v.id).padStart(3,'0'));
+}
+
+// ── 3) VENTA → REGISTRAR COBRO EN CASHFLOW ──────────────────
+function registrarCobroDesdeVenta(id) {
+  const v = _data.ventas.find(x=>x.id==id);
+  if(!v){ toast('Venta no encontrada', true); return; }
+
+  const hoy = new Date();
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
+  document.getElementById('nt-mes').value = meses[hoy.getMonth()];
+  document.getElementById('nt-concepto').value = 'Cobro venta #' + String(v.numero||v.id).padStart(3,'0') + ' — ' + v.cliente;
+  document.getElementById('nt-cat').value = 'Cobros directos';
+  document.getElementById('nt-tipo').value = 'INGRESO';
+  document.getElementById('nt-monto').value = Math.round(parseFloat(v.total_con_iva)||0);
+  document.getElementById('nt-notas').value = v.producto + (v.forma_pago ? ' · ' + v.forma_pago : '');
+
+  openModal('nueva-transaccion');
+  toast('💰 Cobro pre-cargado: ' + fmtARS(v.total_con_iva));
+}
+
+// ── 4) PEDIDO → REGISTRAR ANTICIPO EN CASHFLOW ──────────────
+function registrarAnticipoDesdePedido(id) {
+  const p = _data.pedidos.find(x=>x.id==id);
+  if(!p){ toast('Orden no encontrada', true); return; }
+
+  const hoy = new Date();
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
+  document.getElementById('nt-mes').value = meses[hoy.getMonth()];
+  document.getElementById('nt-concepto').value = 'Anticipo orden ' + p.numero + ' — ' + p.proveedor;
+  document.getElementById('nt-cat').value = 'Producción / Taller';
+  document.getElementById('nt-tipo').value = 'EGRESO';
+  document.getElementById('nt-monto').value = Math.round(parseFloat(p.anticipo) || (parseFloat(p.total)||0) * 0.5);
+  document.getElementById('nt-notas').value = 'Anticipo pedido a ' + p.proveedor;
+
+  openModal('nueva-transaccion');
+  toast('💸 Anticipo pre-cargado para ' + p.proveedor);
+}
+
+// ── 5) PEDIDO → REGISTRAR PAGO SALDO EN CASHFLOW ────────────
+function registrarSaldoPedido(id) {
+  const p = _data.pedidos.find(x=>x.id==id);
+  if(!p){ toast('Orden no encontrada', true); return; }
+
+  const hoy = new Date();
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const saldo = (parseFloat(p.total)||0) - (parseFloat(p.anticipo)||0);
+
+  document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
+  document.getElementById('nt-mes').value = meses[hoy.getMonth()];
+  document.getElementById('nt-concepto').value = 'Saldo orden ' + p.numero + ' — ' + p.proveedor;
+  document.getElementById('nt-cat').value = 'Producción / Taller';
+  document.getElementById('nt-tipo').value = 'EGRESO';
+  document.getElementById('nt-monto').value = Math.round(saldo > 0 ? saldo : parseFloat(p.total)||0);
+  document.getElementById('nt-notas').value = 'Pago saldo contra entrega · ' + p.proveedor;
+
+  openModal('nueva-transaccion');
+  toast('💸 Saldo pre-cargado: ' + fmtARS(saldo));
+}
+
+// ── 6) AUTO-PROMPT: After cotización marked as Aceptada ──────
+const _origCambiarEstadoCotiz = cambiarEstadoCotiz;
+cambiarEstadoCotiz = async function(id, val) {
+  await _origCambiarEstadoCotiz(id, val);
+  if(val === 'Aceptada') {
+    // Show auto-generate prompt
+    setTimeout(() => {
+      if(confirm('¡Cotización aceptada! ¿Querés generar una venta automáticamente con los datos de esta cotización?')) {
+        generarVentaDesdeCotiz(id);
+      }
+    }, 400);
+  }
+};
+
+// ── LOAD ALL DATA ────────────────────────────────────────────
+
+
+async function loadAll() {
+  document.getElementById('db-status').textContent = '● Cargando...';
+  document.getElementById('db-status').style.color = 'var(--muted)';
+  try {
+    const tabs = ['consultas','cotizaciones','ventas','productos','pedidos','cashflow'];
+    const results = await Promise.all(tabs.map(t => fetch(API+'?tabla='+t).then(r=>r.json()).catch(()=>[])));
+    tabs.forEach((t,i) => { _data[t] = Array.isArray(results[i]) ? results[i] : []; });
+    document.getElementById('db-status').textContent = '● Conectado';
+    document.getElementById('db-status').style.color = 'var(--green)';
+    // Render current page
+    const active = document.querySelector('.page.active');
+    if(active) {
+      const page = active.id.replace('page-','');
+      renderPage(page);
+    }
+  } catch(e) {
+    document.getElementById('db-status').textContent = '● Error DB';
+    document.getElementById('db-status').style.color = 'var(--red)';
+  }
+}
+
+function renderPage(page) {
+  if(page==='dashboard')     renderDashboard();
+  if(page==='consultas')     renderConsultas(_data.consultas);
+  if(page==='cotizaciones')  renderCotizaciones(_data.cotizaciones);
+  if(page==='ventas')        renderVentas(_data.ventas);
+  if(page==='productos')     renderProductos(_data.productos);
+  if(page==='pedidos')       renderPedidos(_data.pedidos);
+  if(page==='cashflow')      renderCF(_data.cashflow);
+  if(page==='pipeline')      renderPipeline();
+}
+
+
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  if(m.id==='modal-nueva-consulta' || m.id==='modal-nueva-cotizacion') return;
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+
+
+
+// ── AUTH ─────────────────────────────────────────────────────
+const USERS=[{user:'emanteca',pass:'jagger2025'},{user:'jmanteca',pass:'jagger2025'}];
+
+function doLogout(){sessionStorage.removeItem('saguma_auth');location.reload();}
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  const match = USERS.find(x=>x.user===u&&x.pass===p);
+  if(match){
+    sessionStorage.setItem('saguma_auth', match.user);
+    document.getElementById('login-screen').style.display='none';
+    const tu = document.getElementById('topbar-user'); if(tu) tu.textContent=match.user;
+    loadAll();
+  } else {
+    err.textContent = 'Usuario o contraseña incorrectos.';
+    document.getElementById('login-pass').value = '';
+    setTimeout(()=>{ err.textContent=''; }, 3000);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key==='Enter' && document.getElementById('login-screen').style.display!=='none') doLogin();
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const su = sessionStorage.getItem('saguma_auth');
+  if(su){
+    document.getElementById('login-screen').style.display='none';
+    const tu = document.getElementById('topbar-user'); if(tu) tu.textContent=su;
+    loadAll();
+  }
+});
+
+// Mobile sidebar handled inline
+
+</script>
+
+<!-- Modal Nuevo/Editar Producto -->
+<!-- Modal Seguimiento Cotización -->
+<div class="modal-backdrop" id="modal-seguimiento-cotiz">
+  <div class="modal" style="width:520px;max-width:98vw">
+    <div class="modal-head">
+      <div class="modal-title">Seguimiento de cotización</div>
+      <button class="modal-close" onclick="closeModal('seguimiento-cotiz')">✕</button>
+    </div>
+    <div class="modal-body" id="seg-modal-body"></div>
+    <input type="hidden" id="seg-modal-id">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('seguimiento-cotiz')">Cerrar</button>
+      <button class="btn btn-primary" onclick="guardarSeguimiento()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-nuevo-producto">
+  <div class="modal" style="width:560px;max-width:98vw">
+    <div class="modal-head">
+      <div class="modal-title" id="prod-modal-title">Nuevo Producto</div>
+      <button class="modal-close" onclick="closeModal('nuevo-producto')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="np-id">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Categoría *</label>
+          <input class="form-input" id="np-categoria" type="text" placeholder="Ej: Camisas, Pantalones..."></div>
+        <div class="form-group"><label class="form-label">Marca</label>
+          <input class="form-input" id="np-marca" type="text" placeholder="Ej: Pampero, Sin marca"></div>
+        <div class="form-group full"><label class="form-label">Producto / Tela *</label>
+          <input class="form-input" id="np-tela" type="text" placeholder="Ej: Camisa Gabardina Algodón 8oz"></div>
+        <div class="form-group"><label class="form-label">Costo s/IVA ($)</label>
+          <input class="form-input" id="np-costo" type="number" placeholder="0" oninput="recalcNuevoProd()"></div>
+        <div class="form-group"><label class="form-label">Margen sobre costo (%)</label>
+          <input class="form-input" id="np-margen" type="number" placeholder="0" min="0" max="999" oninput="recalcNuevoProd()"></div>
+        <div class="form-group"><label class="form-label">Precio Venta s/IVA — auto</label>
+          <input class="form-input" id="np-precio" readonly style="color:var(--accent);font-weight:600"></div>
+        <div class="form-group"><label class="form-label">Precio c/IVA 21% — auto</label>
+          <input class="form-input" id="np-precio-iva" readonly style="color:var(--accent2);font-weight:600"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nuevo-producto')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-producto" onclick="guardarProducto()">Guardar Producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle Venta -->
+<div class="modal-backdrop" id="modal-detalle-venta">
+  <div class="modal" style="width:620px;max-width:98vw">
+    <div class="modal-head">
+      <div class="modal-title">Detalle de Venta</div>
+      <button class="modal-close" onclick="closeModal('detalle-venta')">✕</button>
+    </div>
+    <div class="modal-body" id="detalle-venta-body"></div>
+    <div class="modal-footer" id="detalle-venta-footer">
+      <button class="btn btn-ghost" onclick="closeModal('detalle-venta')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Consulta -->
+<div class="modal-backdrop" id="modal-editar-consulta">
+  <div class="modal" style="width:680px;max-width:98vw">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Editar Consulta</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px" id="ec-id-consulta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('editar-consulta')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ec-id">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Nombre del Cliente *</label><input class="form-input" id="ec-nombre" type="text"></div>
+        <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="ec-empresa" type="text"></div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="ec-tel" type="text"></div>
+        <div class="form-group"><label class="form-label">Mail</label><input class="form-input" id="ec-mail" type="email"></div>
+        <div class="form-group"><label class="form-label">Canal</label>
+          <select class="form-select" id="ec-canal"><option>Mail</option><option>WhatsApp</option><option>Web / Formulario</option><option>Instagram</option><option>Teléfono</option><option>Referido</option></select></div>
+        <div class="form-group"><label class="form-label">Estado</label>
+          <select class="form-select" id="ec-estado"><option>Pendiente</option><option>Respondido</option><option>Sin respuesta</option><option>Cotizado</option><option>Venta</option></select></div>
+        <div class="form-group"><label class="form-label">¿Calificada?</label>
+          <select class="form-select" id="ec-cal"><option value="Pendiente de evaluar">Pendiente de evaluar</option><option value="SI">SÍ</option><option value="No">No</option></select></div>
+        <div class="form-group"><label class="form-label">Prenda</label>
+          <select class="form-select" id="ec-prenda" multiple style="min-height:100px">
+            <option>Ambos</option><option>Pantalones</option><option>Camisas</option><option>Chombas</option>
+            <option>Buzos</option><option>Camperas</option><option>Chalecos</option><option>Remeras</option>
+            <option>Mameluco</option><option>Bombacha de campo</option><option>Otro</option>
+          </select></div>
+        <div class="form-group full"><label class="form-label">Consulta Exacta</label><textarea class="form-textarea" id="ec-texto"></textarea></div>
+        <div class="form-group full"><label class="form-label">Observaciones Internas</label><textarea class="form-textarea" id="ec-obs" style="min-height:60px"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editar-consulta')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-edicion" onclick="guardarEdicionConsulta()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
