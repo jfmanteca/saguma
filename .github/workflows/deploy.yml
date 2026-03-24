@@ -17,7 +17,7 @@ jobs:
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 65002
           local_path: './'
           remote_path: '/home/u868157557/domains/saguma.com.ar/public_html/'
