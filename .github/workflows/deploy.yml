@@ -12,15 +12,47 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Deploy vía SFTP a Hostinger
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 65002
-          local_path: './'
-          remote_path: '/home/u868157557/domains/saguma.com.ar/public_html/'
-          sftp_only: true
-          args: '-o StrictHostKeyChecking=no'
-          delete_remote_files: false
+      - name: Instalar paramiko
+        run: pip install paramiko
+
+      - name: Deploy via SFTP
+        env:
+          SFTP_HOST: ${{ secrets.FTP_SERVER }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.SFTP_PASSWORD }}
+        run: |
+          python3 << 'EOF'
+          import paramiko, os, sys
+
+          host     = os.environ['SFTP_HOST']
+          user     = os.environ['SFTP_USER']
+          password = os.environ['SFTP_PASS']
+          port     = 65002
+          base     = '/home/u868157557/domains/saguma.com.ar/public_html'
+
+          files = [
+            ('crm/api.php',              f'{base}/crm/api.php'),
+            ('crm/enviar_cotizacion.php', f'{base}/crm/enviar_cotizacion.php'),
+            ('crm/index.html',           f'{base}/crm/index.html'),
+            ('test/index.html',          f'{base}/test/index.html'),
+          ]
+
+          transport = paramiko.Transport((host, port))
+          transport.connect()
+
+          try:
+            transport.auth_interactive(user, lambda t, i, f: [password]*len(f))
+          except Exception:
+            transport.auth_password(user, password)
+
+          sftp = paramiko.SFTPClient.from_transport(transport)
+
+          for local, remote in files:
+            print(f'Subiendo {local}...')
+            sftp.put(local, remote)
+            print(f'  OK')
+
+          sftp.close()
+          transport.close()
+          print('Deploy completo!')
+          EOF
