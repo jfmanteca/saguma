@@ -872,7 +872,8 @@ async function enviarCotizacion() {
     else if(custom==='Ambos') costoCustom=costoBordado+costoEstampado;
     const precioNormal=precioBase+costoCustom;
 
-    let desc=cat+' '+tela.toLowerCase();
+    const marca=v._marca||'';
+    let desc=cat+' '+tela.toLowerCase()+(marca?' ('+marca.toLowerCase()+')':'');
     if(custom==='Bordado') desc+=' c/ bordado';
     else if(custom==='Estampado') desc+=' c/ estampado';
     else if(custom==='Ambos') desc+=' c/ bordado y estampado';

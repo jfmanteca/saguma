@@ -38,14 +38,8 @@ function enviarMailCotizacion($pdo, $data, $cotizacion_id, $numero) {
         $ok_cliente = _enviarMailConPDF(
             $data['mail'], $contacto,
             "Cotización {$numero} — SAGUMA Indumentaria Laboral",
-            $html_cliente, $pdf_path, "Cotizacion_{$numero}.pdf"
-        );
-
-        $html_interno = _mailInterno($data, $items, $numero, $fecha, $cotizacion_id);
-        _enviarMailConPDF(
-            VENTAS_INTERNO, 'Ventas SAGUMA',
-            "[Nueva Cotización] {$numero} — {$cliente}",
-            $html_interno, $pdf_path, "Cotizacion_{$numero}.pdf"
+            $html_cliente, $pdf_path, "Cotizacion_{$numero}.pdf",
+            VENTAS_INTERNO
         );
 
         @unlink($pdf_path);
@@ -410,7 +404,7 @@ function _calcularPrecios($pdo, $items, $costos) {
 }
 
 // ── ENVÍO ───────────────────────────────────────────────────
-function _enviarMailConPDF($to, $to_name, $subject, $html, $pdf_path, $pdf_filename) {
+function _enviarMailConPDF($to, $to_name, $subject, $html, $pdf_path, $pdf_filename, $cc = null) {
     $m = new PHPMailer\PHPMailer\PHPMailer(true);
     try {
         $m->isSMTP(); $m->Host=SMTP_HOST; $m->SMTPAuth=true;
@@ -420,6 +414,7 @@ function _enviarMailConPDF($to, $to_name, $subject, $html, $pdf_path, $pdf_filen
         $m->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $m->addReplyTo(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $m->addAddress($to, $to_name);
+        if ($cc) $m->addCC($cc);
         $m->isHTML(true); $m->Subject=$subject; $m->Body=$html;
         $m->AltBody=strip_tags(str_replace(['<br>','<br/>','<br />'],"\n",$html));
         if ($pdf_path && file_exists($pdf_path)) $m->addAttachment($pdf_path, $pdf_filename, 'base64', 'application/pdf');
