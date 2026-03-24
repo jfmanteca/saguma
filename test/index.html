@@ -659,7 +659,7 @@ function renderCotItems() {
       <td><div style="font-size:13px"><span style="font-weight:600;text-transform:uppercase">${p.categoria}</span> <span>${p.tela||'-'}</span></div></td>
       <td><input type="text" class="item-color" value="${state.color||''}" placeholder="Opcional" onchange="updateItemColor(${p.id}, this.value)" ${state.checked?'':'disabled'} style="width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;"></td>
       <td><input type="number" class="item-qty" value="${state.qty}" min="${MIN_PER_PRODUCT}" step="1" onchange="updateItemQty(${p.id}, this.value)" ${state.checked?'':'disabled'}><div class="qty-warning" id="qw-${p.id}">Min. ${MIN_PER_PRODUCT} unidades</div></td>
-      <td><select class="item-custom" onchange="updateItemCustom(${p.id}, this.value)" ${state.checked?'':'disabled'}><option ${state.custom==='Sin personalizar'?'selected':''}>Sin personalizar</option><option ${state.custom==='Bordado'?'selected':''}>Bordado</option><option ${state.custom==='Estampado'?'selected':''}>Estampado</option><option ${state.custom==='Ambos'?'selected':''}>Ambos</option></select></td>
+      <td><select class="item-custom" onchange="updateItemCustom(${p.id}, this.value)" ${state.checked?'':'disabled'}><option ${state.custom==='Sin personalizar'?'selected':''}>Sin personalizar</option><option ${state.custom==='Bordado'?'selected':''}>Bordado</option><option ${state.custom==='Estampado'?'selected':''}>Estampado</option></select></td>
     </tr>`;
   }).join('');
   updateQtyBar();

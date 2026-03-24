@@ -270,7 +270,6 @@
       <div class="nav-label" style="margin-top:8px">CRM</div>
       <div class="nav-item" onclick="goTo('consultas')"><span class="nav-icon">✉</span>Consultas</div>
       <div class="nav-item" onclick="goTo('cotizaciones')"><span class="nav-icon">📄</span>Cotizaciones</div>
-      <div class="nav-item" onclick="goTo('pipeline')"><span class="nav-icon">◎</span>Pipeline</div>
       <div class="nav-label" style="margin-top:8px">ERP</div>
       <div class="nav-item" onclick="goTo('productos')"><span class="nav-icon">◈</span>Productos y Precios</div>
       <div class="nav-item" onclick="goTo('pedidos')"><span class="nav-icon">◻</span>Órdenes de Pedido</div>
@@ -370,12 +369,6 @@
           <table><thead><tr><th>ID</th><th>Fecha</th><th>Canal</th><th>Cliente / Empresa</th><th>Calificada</th><th>Estado</th><th>Prenda</th><th>Acciones</th></tr></thead>
           <tbody id="consultas-tbody"><tr><td colspan="9" class="loading">Cargando desde base de datos...</td></tr></tbody></table>
         </div>
-      </div>
-
-      <!-- PIPELINE -->
-      <div class="page" id="page-pipeline">
-        <p style="color:var(--muted);font-size:12px;margin-bottom:16px">Pipeline generado automáticamente desde consultas y cotizaciones.</p>
-        <div class="pipeline" id="pipeline-board"></div>
       </div>
 
       <!-- COTIZACIONES -->
