@@ -12,18 +12,13 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Deploy vía FTP a Hostinger
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy vía SFTP a Hostinger
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          host: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /home/u868157557/domains/saguma.com.ar/public_html/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/crm/vendor/**
-            **/.DS_Store
-            **/.env
-            **/test/**
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: 65002
+          source: "crm/api.php,crm/enviar_cotizacion.php,crm/index.html,test/index.html"
+          target: /home/u868157557/domains/saguma.com.ar/public_html/
+          strip_components: 0
