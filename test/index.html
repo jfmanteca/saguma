@@ -609,7 +609,7 @@ function scrollToCotizador(cat) {
 function renderCotCats() {
   const grid = document.getElementById('cot-cat-grid');
   grid.innerHTML = _categorias.map(cat => {
-    const count = _productos.filter(p => p.categoria === cat).length;
+    const count = _productos.filter(p => p.categoria === cat && parseInt(p.visible_web) === 1).length;
     const sel = _selectedCats.has(cat) ? 'selected' : '';
     return `<div class="cat-select-card ${sel}" onclick="toggleCotCat('${cat}', this)"><div class="cat-select-name">${cat}</div><div class="cat-select-count">${count} producto${count !== 1 ? 's' : ''}</div></div>`;
   }).join('');
@@ -835,6 +835,8 @@ function cotNext(step) {
 }
 
 function renderSummary() {
+  const btnE = document.getElementById('btn-enviar');
+  if(btnE){ btnE.disabled=false; btnE.innerHTML='Enviar solicitud &#8594;'; }
   const items = getSelectedItems().map(([id,v])=>{ return {...v, producto:v._tela||'-', categoria:v._cat||''}; });
   const empresa=document.getElementById('cot-empresa').value.trim(), nombre=document.getElementById('cot-nombre').value.trim(), email=document.getElementById('cot-email').value.trim(), tel=document.getElementById('cot-tel').value.trim(), notas=document.getElementById('cot-notas').value.trim();
   const totalQty = items.reduce((s,it)=>s+it.qty,0);
@@ -895,11 +897,14 @@ async function enviarCotizacion() {
 
   const data = { cliente:document.getElementById('cot-empresa').value.trim(), contacto:document.getElementById('cot-nombre').value.trim(), mail:document.getElementById('cot-email').value.trim(), telefono:document.getElementById('cot-tel').value.trim(), notas:document.getElementById('cot-notas').value.trim(), cargo:document.getElementById('cot-cargo').value.trim(), items_json:JSON.stringify(items), estado:'Web', numero:'WEB-'+Date.now(), fecha:new Date().toISOString().split('T')[0], origen:'cotizador-web' };
   try {
-    const res = await fetch(`${API_URL}?tabla=cotizaciones`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 40000);
+    const res = await fetch(`${API_URL}?tabla=cotizaciones`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data), signal:ctrl.signal });
+    clearTimeout(timer);
     const result = await res.json();
     if (result.ok||result.id) { document.querySelectorAll('.cot-panel').forEach(p=>p.classList.remove('active')); document.getElementById('cot-panel-success').classList.add('active'); document.querySelectorAll('.cot-step').forEach(s=>s.classList.add('done')); toast('Solicitud enviada con éxito.'); }
     else throw new Error(result.error||'Error al enviar');
-  } catch(e) { console.error('Submit error:',e); toast('Hubo un error al enviar. Intenta nuevamente.',true); }
+  } catch(e) { console.error('Submit error:',e); toast(e.name==='AbortError'?'El servidor tardó demasiado. Intentá de nuevo.':'Hubo un error al enviar. Intenta nuevamente.',true); }
   btn.disabled=false; btn.innerHTML='Enviar solicitud &#8594;';
 }
 

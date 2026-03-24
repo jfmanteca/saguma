@@ -210,7 +210,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 
         $pdf->SetDrawColor(220, 220, 220);
         $pdf->Cell($c[0], 7, $n, 'B', 0, 'C');
-        $pdf->Cell($c[1], 7, ucfirst($desc), 'B', 0, 'L');
+        $pdf->Cell($c[1], 7, ucfirst($desc), 'B', 0, 'L', false, '', 1);
         $pdf->Cell($c[2], 7, $talle, 'B', 0, 'C');
         $pdf->Cell($c[3], 7, $color, 'B', 0, 'C');
         $pdf->Cell($c[4], 7, $cant, 'B', 0, 'C');
@@ -411,6 +411,7 @@ function _enviarMailConPDF($to, $to_name, $subject, $html, $pdf_path, $pdf_filen
         $m->Username=SMTP_USER; $m->Password=SMTP_PASS;
         $m->SMTPSecure=PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         $m->Port=SMTP_PORT; $m->CharSet='UTF-8';
+        $m->Timeout=10;
         $m->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $m->addReplyTo(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $m->addAddress($to, $to_name);
