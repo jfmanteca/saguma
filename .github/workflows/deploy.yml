@@ -13,12 +13,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy vía SFTP a Hostinger
-        uses: appleboy/scp-action@v0.1.7
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          host: ${{ secrets.FTP_SERVER }}
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
           port: 65002
-          source: "crm/api.php,crm/enviar_cotizacion.php,crm/index.html,test/index.html"
-          target: /home/u868157557/domains/saguma.com.ar/public_html/
-          strip_components: 0
+          local_path: './'
+          remote_path: '/home/u868157557/domains/saguma.com.ar/public_html/'
+          sftp_only: true
+          args: '-o StrictHostKeyChecking=no'
+          delete_remote_files: false
