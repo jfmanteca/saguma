@@ -76,6 +76,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
         $subtotal_gen += $sub;
         $total_prendas += $cant;
     }
+    unset($it); // evita que $it quede como referencia al último elemento
     $iva_gen   = $subtotal_gen * 0.21;
     $total_gen = $subtotal_gen + $iva_gen;
     $hay_precios = $subtotal_gen > 0;
@@ -176,7 +177,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     $pdf->SetY($ty);
 
     // Anchos columnas (como CRM): #, DESC, TALLE, COLOR, CANT, P.UNIT, SUBTOTAL, IVA, TOTAL
-    $c = [8, 50, 16, 16, 13, 22, 22, 17, 22];
+    $c = [8, 56, 14, 14, 11, 22, 22, 17, 22];
 
     $pdf->SetFillColor(55, 96, 146);
     $pdf->SetTextColor(255, 255, 255);
@@ -400,6 +401,7 @@ function _calcularPrecios($pdo, $items, $costos) {
         $it['costo_custom'] = 0;
         $it['subtotal'] = $pu * $cant;
     }
+    unset($it);
     return $items;
 }
 

@@ -345,6 +345,20 @@
           <table><thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Ingreso Neto</th><th>Estado</th></tr></thead>
           <tbody id="dash-ventas-tbody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
         </div>
+        <div class="grid3">
+          <div class="chart-card">
+            <div class="chart-title">Productos más vendidos</div>
+            <div id="chart-prod-vendidos" class="bar-chart"><div class="loading">Cargando...</div></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Margen promedio por producto</div>
+            <div id="chart-margenes" class="bar-chart"><div class="loading">Cargando...</div></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Productos más consultados</div>
+            <div id="chart-prod-consultados" class="bar-chart"><div class="loading">Cargando...</div></div>
+          </div>
+        </div>
       </div>
 
       <!-- CONSULTAS -->
@@ -812,7 +826,7 @@ function openModal(id){
   if(id==='nueva-cotizacion') { if(window._editingCotizacion){window._editingCotizacion=false;}else{initNuevaCotiz();} }
   if(id==='nueva-venta' && !window._skipVentaInit) initNuevaVenta();
   window._skipVentaInit = false;
-  if(id==='nuevo-producto'){ if(window._editingProducto){window._editingProducto=false;}else{document.getElementById('prod-modal-title').textContent='Nuevo Producto'; document.getElementById('np-id').value=''; ['np-categoria','np-tela','np-marca','np-costo','np-margen','np-precio','np-precio-iva'].forEach(x=>{const el=document.getElementById(x);if(el) el.value='';});} }
+  if(id==='nuevo-producto'){ if(window._editingProducto){window._editingProducto=false;}else{document.getElementById('prod-modal-title').textContent='Nuevo Producto'; document.getElementById('np-id').value=''; ['np-categoria','np-tela','np-marca','np-costo','np-margen','np-precio','np-precio-iva','np-descripcion','np-img-url'].forEach(x=>{const el=document.getElementById(x);if(el) el.value=''}); quitarImagenProducto(); } }
   if(id==='nueva-orden') initNuevaOrden();
   if(id==='nueva-consulta') clearFormConsulta && clearFormConsulta();
 }
@@ -1537,8 +1551,11 @@ function editarProducto(id) {
   document.getElementById('np-categoria').value = p.categoria||'';
   document.getElementById('np-tela').value      = p.tela||'';
   document.getElementById('np-marca').value     = p.marca||'';
-  document.getElementById('np-costo').value     = parseFloat(p.costo)||'';
-  document.getElementById('np-margen').value    = margenPct.toFixed(1);
+  document.getElementById('np-costo').value       = parseFloat(p.costo)||'';
+  document.getElementById('np-margen').value      = margenPct.toFixed(1);
+  document.getElementById('np-descripcion').value = p.descripcion||'';
+  document.getElementById('np-img-url').value     = p.img_url||'';
+  actualizarPreviewProducto(p.img_url||'');
   recalcNuevoProd();
   openModal('nuevo-producto');
 }
@@ -1553,18 +1570,49 @@ async function guardarProducto() {
   const id        = document.getElementById('np-id').value;
   setLoading('btn-guardar-producto', true);
   let res;
+  const marca       = document.getElementById('np-marca').value;
+  const descripcion = document.getElementById('np-descripcion').value.trim();
+  const img_url     = document.getElementById('np-img-url').value.trim();
   if(id) {
     const r = await fetch(API+'?tabla=productos&id='+id, {
       method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ categoria: cat, tela, marca: document.getElementById('np-marca').value, costo, margen: margenPct/100, precio })
+      body: JSON.stringify({ categoria: cat, tela, marca, costo, margen: margenPct/100, precio, descripcion, img_url })
     });
     res = await r.json();
   } else {
-    res = await apiPost('productos', { categoria: cat, tela, marca: document.getElementById('np-marca').value, costo, margen: margenPct/100, precio });
+    res = await apiPost('productos', { categoria: cat, tela, marca, costo, margen: margenPct/100, precio, descripcion, img_url });
   }
   setLoading('btn-guardar-producto', false);
   if(res.ok) { closeModal('nuevo-producto'); await loadAll(); toast(id ? '✓ Producto actualizado' : '✓ Producto agregado'); }
   else toast('Error al guardar', true);
+}
+
+async function subirImagenProducto(input) {
+  if (!input.files[0]) return;
+  const form = new FormData();
+  form.append('imagen', input.files[0]);
+  try {
+    const r = await fetch('https://saguma.com.ar/crm/upload_imagen.php', { method:'POST', body:form });
+    const data = await r.json();
+    if (data.ok) {
+      document.getElementById('np-img-url').value = data.url;
+      actualizarPreviewProducto(data.url);
+      toast('Imagen subida');
+    } else { toast('Error: ' + (data.error||'desconocido'), true); }
+  } catch(e) { toast('Error al subir imagen', true); }
+  input.value = '';
+}
+function actualizarPreviewProducto(url) {
+  const wrap = document.getElementById('np-img-preview');
+  const img  = document.getElementById('np-img-preview-img');
+  if (url) { img.src = url; wrap.style.display = 'flex'; }
+  else { wrap.style.display = 'none'; }
+}
+function quitarImagenProducto() {
+  const el = document.getElementById('np-img-url');
+  if (el) el.value = '';
+  const wrap = document.getElementById('np-img-preview');
+  if (wrap) wrap.style.display = 'none';
 }
 
 function filterProductos() {
@@ -1771,6 +1819,42 @@ function renderDashboard() {
       <td class="mono" style="color:var(--accent)">${fmtARS(x.ingreso_neto)}</td>
       <td>${statusPill(x.estado)}</td>
     </tr>`).join('') || '<tr><td colspan="6" class="empty">Sin ventas</td></tr>';
+
+  // Productos más vendidos
+  const prodVentas = {};
+  v.forEach(x=>{ if(!x.producto) return; prodVentas[x.producto]=(prodVentas[x.producto]||0)+(parseFloat(x.cantidad)||1); });
+  const maxPV = Math.max(...Object.values(prodVentas),1);
+  document.getElementById('chart-prod-vendidos').innerHTML = Object.entries(prodVentas).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,val],i)=>`
+    <div class="bar-row">
+      <div class="bar-label">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/maxPV*100).toFixed(0)}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="bar-val">${val} u.</div>
+    </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--muted)">Sin datos</div>';
+
+  // Margen promedio por producto
+  const prodMargenSum = {}, prodMargenCnt = {};
+  v.forEach(x=>{ if(!x.producto) return; const m=parseFloat(x.margen_bruto); if(!m||isNaN(m)) return; prodMargenSum[x.producto]=(prodMargenSum[x.producto]||0)+m; prodMargenCnt[x.producto]=(prodMargenCnt[x.producto]||0)+1; });
+  const prodMargenAvg = Object.fromEntries(Object.entries(prodMargenSum).map(([k,s])=>[k,s/prodMargenCnt[k]]));
+  const maxM = Math.max(...Object.values(prodMargenAvg),0.01);
+  document.getElementById('chart-margenes').innerHTML = Object.keys(prodMargenAvg).length
+    ? Object.entries(prodMargenAvg).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,val],i)=>`
+        <div class="bar-row">
+          <div class="bar-label">${k}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(val/maxM*100).toFixed(0)}%;background:${colors[i%colors.length]}"></div></div>
+          <div class="bar-val">${(val*100).toFixed(1)}%</div>
+        </div>`).join('')
+    : '<div style="padding:20px;text-align:center;color:var(--muted)">Sin datos de margen registrados</div>';
+
+  // Productos más consultados
+  const prodConsultas = {};
+  c.forEach(x=>{ if(!x.prenda) return; x.prenda.split(',').forEach(p=>{ const pt=p.trim(); if(pt) prodConsultas[pt]=(prodConsultas[pt]||0)+1; }); });
+  const maxPC = Math.max(...Object.values(prodConsultas),1);
+  document.getElementById('chart-prod-consultados').innerHTML = Object.entries(prodConsultas).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,val],i)=>`
+    <div class="bar-row">
+      <div class="bar-label">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/maxPC*100).toFixed(0)}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="bar-val">${val} consultas</div>
+    </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--muted)">Sin datos</div>';
 }
 
 // ── CRUD ─────────────────────────────────────────────────────
@@ -2823,6 +2907,24 @@ window.addEventListener('DOMContentLoaded', () => {
           <input class="form-input" id="np-precio" readonly style="color:var(--accent);font-weight:600"></div>
         <div class="form-group"><label class="form-label">Precio c/IVA 21% — auto</label>
           <input class="form-input" id="np-precio-iva" readonly style="color:var(--accent2);font-weight:600"></div>
+      </div>
+      <div style="border-top:1px solid var(--border);margin:16px 0 12px;"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px">Información visible en el cotizador web</div>
+      <div class="form-group full" style="margin-bottom:12px">
+        <label class="form-label">Descripción del producto</label>
+        <textarea class="form-input" id="np-descripcion" rows="2" placeholder="Ej: Gabardina algodón sanforizada 8oz, resistente al desgaste..." style="resize:vertical;min-height:56px;font-family:'DM Sans',sans-serif;font-size:13px"></textarea>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Imagen del producto</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input class="form-input" id="np-img-url" type="text" placeholder="URL de imagen (o subí un archivo)" style="flex:1;min-width:180px" oninput="actualizarPreviewProducto(this.value)">
+          <label for="np-img-file" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap">Subir archivo</label>
+          <input type="file" id="np-img-file" accept="image/*" style="display:none" onchange="subirImagenProducto(this)">
+        </div>
+        <div id="np-img-preview" style="margin-top:8px;display:none;align-items:center;gap:8px">
+          <img id="np-img-preview-img" style="height:64px;width:64px;border-radius:6px;border:1px solid var(--border);object-fit:cover">
+          <button type="button" onclick="quitarImagenProducto()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✕ quitar</button>
+        </div>
       </div>
     </div>
     <div class="modal-footer">

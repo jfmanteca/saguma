@@ -202,15 +202,17 @@ try {
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
             case 'productos':
-                $stmt = $pdo->prepare("INSERT INTO productos (categoria,tela,marca,costo,margen,precio,visible_web) VALUES (:categoria,:tela,:marca,:costo,:margen,:precio,:visible_web)");
+                $stmt = $pdo->prepare("INSERT INTO productos (categoria,tela,marca,costo,margen,precio,visible_web,descripcion,img_url) VALUES (:categoria,:tela,:marca,:costo,:margen,:precio,:visible_web,:descripcion,:img_url)");
                 $stmt->execute([
-                    'categoria'   => $body['categoria'] ?? '',
-                    'tela'        => $body['tela']      ?? '',
-                    'marca'       => $body['marca']     ?? '',
+                    'categoria'   => $body['categoria']   ?? '',
+                    'tela'        => $body['tela']         ?? '',
+                    'marca'       => $body['marca']        ?? '',
                     'costo'       => floatval($body['costo']  ?? 0),
                     'margen'      => floatval($body['margen'] ?? 0),
                     'precio'      => floatval($body['precio'] ?? 0),
                     'visible_web' => intval($body['visible_web'] ?? 1),
+                    'descripcion' => $body['descripcion']  ?? null,
+                    'img_url'     => $body['img_url']      ?? null,
                 ]);
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
@@ -249,15 +251,17 @@ try {
             }
             if (!empty($body['categoria'])) {
                 // Full product edit
-                $stmt = $pdo->prepare("UPDATE productos SET categoria=:categoria, tela=:tela, marca=:marca, costo=:costo, margen=:margen, precio=:precio WHERE id=:id");
+                $stmt = $pdo->prepare("UPDATE productos SET categoria=:categoria, tela=:tela, marca=:marca, costo=:costo, margen=:margen, precio=:precio, descripcion=:descripcion, img_url=:img_url WHERE id=:id");
                 $stmt->execute([
-                    'categoria' => $body['categoria'] ?? '',
-                    'tela'      => $body['tela']      ?? '',
-                    'marca'     => $body['marca']     ?? '',
-                    'costo'     => floatval($body['costo']  ?? 0),
-                    'margen'    => floatval($body['margen'] ?? 0),
-                    'precio'    => floatval($body['precio'] ?? 0),
-                    'id'        => $id,
+                    'categoria'   => $body['categoria']   ?? '',
+                    'tela'        => $body['tela']         ?? '',
+                    'marca'       => $body['marca']        ?? '',
+                    'costo'       => floatval($body['costo']  ?? 0),
+                    'margen'      => floatval($body['margen'] ?? 0),
+                    'precio'      => floatval($body['precio'] ?? 0),
+                    'descripcion' => $body['descripcion']  ?? null,
+                    'img_url'     => $body['img_url']      ?? null,
+                    'id'          => $id,
                 ]);
             } else {
                 // Price-only edit
