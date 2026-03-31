@@ -606,7 +606,8 @@ const CAT_IMAGES = {
   'Camperas':   'images/Categorias_cotizador/camperas_cotizador.png',
   'Chalecos':   'images/Categorias_cotizador/chalecos_cotizador.png',
   'Ambos':      'images/Categorias_cotizador/ambos_cotizador.png',
-  'Mamelucos':  'images/Categorias_cotizador/mamelucos_cotizador.png',
+  'Mamelucos':  'images/Categorias_cotizador/mameluco_cotizador.png',
+  'Buzos':      'images/Categorias_cotizador/buzos_cotizador.png',
   'Zapatos de seguridad': 'images/Categorias_cotizador/zapatos_cotizador.png',
 };
 
@@ -615,7 +616,7 @@ function renderCotCats() {
   grid.innerHTML = _categorias.map(cat => {
     const count  = _productos.filter(p => p.categoria === cat && parseInt(p.visible_web) === 1).length;
     const sel    = _selectedCats.has(cat) ? 'selected' : '';
-    const imgUrl = CAT_IMAGES[cat] || '';
+    const imgUrl = CAT_IMAGES[cat] || CAT_IMAGES[cat.charAt(0).toUpperCase()+cat.slice(1).toLowerCase()] || Object.entries(CAT_IMAGES).find(([k])=>k.toLowerCase()===cat.toLowerCase())?.[1] || '';
     const imgHtml = imgUrl
       ? `<div class="cat-select-img-wrap"><img src="${imgUrl}" alt="${cat}" loading="lazy"></div>`
       : `<div class="cat-select-no-img"></div>`;
