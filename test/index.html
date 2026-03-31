@@ -188,17 +188,21 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .cat-select-card{padding:0;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:all .2s;overflow:hidden;}
 .cat-select-card:hover{border-color:var(--blue);}
 .cat-select-card.selected{border-color:var(--blue);background:rgba(37,99,176,.04);}
-.cat-select-img-wrap{height:80px;overflow:hidden;background:var(--gray-100);}
+.cat-select-img-wrap{height:130px;overflow:hidden;background:var(--gray-100);}
 .cat-select-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-.cat-select-no-img{height:80px;background:var(--gray-100);}
+.cat-select-no-img{height:130px;background:var(--gray-100);}
 .cat-select-info{padding:12px 16px;}
 .cat-select-name{font-size:13px;font-weight:600;}
 .cat-select-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;}
-.col-prod-img{width:50px;}
-.prod-img-thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;display:block;}
-.prod-img-empty{width:44px;height:44px;border-radius:6px;background:var(--gray-100);display:block;}
+.col-prod-img{width:70px;}
+.prod-img-thumb{width:62px;height:62px;border-radius:8px;object-fit:cover;display:block;cursor:zoom-in;transition:opacity .15s;}
+.prod-img-thumb:hover{opacity:.85;}
+.prod-img-empty{width:62px;height:62px;border-radius:8px;background:var(--gray-100);display:block;}
 .prod-desc-small{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
-@media(max-width:600px){.col-prod-img{display:none;}}
+.img-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;}
+.img-lightbox.open{display:flex;}
+.img-lightbox img{max-width:90vw;max-height:88vh;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+@media(max-width:600px){.col-prod-img{width:54px;}.prod-img-thumb{width:48px;height:48px;}}
 .items-table{width:100%;border-collapse:collapse;}
 .items-table th{text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--gray-300);}
 .items-table td{padding:12px;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px;vertical-align:middle;}
@@ -547,6 +551,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
   </div>
 </footer>
 
+<div class="img-lightbox" id="img-lightbox" onclick="cerrarLightbox()"><img id="img-lightbox-src" src="" alt=""></div>
+
 <a href="https://wa.me/5491161125719?text=Hola,%20vi%20la%20web%20de%20Saguma%20y%20quiero%20hacer%20una%20consulta" target="_blank" class="whatsapp-float" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
@@ -593,8 +599,15 @@ function scrollToCotizador(cat) {
 
 // Imágenes por categoría — completar con URLs cuando estén disponibles
 const CAT_IMAGES = {
-  // 'Pantalones': 'images/cat_pantalones.jpg',
-  // 'Camisas': 'images/cat_camisas.jpg',
+  'Remeras':    'images/Categorias_cotizador/remeras_cotizador.png',
+  'Camisas':    'images/Categorias_cotizador/camisas_cotizador.png',
+  'Chombas':    'images/Categorias_cotizador/chombas_cotizador.png',
+  'Pantalones': 'images/Categorias_cotizador/pantalones_cotizador.png',
+  'Camperas':   'images/Categorias_cotizador/camperas_cotizador.png',
+  'Chalecos':   'images/Categorias_cotizador/chalecos_cotizador.png',
+  'Ambos':      'images/Categorias_cotizador/ambos_cotizador.png',
+  'Mamelucos':  'images/Categorias_cotizador/mamelucos_cotizador.png',
+  'Zapatos de seguridad': 'images/Categorias_cotizador/zapatos_cotizador.png',
 };
 
 function renderCotCats() {
@@ -650,7 +663,7 @@ function renderCotItems() {
     if (!_cotizItems[p.id]) _cotizItems[p.id] = { checked: false, qty: MIN_PER_PRODUCT, custom: 'Sin personalizar', color: '', _pid: p.id, _cat: p.categoria, _tela: p.tela, _marca: p.marca, _precio: p.precio, _img_url: p.img_url||'', _descripcion: p.descripcion||'' };
     const state   = _cotizItems[p.id];
     const imgHtml = p.img_url
-      ? `<img src="${p.img_url}" class="prod-img-thumb" alt="${p.tela||''}" loading="lazy">`
+      ? `<img src="${p.img_url}" class="prod-img-thumb" alt="${p.tela||''}" loading="lazy" onclick="abrirLightbox('${p.img_url}')">`
       : `<span class="prod-img-empty"></span>`;
     const descHtml = p.descripcion
       ? `<div class="prod-desc-small">${p.descripcion}</div>` : '';
@@ -681,6 +694,14 @@ function updateItemQty(id, val) {
 }
 function updateItemCustom(id, val) { _cotizItems[id].custom = val; }
 function updateItemColor(id, val) { _cotizItems[id].color = val; }
+
+function abrirLightbox(src) {
+  document.getElementById('img-lightbox-src').src = src;
+  document.getElementById('img-lightbox').classList.add('open');
+}
+function cerrarLightbox() {
+  document.getElementById('img-lightbox').classList.remove('open');
+}
 
 const TALLES = ['S','M','L','XL','XXL','3XL','4XL','5XL'];
 const TALLES_RECARGO = ['3XL','4XL','5XL'];
