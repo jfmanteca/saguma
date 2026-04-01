@@ -1457,7 +1457,7 @@ function renderProductos(data) {
   const catSelect = document.getElementById('prod-cat');
   if(catSelect) {
     const currentVal = catSelect.value;
-    catSelect.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option value="${c}" ${c===currentVal?'selected':''}>${c}</option>`).join('');
+    catSelect.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option value="${c}" ${c===currentVal?'selected':''}>${c.toUpperCase()}</option>`).join('');
   }
   tbody.innerHTML = data.map(p => {
     const costo     = parseFloat(p.costo)||0;
@@ -1472,7 +1472,7 @@ function renderProductos(data) {
       ? '<span style="font-size:10px;color:var(--muted);">—</span>'
       : `<label style="position:relative;display:inline-block;width:36px;height:20px;"><input type="checkbox" ${visWeb?'checked':''} onchange="toggleVisibleWeb(${p.id},this.checked)" style="opacity:0;width:0;height:0;"><span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:${visWeb?'var(--accent2)':'#ccc'};border-radius:20px;transition:.2s;"></span><span style="position:absolute;height:16px;width:16px;left:${visWeb?'18px':'2px'};bottom:2px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></span></label>`;
     return `<tr id="prod-row-${p.id}" ${rowOpacity}>
-      <td style="font-size:11px;color:var(--muted)">${p.categoria||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${p.categoria ? p.categoria.toUpperCase() : '—'}</td>
       <td><strong>${p.tela||'—'}</strong></td>
       <td style="font-size:12px;color:var(--muted)">${p.marca||'—'}</td>
       <td>

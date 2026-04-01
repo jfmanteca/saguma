@@ -202,7 +202,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .img-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;}
 .img-lightbox.open{display:flex;}
 .img-lightbox img{max-width:90vw;max-height:88vh;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
-@media(max-width:600px){.col-prod-img{width:54px;}.prod-img-thumb{width:48px;height:48px;}}
+@media(max-width:600px){.col-prod-img{width:54px;}.prod-img-thumb{width:48px;height:48px;}.items-table thead{display:none;}.items-table,.items-table tbody{display:block;width:100%;}.items-table tr{display:flex;flex-wrap:wrap;align-items:center;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;gap:6px;}.items-table td{border:none;padding:0;}.items-table td:nth-child(1){width:24px;flex-shrink:0;}.items-table td:nth-child(2){width:52px;flex-shrink:0;}.items-table td:nth-child(3){flex:1;min-width:0;}.items-table td:nth-child(4){width:100%;display:flex;flex-direction:column;gap:4px;}.items-table td:nth-child(5){flex:1;display:flex;flex-direction:column;gap:4px;}.items-table td:nth-child(6){flex:2;display:flex;flex-direction:column;gap:4px;}.items-table td[data-label]::before{content:attr(data-label);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}.item-qty,.item-custom{width:100%!important;box-sizing:border-box;}.item-color{width:100%!important;box-sizing:border-box;}}
 .items-table{width:100%;border-collapse:collapse;}
 .items-table th{text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--gray-300);}
 .items-table td{padding:12px;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px;vertical-align:middle;}
@@ -217,7 +217,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .form-input,.form-textarea,.form-select{padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--white);transition:border-color .2s;}
 .form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(37,99,176,.08);}
 .form-textarea{resize:vertical;min-height:100px;}
-@media(max-width:600px){.form-grid{grid-template-columns:1fr;}.cotizador-body{padding:24px;}.cotizador-header{padding:24px;}.summary-item{flex-direction:column;gap:2px;}.summary-item-value{text-align:left;}.cot-actions{flex-direction:column;}.cot-actions .btn{width:100%;justify-content:center;}}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}.cotizador-body{padding:24px;}.cotizador-header{padding:24px;}.summary-item{flex-direction:column;gap:2px;}.summary-item-value{text-align:left;}.cot-actions{flex-direction:column;}.cot-actions .btn{width:100%;justify-content:center;}.cot-step{padding:8px 4px;font-size:10px;letter-spacing:0;}}
 .cot-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);}
 .btn-back{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
 .btn-back:hover{color:var(--text);border-color:var(--muted);}
@@ -673,10 +673,10 @@ function renderCotItems() {
     return `<tr>
       <td><input type="checkbox" class="item-check" ${state.checked?'checked':''} onchange="toggleItem(${p.id}, this.checked)"></td>
       <td class="col-prod-img">${imgHtml}</td>
-      <td><div style="font-size:13px"><span style="font-weight:600;text-transform:uppercase">${p.categoria}</span> <span>${p.tela||'-'}</span></div>${descHtml}</td>
-      <td><input type="text" class="item-color" value="${state.color||''}" placeholder="Opcional" onchange="updateItemColor(${p.id}, this.value)" ${state.checked?'':'disabled'} style="width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;"></td>
-      <td><input type="number" class="item-qty" value="${state.qty}" min="${MIN_PER_PRODUCT}" step="1" onchange="updateItemQty(${p.id}, this.value)" ${state.checked?'':'disabled'}><div class="qty-warning" id="qw-${p.id}">Min. ${MIN_PER_PRODUCT} unidades</div></td>
-      <td><select class="item-custom" onchange="updateItemCustom(${p.id}, this.value)" ${state.checked?'':'disabled'}><option ${state.custom==='Sin personalizar'?'selected':''}>Sin personalizar</option><option ${state.custom==='Bordado'?'selected':''}>Bordado</option><option ${state.custom==='Estampado'?'selected':''}>Estampado</option></select></td>
+      <td><div style="font-size:13px"><span style="font-weight:600">${(p.categoria||'').toUpperCase()}</span> <span>${p.tela||'-'}</span></div>${descHtml}</td>
+      <td data-label="Color"><input type="text" class="item-color" value="${state.color||''}" placeholder="Opcional" onchange="updateItemColor(${p.id}, this.value)" ${state.checked?'':'disabled'} style="width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;"></td>
+      <td data-label="Cantidad"><input type="number" class="item-qty" value="${state.qty}" min="${MIN_PER_PRODUCT}" step="1" onchange="updateItemQty(${p.id}, this.value)" ${state.checked?'':'disabled'}><div class="qty-warning" id="qw-${p.id}">Min. ${MIN_PER_PRODUCT} unidades</div></td>
+      <td data-label="Personalización"><select class="item-custom" onchange="updateItemCustom(${p.id}, this.value)" ${state.checked?'':'disabled'}><option ${state.custom==='Sin personalizar'?'selected':''}>Sin personalizar</option><option ${state.custom==='Bordado'?'selected':''}>Bordado</option><option ${state.custom==='Estampado'?'selected':''}>Estampado</option></select></td>
     </tr>`;
   }).join('');
   updateQtyBar();
