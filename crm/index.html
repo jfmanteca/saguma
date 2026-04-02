@@ -115,6 +115,9 @@
   .margin-tag{font-size:10px;background:rgba(37,99,176,.1);color:var(--accent2);padding:2px 6px;border-radius:3px;font-family:'DM Mono',monospace;}
   .cf-positive{color:#16a34a;font-family:'DM Mono',monospace;font-size:12px;}
   .cf-negative{color:var(--red);font-family:'DM Mono',monospace;font-size:12px;}
+  .cf-sort-th{cursor:pointer;user-select:none;white-space:nowrap;}
+  .cf-sort-th:hover{color:var(--blue);}
+  .cf-sort-icon{font-size:10px;margin-left:3px;color:var(--muted);}
   .cf-neutral{color:var(--accent2);font-family:'DM Mono',monospace;font-size:12px;}
   .loading{text-align:center;padding:40px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;}
   .empty{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
@@ -470,10 +473,20 @@
       <div class="page" id="page-cashflow">
         <div class="search-bar">
           <input class="search-input" type="text" id="cf-search" placeholder="🔍  Buscar transacción..." oninput="filterCF()">
-          <select class="form-select" id="cf-tipo" onchange="filterCF()" style="width:140px">
-            <option value="">Todos</option><option value="INGRESO">Ingresos</option><option value="EGRESO">Egresos</option>
-          </select>
           <button class="btn btn-primary btn-sm" onclick="openModal('nueva-transaccion')">+ Transacción</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+          <select class="form-select" id="cf-mes" onchange="filterCF()" style="width:150px">
+            <option value="">Todos los meses</option>
+            <option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+          </select>
+          <select class="form-select" id="cf-cat" onchange="filterCF()" style="width:200px">
+            <option value="">Todas las categorías</option>
+            <option>Anticipos</option><option>Cobros directos</option><option>E-commerce</option><option>Otros ingresos</option><option>Producción / Taller</option><option>Telas y materias primas</option><option>Publicidad digital</option><option>Gestión publicidad</option><option>Hosting + Dominio</option><option>Avíos</option><option>Otros egresos</option>
+          </select>
+          <select class="form-select" id="cf-tipo" onchange="filterCF()" style="width:140px">
+            <option value="">Todos los tipos</option><option value="INGRESO">Ingresos</option><option value="EGRESO">Egresos</option>
+          </select>
         </div>
         <div class="kpi-grid" style="margin-bottom:20px">
           <div class="kpi-card green"><div class="kpi-label">Total Ingresos</div><div class="kpi-value" id="cf-ingresos">—</div></div>
@@ -483,7 +496,16 @@
         </div>
         <div class="table-wrap">
           <div class="table-header"><div class="table-title">Libro de Transacciones 2026</div></div>
-          <table><thead><tr><th>#</th><th>Fecha</th><th>Mes</th><th>Concepto</th><th>Categoría</th><th>Tipo</th><th>Monto</th><th>Notas</th><th></th></tr></thead>
+          <table><thead><tr>
+            <th class="cf-sort-th" onclick="sortCF('id')" data-col="id"># <span class="cf-sort-icon">↕</span></th>
+            <th class="cf-sort-th" onclick="sortCF('fecha')" data-col="fecha">Fecha <span class="cf-sort-icon">↕</span></th>
+            <th class="cf-sort-th" onclick="sortCF('mes')" data-col="mes">Mes <span class="cf-sort-icon">↕</span></th>
+            <th class="cf-sort-th" onclick="sortCF('concepto')" data-col="concepto">Concepto <span class="cf-sort-icon">↕</span></th>
+            <th class="cf-sort-th" onclick="sortCF('categoria')" data-col="categoria">Categoría <span class="cf-sort-icon">↕</span></th>
+            <th class="cf-sort-th" onclick="sortCF('tipo')" data-col="tipo">Tipo <span class="cf-sort-icon">↕</span></th>
+            <th class="cf-sort-th" onclick="sortCF('monto')" data-col="monto">Monto <span class="cf-sort-icon">↕</span></th>
+            <th>Notas</th><th></th>
+          </tr></thead>
           <tbody id="cf-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
@@ -723,9 +745,8 @@
     <div class="modal-head"><div class="modal-title">Nueva Transacción</div><button class="modal-close" onclick="closeModal('nueva-transaccion')">✕</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" id="nt-fecha" type="date"></div>
-        <div class="form-group"><label class="form-label">Mes</label>
-          <select class="form-select" id="nt-mes"><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></div>
+        <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" id="nt-fecha" type="date" onchange="autoMesCF()"></div>
+        <input type="hidden" id="nt-mes-hidden">
         <div class="form-group full"><label class="form-label">Concepto *</label><input class="form-input" id="nt-concepto" type="text"></div>
         <div class="form-group"><label class="form-label">Categoría</label>
           <select class="form-select" id="nt-cat"><option>Anticipos</option><option>Cobros directos</option><option>E-commerce</option><option>Otros ingresos</option><option>Producción / Taller</option><option>Telas y materias primas</option><option>Publicidad digital</option><option>Gestión publicidad</option><option>Hosting + Dominio</option><option>Avíos</option><option>Otros egresos</option></select></div>
@@ -1639,6 +1660,25 @@ async function toggleVisibleWeb(id, checked) {
   toast(checked ? 'Producto visible en la web' : 'Producto oculto de la web');
 }
 
+const MESES_CF = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MESES_ORD = Object.fromEntries(MESES_CF.map((m,i)=>[m.toLowerCase(),i]));
+let _cfSort = { col: 'fecha', dir: -1 };
+
+function autoMesCF() {
+  const f = document.getElementById('nt-fecha').value;
+  if (f) document.getElementById('nt-mes-hidden').value = MESES_CF[new Date(f + 'T12:00:00').getMonth()];
+}
+
+function sortCF(col) {
+  if (_cfSort.col === col) { _cfSort.dir *= -1; } else { _cfSort.col = col; _cfSort.dir = -1; }
+  document.querySelectorAll('.cf-sort-th').forEach(th => {
+    const ic = th.querySelector('.cf-sort-icon');
+    ic.textContent = th.dataset.col === col ? (_cfSort.dir === -1 ? '↓' : '↑') : '↕';
+    ic.style.color = th.dataset.col === col ? 'var(--blue)' : '';
+  });
+  filterCF();
+}
+
 function renderCF(data) {
   const ing = data.filter(t=>t.tipo==='INGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
   const eg  = data.filter(t=>t.tipo==='EGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
@@ -1664,11 +1704,25 @@ function renderCF(data) {
 }
 
 function filterCF() {
-  const q = document.getElementById('cf-search').value.toLowerCase();
+  const q    = document.getElementById('cf-search').value.toLowerCase();
   const tipo = document.getElementById('cf-tipo').value;
-  renderCF(_data.cashflow.filter(t=>{
-    return [t.concepto,t.categoria,t.notas].join(' ').toLowerCase().includes(q) && (!tipo||t.tipo===tipo);
-  }));
+  const mes  = document.getElementById('cf-mes').value;
+  const cat  = document.getElementById('cf-cat').value;
+  let data = _data.cashflow.filter(t=>{
+    return [t.concepto,t.categoria,t.notas].join(' ').toLowerCase().includes(q)
+      && (!tipo || t.tipo === tipo)
+      && (!mes  || t.mes === mes)
+      && (!cat  || t.categoria === cat);
+  });
+  const col = _cfSort.col, dir = _cfSort.dir;
+  data.sort((a,b)=>{
+    let va = a[col]||'', vb = b[col]||'';
+    if (col === 'monto' || col === 'id') { va = parseFloat(va)||0; vb = parseFloat(vb)||0; return (va-vb)*dir; }
+    if (col === 'mes') { va = MESES_ORD[va.toLowerCase()]??99; vb = MESES_ORD[vb.toLowerCase()]??99; return (va-vb)*dir; }
+    if (col === 'fecha') { va = va||''; vb = vb||''; }
+    return va.toString().localeCompare(vb.toString())*dir;
+  });
+  renderCF(data);
 }
 
 function renderPipeline() {
@@ -2315,9 +2369,11 @@ async function guardarTransaccion() {
   if(!concepto){ toast('Ingresá el concepto.', true); return; }
   document.getElementById('btn-guardar-trans').dataset.label = 'Guardar';
   setLoading('btn-guardar-trans', true);
+  const fechaCF = document.getElementById('nt-fecha').value;
+  const mesCF   = document.getElementById('nt-mes-hidden').value || (fechaCF ? MESES_CF[new Date(fechaCF+'T12:00:00').getMonth()] : '');
   const res = await apiPost('cashflow',{
-    fecha: document.getElementById('nt-fecha').value,
-    mes: document.getElementById('nt-mes').value,
+    fecha: fechaCF,
+    mes: mesCF,
     concepto,
     categoria: document.getElementById('nt-cat').value,
     tipo: document.getElementById('nt-tipo').value,
