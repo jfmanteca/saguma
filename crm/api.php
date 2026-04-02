@@ -46,7 +46,7 @@ try {
 
     // ── GET: listar todos ──────────────────────────────────
     if ($method === 'GET' && $tabla) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
         $stmt = $pdo->query("SELECT * FROM `$tabla` ORDER BY id DESC LIMIT 9999");
         respuesta($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -218,12 +218,13 @@ try {
 
             case 'cobranzas':
                 // Crear la cobranza
-                $stmt = $pdo->prepare("INSERT INTO cobranzas (venta_id,fecha,monto,forma_pago,notas) VALUES (:venta_id,:fecha,:monto,:forma_pago,:notas)");
+                $stmt = $pdo->prepare("INSERT INTO cobranzas (venta_id,fecha,monto,forma_pago,concepto,notas) VALUES (:venta_id,:fecha,:monto,:forma_pago,:concepto,:notas)");
                 $stmt->execute([
                     'venta_id'   => $body['venta_id'] ?? null,
                     'fecha'      => $body['fecha'] ?? date('Y-m-d'),
                     'monto'      => floatval($body['monto'] ?? 0),
                     'forma_pago' => $body['forma_pago'] ?? '',
+                    'concepto'   => $body['concepto'] ?? 'Saldo',
                     'notas'      => $body['notas'] ?? '',
                 ]);
                 $cobr_id = $pdo->lastInsertId();
@@ -241,7 +242,8 @@ try {
                     $vrow = $sv->fetch(PDO::FETCH_ASSOC);
                     if($vrow) $cliente_cobr = ' — ' . $vrow['cliente'];
                 }
-                $concepto_cobr = 'Cobro venta #' . str_pad($body['venta_id']??'', 3, '0', STR_PAD_LEFT) . $cliente_cobr;
+                $tipo_cobro = $body['concepto'] ?? 'Saldo';
+                $concepto_cobr = $tipo_cobro . ' venta #' . str_pad($body['venta_id']??'', 3, '0', STR_PAD_LEFT) . $cliente_cobr;
                 $stmt2 = $pdo->prepare("INSERT INTO cashflow (fecha,mes,concepto,categoria,tipo,monto,notas,origen,ref_id) VALUES (:fecha,:mes,:concepto,:categoria,:tipo,:monto,:notas,:origen,:ref_id)");
                 $stmt2->execute([
                     'fecha'     => $fecha_cobr,
@@ -304,6 +306,33 @@ try {
                 ]);
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
+            case 'clientes':
+                $stmt = $pdo->prepare("INSERT INTO clientes (nombre,empresa,telefono,mail,cuit,direccion,notas) VALUES (:nombre,:empresa,:telefono,:mail,:cuit,:direccion,:notas)");
+                $stmt->execute([
+                    'nombre'    => $body['nombre']    ?? '',
+                    'empresa'   => $body['empresa']   ?? '',
+                    'telefono'  => $body['telefono']  ?? '',
+                    'mail'      => $body['mail']       ?? '',
+                    'cuit'      => $body['cuit']       ?? '',
+                    'direccion' => $body['direccion']  ?? '',
+                    'notas'     => $body['notas']      ?? '',
+                ]);
+                respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
+
+            case 'proveedores':
+                $stmt = $pdo->prepare("INSERT INTO proveedores (nombre,empresa,categoria,telefono,mail,cuit,direccion,notas) VALUES (:nombre,:empresa,:categoria,:telefono,:mail,:cuit,:direccion,:notas)");
+                $stmt->execute([
+                    'nombre'    => $body['nombre']    ?? '',
+                    'empresa'   => $body['empresa']   ?? '',
+                    'categoria' => $body['categoria'] ?? '',
+                    'telefono'  => $body['telefono']  ?? '',
+                    'mail'      => $body['mail']       ?? '',
+                    'cuit'      => $body['cuit']       ?? '',
+                    'direccion' => $body['direccion']  ?? '',
+                    'notas'     => $body['notas']      ?? '',
+                ]);
+                respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
+
             default:
                 respuesta(['error'=>'Tabla no soportada'], 400);
         }
@@ -311,7 +340,7 @@ try {
 
     // ── PUT: actualizar campo único o múltiples campos ────
     if ($method === 'PUT' && $tabla && $id) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
 
         // Productos: actualizar costo, margen y precio
@@ -357,7 +386,9 @@ try {
                         'ingreso_neto','iva','total_con_iva','forma_pago','orden_fabricante',
                         'factura','fab_tipo','costo_fab_neto','flete','comisiones','otros_costos',
                         'costo_total_neto','ganancia_bruta','margen_bruto',
-                        'numero','contacto','fecha_sol','valida','plazo','monto','notas','items_json','visible_web'];
+                        'numero','contacto','fecha_sol','valida','plazo','monto','notas','items_json','visible_web',
+                        'venta_id','concepto','orden_pedido_ref','categoria','proveedor',
+                        'nombre','empresa','telefono','mail','cuit','direccion'];
             $sets = []; $params = ['id' => $id];
             foreach ($body['fields'] as $k => $v) {
                 if (in_array($k, $allowed)) {
@@ -381,7 +412,7 @@ try {
 
     // ── DELETE ─────────────────────────────────────────────
     if ($method === 'DELETE' && $tabla && $id) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
         $stmt = $pdo->prepare("DELETE FROM `$tabla` WHERE id = :id");
         $stmt->execute(['id'=>$id]);

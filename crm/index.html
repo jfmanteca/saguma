@@ -274,11 +274,13 @@
       <div class="nav-item" onclick="goTo('consultas')"><span class="nav-icon">✉</span>Consultas</div>
       <div class="nav-item" onclick="goTo('cotizaciones')"><span class="nav-icon">📄</span>Cotizaciones</div>
       <div class="nav-item" onclick="goTo('cobranzas')"><span class="nav-icon">💰</span>Cobranzas</div>
+      <div class="nav-item" onclick="goTo('clientes')"><span class="nav-icon">👤</span>Clientes</div>
       <div class="nav-label" style="margin-top:8px">ERP</div>
       <div class="nav-item" onclick="goTo('productos')"><span class="nav-icon">◈</span>Productos y Precios</div>
       <div class="nav-item" onclick="goTo('pedidos')"><span class="nav-icon">◻</span>Órdenes de Pedido</div>
       <div class="nav-item" onclick="goTo('ventas')"><span class="nav-icon">↑</span>Ventas</div>
       <div class="nav-item" onclick="goTo('pagos')"><span class="nav-icon">↓</span>Pagos</div>
+      <div class="nav-item" onclick="goTo('proveedores')"><span class="nav-icon">🏭</span>Proveedores</div>
       <div class="nav-item" onclick="goTo('cashflow')"><span class="nav-icon">∿</span>Cash Flow</div>
       <div class="nav-item" onclick="goTo('cuentas')"><span class="nav-icon">⊟</span>Cuentas Ctes.</div>
     </nav>
@@ -495,7 +497,7 @@
         </div>
         <div class="table-wrap">
           <div class="table-header"><div class="table-title">Registro de Cobranzas</div></div>
-          <table><thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Venta N°</th><th>Monto</th><th>Forma de Pago</th><th>Notas</th><th></th></tr></thead>
+          <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Venta N°</th><th>Concepto</th><th>Monto</th><th>Forma de Pago</th><th>Notas</th><th></th></tr></thead>
           <tbody id="cobr-tbody"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
@@ -516,13 +518,25 @@
         </div>
         <div class="table-wrap">
           <div class="table-header"><div class="table-title">Registro de Pagos</div></div>
-          <table><thead><tr><th>N°</th><th>Fecha</th><th>Concepto / Proveedor</th><th>Categoría</th><th>Monto</th><th>Forma de Pago</th><th>Ref. O/P</th><th>Notas</th><th></th></tr></thead>
-          <tbody id="pag-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+          <table><thead><tr><th>Fecha</th><th>Concepto / Proveedor</th><th>Categoría</th><th>Monto</th><th>Forma de Pago</th><th>Ref. O/P</th><th>Notas</th><th></th></tr></thead>
+          <tbody id="pag-tbody"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
 
       <!-- CASHFLOW -->
       <div class="page" id="page-cashflow">
+        <!-- Gráfico comparativo mensual -->
+        <div class="table-wrap" style="margin-bottom:20px">
+          <div class="table-header">
+            <div class="table-title">Ingresos vs Egresos por Mes</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn btn-ghost btn-sm" id="cf-chart-prev" onclick="moveCFChart(-1)">← Anterior</button>
+              <span id="cf-chart-range" style="font-size:12px;color:var(--muted);min-width:160px;text-align:center"></span>
+              <button class="btn btn-ghost btn-sm" id="cf-chart-next" onclick="moveCFChart(1)">Siguiente →</button>
+            </div>
+          </div>
+          <div id="cf-chart-monthly" style="padding:16px 20px"></div>
+        </div>
         <div class="search-bar">
           <input class="search-input" type="text" id="cf-search" placeholder="🔍  Buscar transacción..." oninput="filterCF()">
           <button class="btn btn-primary btn-sm" onclick="openModal('nueva-transaccion')">+ Transacción</button>
@@ -549,7 +563,6 @@
         <div class="table-wrap">
           <div class="table-header"><div class="table-title">Libro de Transacciones 2026</div></div>
           <table><thead><tr>
-            <th class="cf-sort-th" onclick="sortCF('id')" data-col="id"># <span class="cf-sort-icon">↕</span></th>
             <th class="cf-sort-th" onclick="sortCF('fecha')" data-col="fecha">Fecha <span class="cf-sort-icon">↕</span></th>
             <th class="cf-sort-th" onclick="sortCF('mes')" data-col="mes">Mes <span class="cf-sort-icon">↕</span></th>
             <th class="cf-sort-th" onclick="sortCF('concepto')" data-col="concepto">Concepto <span class="cf-sort-icon">↕</span></th>
@@ -558,7 +571,40 @@
             <th class="cf-sort-th" onclick="sortCF('monto')" data-col="monto">Monto <span class="cf-sort-icon">↕</span></th>
             <th>Notas</th><th></th>
           </tr></thead>
-          <tbody id="cf-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+          <tbody id="cf-tbody"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
+          <div id="cf-pag-controls"></div>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div class="page" id="page-clientes">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="cli-search" placeholder="🔍  Buscar por nombre, empresa, mail..." oninput="filterClientes()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-cliente')">+ Nuevo Cliente</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">Cartera de Clientes</div>
+            <div id="cli-count" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)"></div>
+          </div>
+          <table><thead><tr><th>Nombre</th><th>Empresa</th><th>Teléfono</th><th>Mail</th><th>CUIT</th><th>Notas</th><th></th></tr></thead>
+          <tbody id="cli-tbody"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- PROVEEDORES -->
+      <div class="page" id="page-proveedores">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="prov-search" placeholder="🔍  Buscar por nombre, empresa, categoría..." oninput="filterProveedores()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-proveedor')">+ Nuevo Proveedor</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">Directorio de Proveedores</div>
+            <div id="prov-count" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)"></div>
+          </div>
+          <table><thead><tr><th>Nombre</th><th>Empresa</th><th>Categoría</th><th>Teléfono</th><th>Mail</th><th>CUIT</th><th>Notas</th><th></th></tr></thead>
+          <tbody id="prov-tbody"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
 
@@ -635,7 +681,7 @@
       <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Datos de la Venta</div>
       <div class="form-grid" style="margin-bottom:18px">
         <div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" id="nv-fecha" type="date"></div>
-        <div class="form-group"><label class="form-label">Cliente *</label><input class="form-input" id="nv-cliente" type="text"></div>
+        <div class="form-group"><label class="form-label">Cliente *</label><input class="form-input" id="nv-cliente" type="text" list="dl-clientes"></div>
       </div>
       <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Ítems de la Venta</div>
       <div class="cotiz-table-wrap">
@@ -764,7 +810,7 @@
     <div class="modal-body">
       <input type="hidden" id="no-num">
       <div class="form-grid" style="margin-bottom:18px">
-        <div class="form-group"><label class="form-label">Proveedor / Taller *</label><input class="form-input" id="no-prov" type="text" placeholder="Nombre del fabricante o taller"></div>
+        <div class="form-group"><label class="form-label">Proveedor / Taller *</label><input class="form-input" id="no-prov" type="text" placeholder="Nombre del fabricante o taller" list="dl-proveedores"></div>
         <div class="form-group"><label class="form-label">Dirección Proveedor</label><input class="form-input" id="no-dir-prov" type="text" placeholder="Calle, localidad"></div>
         <div class="form-group"><label class="form-label">Fecha Orden</label><input class="form-input" id="no-fecha" type="date"></div>
         <div class="form-group"><label class="form-label">Fecha Entrega Estimada</label><input class="form-input" id="no-fecha-entrega" type="date"></div>
@@ -810,13 +856,20 @@
 <!-- Nueva Cobranza -->
 <div class="modal-backdrop" id="modal-nueva-cobranza">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Nueva Cobranza</div><button class="modal-close" onclick="closeModal('nueva-cobranza')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="cobr-modal-title">Nueva Cobranza</div><button class="modal-close" onclick="closeModal('nueva-cobranza')">✕</button></div>
     <div class="modal-body">
+      <input type="hidden" id="nc2-edit-id">
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" id="nc2-fecha" type="date"></div>
         <div class="form-group"><label class="form-label">Venta asociada *</label>
           <select class="form-select" id="nc2-venta">
             <option value="">Seleccionar venta...</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Concepto *</label>
+          <select class="form-select" id="nc2-concepto">
+            <option value="Saldo">Saldo</option>
+            <option value="Anticipo">Anticipo</option>
           </select>
         </div>
         <div class="form-group"><label class="form-label">Monto (ARS $) *</label><input class="form-input" id="nc2-monto" type="number" placeholder="0"></div>
@@ -838,11 +891,12 @@
 <!-- Nuevo Pago -->
 <div class="modal-backdrop" id="modal-nuevo-pago">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Nuevo Pago</div><button class="modal-close" onclick="closeModal('nuevo-pago')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="pago-modal-title">Nuevo Pago</div><button class="modal-close" onclick="closeModal('nuevo-pago')">✕</button></div>
     <div class="modal-body">
+      <input type="hidden" id="np2-edit-id">
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" id="np2-fecha" type="date"></div>
-        <div class="form-group"><label class="form-label">Proveedor / Concepto *</label><input class="form-input" id="np2-concepto" type="text" placeholder="Nombre del proveedor o concepto"></div>
+        <div class="form-group"><label class="form-label">Proveedor / Concepto *</label><input class="form-input" id="np2-concepto" type="text" placeholder="Nombre del proveedor o concepto" list="dl-proveedores"></div>
         <div class="form-group"><label class="form-label">Categoría</label>
           <select class="form-select" id="np2-categoria">
             <option>Producción / Taller</option><option>Telas y materias primas</option><option>Publicidad digital</option><option>Gestión publicidad</option><option>Hosting + Dominio</option><option>Avíos</option><option>Otros egresos</option>
@@ -864,6 +918,62 @@
     </div>
   </div>
 </div>
+
+<!-- Nuevo Cliente -->
+<div class="modal-backdrop" id="modal-nuevo-cliente">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="cli-modal-title">Nuevo Cliente</div><button class="modal-close" onclick="closeModal('nuevo-cliente')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="ncli-edit-id">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Nombre *</label><input class="form-input" id="ncli-nombre" type="text" placeholder="Nombre completo o razón social"></div>
+        <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="ncli-empresa" type="text" placeholder="Nombre de la empresa (opcional)"></div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="ncli-tel" type="text" placeholder="+54 9 ..."></div>
+        <div class="form-group"><label class="form-label">Mail</label><input class="form-input" id="ncli-mail" type="email" placeholder="cliente@mail.com"></div>
+        <div class="form-group"><label class="form-label">CUIT</label><input class="form-input" id="ncli-cuit" type="text" placeholder="30-00000000-0"></div>
+        <div class="form-group"><label class="form-label">Dirección</label><input class="form-input" id="ncli-dir" type="text" placeholder="Calle, localidad"></div>
+        <div class="form-group full"><label class="form-label">Notas</label><input class="form-input" id="ncli-notas" type="text" placeholder="Observaciones opcionales"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nuevo-cliente')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-cliente" data-label="Guardar Cliente" onclick="guardarCliente()">Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nuevo Proveedor -->
+<div class="modal-backdrop" id="modal-nuevo-proveedor">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="prov-modal-title">Nuevo Proveedor</div><button class="modal-close" onclick="closeModal('nuevo-proveedor')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="nprov-edit-id">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Nombre *</label><input class="form-input" id="nprov-nombre" type="text" placeholder="Nombre del proveedor o taller"></div>
+        <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="nprov-empresa" type="text" placeholder="Razón social (opcional)"></div>
+        <div class="form-group"><label class="form-label">Categoría</label>
+          <select class="form-select" id="nprov-categoria">
+            <option value="">Sin categoría</option>
+            <option>Taller / Confección</option><option>Proveedor de telas</option><option>Proveedor de avíos</option><option>Publicidad</option><option>Servicios</option><option>Logística</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="nprov-tel" type="text" placeholder="+54 9 ..."></div>
+        <div class="form-group"><label class="form-label">Mail</label><input class="form-input" id="nprov-mail" type="email" placeholder="proveedor@mail.com"></div>
+        <div class="form-group"><label class="form-label">CUIT</label><input class="form-input" id="nprov-cuit" type="text" placeholder="30-00000000-0"></div>
+        <div class="form-group"><label class="form-label">Dirección</label><input class="form-input" id="nprov-dir" type="text" placeholder="Calle, localidad"></div>
+        <div class="form-group full"><label class="form-label">Notas</label><input class="form-input" id="nprov-notas" type="text" placeholder="Observaciones opcionales"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nuevo-proveedor')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-proveedor" data-label="Guardar Proveedor" onclick="guardarProveedor()">Guardar Proveedor</button>
+    </div>
+  </div>
+</div>
+
+<!-- datalists para autocompletado -->
+<datalist id="dl-clientes"></datalist>
+<datalist id="dl-proveedores"></datalist>
 
 <!-- Nueva Transacción -->
 <div class="modal-backdrop" id="modal-nueva-transaccion">
@@ -899,7 +1009,7 @@ const API = 'https://saguma.com.ar/crm/api.php';
 // ============================================================
 
 // Cache de datos
-let _data = { consultas:[], cotizaciones:[], ventas:[], pedidos:[], cashflow:[], productos:[], cobranzas:[], pagos:[] };
+let _data = { consultas:[], cotizaciones:[], ventas:[], pedidos:[], cashflow:[], productos:[], cobranzas:[], pagos:[], clientes:[], proveedores:[] };
 const _cotizDismissed = new Set();
 
 // ── API helpers ──────────────────────────────────────────────
@@ -937,6 +1047,8 @@ const pageInfo = {
   cobranzas:   ['Cobranzas','CRM · Cobros recibidos de clientes'],
   pagos:       ['Pagos a Proveedores','ERP · Egresos y pagos registrados'],
   cuentas:     ['Cuentas Corrientes','ERP · Saldo por cliente y proveedor'],
+  clientes:    ['Clientes','CRM · Cartera de clientes'],
+  proveedores: ['Proveedores','ERP · Directorio de proveedores y talleres'],
 };
 
 function toggleSidebar(){
@@ -979,8 +1091,10 @@ function openModal(id){
   if(id==='nuevo-producto'){ if(window._editingProducto){window._editingProducto=false;}else{document.getElementById('prod-modal-title').textContent='Nuevo Producto'; document.getElementById('np-id').value=''; ['np-categoria','np-tela','np-marca','np-costo','np-margen','np-precio','np-precio-iva','np-descripcion','np-img-url'].forEach(x=>{const el=document.getElementById(x);if(el) el.value=''}); quitarImagenProducto(); } }
   if(id==='nueva-orden') initNuevaOrden();
   if(id==='nueva-consulta') clearFormConsulta && clearFormConsulta();
-  if(id==='nueva-cobranza') initNuevaCobranza();
-  if(id==='nuevo-pago') initNuevoPago();
+  if(id==='nueva-cobranza'){ if(window._skipCobranzaInit){window._skipCobranzaInit=false;}else{initNuevaCobranza();} }
+  if(id==='nuevo-pago'){ if(window._skipPagoInit){window._skipPagoInit=false;}else{initNuevoPago();} }
+  if(id==='nuevo-cliente'){ if(window._skipClienteInit){window._skipClienteInit=false;}else{ document.getElementById('cli-modal-title').textContent='Nuevo Cliente'; document.getElementById('ncli-edit-id').value=''; ['ncli-nombre','ncli-empresa','ncli-tel','ncli-mail','ncli-cuit','ncli-dir','ncli-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('btn-guardar-cliente').textContent='Guardar Cliente'; } }
+  if(id==='nuevo-proveedor'){ if(window._skipProveedorInit){window._skipProveedorInit=false;}else{ document.getElementById('prov-modal-title').textContent='Nuevo Proveedor'; document.getElementById('nprov-edit-id').value=''; ['nprov-nombre','nprov-empresa','nprov-tel','nprov-mail','nprov-cuit','nprov-dir','nprov-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('nprov-categoria').value=''; document.getElementById('btn-guardar-proveedor').textContent='Guardar Proveedor'; } }
 }
 function closeModal(id){
   document.getElementById('modal-'+id).classList.remove('open');
@@ -1810,6 +1924,60 @@ function sortCF(col) {
   filterCF();
 }
 
+let _cfPag = { page:1, perPage:20, data:[] };
+let _cfChartOffset = 0; // 0 = últimos 6 meses, 1 = 6 meses anteriores, etc.
+
+function renderCFChart(allData) {
+  const now = new Date();
+  const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  // Build 6-month window: offset shifts back by 6 months each step
+  const meses = [];
+  for(let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i - (_cfChartOffset * 6), 1);
+    meses.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: MESES_NOMBRES[d.getMonth()]+' '+d.getFullYear().toString().slice(2) });
+  }
+  // Aggregate
+  const byMes = {};
+  allData.forEach(t => {
+    if(!t.fecha) return;
+    const k = t.fecha.toString().substring(0,7);
+    if(!byMes[k]) byMes[k] = { ing:0, eg:0 };
+    if(t.tipo==='INGRESO') byMes[k].ing += parseFloat(t.monto)||0;
+    else byMes[k].eg += parseFloat(t.monto)||0;
+  });
+  const maxVal = Math.max(...meses.map(m => Math.max(byMes[m.key]?.ing||0, byMes[m.key]?.eg||0)), 1);
+  const fmtK = v => v >= 1000000 ? '$'+(v/1000000).toFixed(1)+'M' : v >= 1000 ? '$'+(v/1000).toFixed(0)+'k' : '$'+Math.round(v);
+  document.getElementById('cf-chart-range').textContent = meses[0].label + ' — ' + meses[5].label;
+  document.getElementById('cf-chart-next').disabled = _cfChartOffset === 0;
+  document.getElementById('cf-chart-monthly').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
+      ${meses.map(m => {
+        const ing = byMes[m.key]?.ing||0;
+        const eg  = byMes[m.key]?.eg||0;
+        const bal = ing - eg;
+        return `<div style="text-align:center">
+          <div style="font-size:11px;font-weight:600;color:var(--fg);margin-bottom:8px;white-space:nowrap">${m.label}</div>
+          <div style="height:80px;display:flex;align-items:flex-end;justify-content:center;gap:4px">
+            <div title="Ingresos: ${fmtARS(ing)}" style="width:20px;background:var(--accent2);border-radius:3px 3px 0 0;height:${ing?(ing/maxVal*76).toFixed(0):2}px;min-height:2px;cursor:default"></div>
+            <div title="Egresos: ${fmtARS(eg)}" style="width:20px;background:var(--red);border-radius:3px 3px 0 0;height:${eg?(eg/maxVal*76).toFixed(0):2}px;min-height:2px;cursor:default"></div>
+          </div>
+          <div style="font-size:10px;color:var(--accent2);margin-top:3px">${ing?fmtK(ing):''}</div>
+          <div style="font-size:10px;color:var(--red)">${eg?fmtK(eg):''}</div>
+          <div style="font-size:11px;font-weight:700;margin-top:4px;color:${bal>=0?'var(--accent2)':'var(--red)'}">${bal>=0?'+':''}${fmtK(bal)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:16px;margin-top:12px;font-size:11px;color:var(--muted)">
+      <span><span style="display:inline-block;width:12px;height:12px;background:var(--accent2);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Ingresos</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:var(--red);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Egresos</span>
+    </div>`;
+}
+
+function moveCFChart(dir) {
+  _cfChartOffset = Math.max(0, _cfChartOffset - dir); // dir=1 → go back (offset++), dir=-1 → go forward
+  renderCFChart(_data.cashflow);
+}
+
 function renderCF(data) {
   const ing = data.filter(t=>t.tipo==='INGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
   const eg  = data.filter(t=>t.tipo==='EGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
@@ -1820,9 +1988,21 @@ function renderCF(data) {
   balEl.textContent = fmtARS(Math.abs(bal));
   balEl.style.color = bal >= 0 ? 'var(--accent2)' : 'var(--red)';
   document.getElementById('cf-count').textContent = data.length;
-  document.getElementById('cf-tbody').innerHTML = data.length ? data.map(t=>`
+  // Render chart using all cashflow data
+  renderCFChart(_data.cashflow);
+  // Pagination
+  _cfPag.data = data;
+  renderCFPage();
+}
+
+function renderCFPage() {
+  const { data, page, perPage } = _cfPag;
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const start = (page-1)*perPage;
+  const slice = data.slice(start, start+perPage);
+  document.getElementById('cf-tbody').innerHTML = slice.length ? slice.map(t=>`
     <tr>
-      <td class="mono">${t.id}</td>
       <td>${fmtDate(t.fecha)}</td>
       <td style="color:var(--muted)">${t.mes}</td>
       <td>${t.concepto}</td>
@@ -1831,8 +2011,25 @@ function renderCF(data) {
       <td class="${t.tipo==='INGRESO'?'cf-positive':'cf-negative'}">${t.tipo==='INGRESO'?'+':'-'}${fmtARS(t.monto)}</td>
       <td style="font-size:11px;color:var(--muted)">${t.notas||'—'}</td>
       <td>${t.origen && t.origen!=='manual' ? '<span title="Generado automáticamente" style="font-size:16px;color:var(--muted)">🔒</span>' : `<button class="btn btn-danger btn-sm" onclick="eliminar('cashflow',${t.id})">✕</button>`}</td>
-    </tr>`).join('') : '<tr><td colspan="9" class="empty">No hay transacciones.</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="8" class="empty">No hay transacciones.</td></tr>';
+  // Pagination controls
+  let pag = `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--border);justify-content:flex-end;flex-wrap:wrap">`;
+  pag += `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-right:8px">${start+1}–${Math.min(start+perPage,total)} de ${total}</span>`;
+  pag += `<button class="btn btn-ghost btn-sm" onclick="cambiarPagCF(-1)" ${page<=1?'disabled':''}>← Ant.</button>`;
+  for(let i=1;i<=totalPages;i++){
+    if(totalPages<=7||i===1||i===totalPages||Math.abs(i-page)<=1){
+      pag += `<button class="btn btn-sm" onclick="irPagCF(${i})" style="${i===page?'background:var(--accent);color:#fff':'background:transparent;border:1px solid var(--border);color:var(--muted)'}">${i}</button>`;
+    } else if(Math.abs(i-page)===2){
+      pag += `<span style="color:var(--muted)">…</span>`;
+    }
+  }
+  pag += `<button class="btn btn-ghost btn-sm" onclick="cambiarPagCF(1)" ${page>=totalPages?'disabled':''}>Sig. →</button>`;
+  pag += `</div>`;
+  document.getElementById('cf-pag-controls').innerHTML = pag;
 }
+
+function cambiarPagCF(dir){ const tot=Math.ceil(_cfPag.data.length/_cfPag.perPage); _cfPag.page=Math.max(1,Math.min(tot,_cfPag.page+dir)); renderCFPage(); }
+function irPagCF(p){ _cfPag.page=p; renderCFPage(); }
 
 function filterCF() {
   const q    = document.getElementById('cf-search').value.toLowerCase();
@@ -1853,6 +2050,7 @@ function filterCF() {
     if (col === 'fecha') { va = va||''; vb = vb||''; }
     return va.toString().localeCompare(vb.toString())*dir;
   });
+  _cfPag.page = 1;
   renderCF(data);
 }
 
@@ -2985,22 +3183,43 @@ cambiarEstadoCotiz = async function(id, val) {
 
 function initNuevaCobranza() {
   const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('nc2-edit-id').value = '';
   document.getElementById('nc2-fecha').value = hoy;
   document.getElementById('nc2-monto').value = '';
   document.getElementById('nc2-notas').value = '';
+  document.getElementById('nc2-concepto').value = 'Saldo';
   document.getElementById('nc2-forma-pago').value = 'Transferencia';
-  // Populate ventas select
+  document.getElementById('cobr-modal-title').textContent = 'Nueva Cobranza';
+  document.getElementById('btn-guardar-cobranza').textContent = 'Guardar Cobranza';
   const sel = document.getElementById('nc2-venta');
   sel.innerHTML = '<option value="">Seleccionar venta...</option>' +
     _data.ventas.map(v=>`<option value="${v.id}">#${String(v.numero||v.id).padStart(3,'0')} — ${v.cliente} (${fmtARS(v.total_con_iva)})</option>`).join('');
+}
+
+function editarCobranza(id) {
+  const c = _data.cobranzas.find(x=>x.id==id);
+  if(!c){ toast('Cobranza no encontrada', true); return; }
+  const sel = document.getElementById('nc2-venta');
+  sel.innerHTML = '<option value="">Seleccionar venta...</option>' +
+    _data.ventas.map(v=>`<option value="${v.id}">#${String(v.numero||v.id).padStart(3,'0')} — ${v.cliente} (${fmtARS(v.total_con_iva)})</option>`).join('');
+  document.getElementById('nc2-edit-id').value = c.id;
+  document.getElementById('nc2-fecha').value = c.fecha||'';
+  document.getElementById('nc2-venta').value = c.venta_id||'';
+  document.getElementById('nc2-concepto').value = c.concepto||'Saldo';
+  document.getElementById('nc2-monto').value = c.monto||'';
+  document.getElementById('nc2-forma-pago').value = c.forma_pago||'Transferencia';
+  document.getElementById('nc2-notas').value = c.notas||'';
+  document.getElementById('cobr-modal-title').textContent = 'Editar Cobranza #'+c.id;
+  document.getElementById('btn-guardar-cobranza').textContent = 'Actualizar Cobranza';
+  window._skipCobranzaInit = true;
+  openModal('nueva-cobranza');
 }
 
 function renderCobranzas(data) {
   const mesActual = new Date().getMonth();
   const cobrMes = data.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
   document.getElementById('cobr-kpi-mes').textContent = fmtARS(cobrMes);
-  // Cobros pendientes: ventas sin cobro completo
-  const cobradas = new Set(data.map(x=>x.venta_id));
+  const cobradas = new Set(data.map(x=>String(x.venta_id)));
   const pendientes = _data.ventas.filter(v=>!cobradas.has(String(v.id))).length;
   document.getElementById('cobr-kpi-pendientes').textContent = pendientes;
   document.getElementById('cobr-kpi-count').textContent = data.length;
@@ -3009,14 +3228,17 @@ function renderCobranzas(data) {
     const ventaLabel = venta ? `#${String(venta.numero||venta.id).padStart(3,'0')}` : (c.venta_id ? '#'+c.venta_id : '—');
     const cliente = venta ? venta.cliente : (c.cliente||'—');
     return `<tr>
-      <td class="mono" style="color:var(--muted);font-size:11px">${c.id}</td>
       <td>${fmtDate(c.fecha)}</td>
       <td><b>${cliente}</b></td>
       <td class="mono">${ventaLabel}</td>
+      <td><span class="pill ${c.concepto==='Anticipo'?'pill-orange':'pill-green'}">${c.concepto||'Saldo'}</span></td>
       <td class="mono" style="color:var(--accent2)">${fmtARS(c.monto)}</td>
       <td style="font-size:12px">${c.forma_pago||'—'}</td>
       <td style="font-size:11px;color:var(--muted)">${c.notas||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="eliminar('cobranzas',${c.id})">✕</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editarCobranza(${c.id})" style="margin-right:4px">✏</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('cobranzas',${c.id})">✕</button>
+      </td>
     </tr>`;
   }).join('') : '<tr><td colspan="8" class="empty">No hay cobranzas registradas.</td></tr>';
 }
@@ -3025,27 +3247,33 @@ function filterCobranzas() {
   const q = document.getElementById('cobr-search').value.toLowerCase();
   const data = _data.cobranzas.filter(c=>{
     const venta = _data.ventas.find(v=>v.id==c.venta_id);
-    const txt = [c.forma_pago, c.notas, venta?.cliente, venta?.numero, c.venta_id].join(' ').toLowerCase();
+    const txt = [c.forma_pago, c.notas, c.concepto, venta?.cliente, venta?.numero, c.venta_id].join(' ').toLowerCase();
     return txt.includes(q);
   });
   renderCobranzas(data);
 }
 
 async function guardarCobranza() {
-  const fecha  = document.getElementById('nc2-fecha').value;
+  const editId = document.getElementById('nc2-edit-id').value;
+  const fecha   = document.getElementById('nc2-fecha').value;
   const ventaId = document.getElementById('nc2-venta').value;
-  const monto  = parseFloat(document.getElementById('nc2-monto').value);
+  const monto   = parseFloat(document.getElementById('nc2-monto').value);
   if(!fecha || !ventaId || !monto){ toast('Completá fecha, venta y monto.', true); return; }
   setLoading('btn-guardar-cobranza', true);
-  const res = await apiPost('cobranzas', {
-    fecha,
-    venta_id: ventaId,
-    monto,
+  const body = {
+    fecha, venta_id: ventaId, monto,
+    concepto: document.getElementById('nc2-concepto').value,
     forma_pago: document.getElementById('nc2-forma-pago').value,
     notas: document.getElementById('nc2-notas').value,
-  });
+  };
+  let res;
+  if(editId) {
+    res = await fetch(`${API}?tabla=cobranzas&id=${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({multi:true, fields:body}) }).then(r=>r.json());
+  } else {
+    res = await apiPost('cobranzas', body);
+  }
   setLoading('btn-guardar-cobranza', false);
-  if(res.ok){ closeModal('nueva-cobranza'); await loadAll(); toast('✓ Cobranza registrada y Cash Flow actualizado'); }
+  if(res.ok){ closeModal('nueva-cobranza'); await loadAll(); toast(editId ? '✓ Cobranza actualizada' : '✓ Cobranza registrada y Cash Flow actualizado'); }
   else toast('Error: '+(res.error||'desconocido'), true);
 }
 
@@ -3053,12 +3281,32 @@ async function guardarCobranza() {
 
 function initNuevoPago() {
   const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('np2-edit-id').value = '';
   document.getElementById('np2-fecha').value = hoy;
   document.getElementById('np2-concepto').value = '';
   document.getElementById('np2-monto').value = '';
   document.getElementById('np2-notas').value = '';
   document.getElementById('np2-op-ref').value = '';
   document.getElementById('np2-forma-pago').value = 'Transferencia';
+  document.getElementById('pago-modal-title').textContent = 'Nuevo Pago';
+  document.getElementById('btn-guardar-pago').textContent = 'Guardar Pago';
+}
+
+function editarPago(id) {
+  const p = _data.pagos.find(x=>x.id==id);
+  if(!p){ toast('Pago no encontrado', true); return; }
+  document.getElementById('np2-edit-id').value = p.id;
+  document.getElementById('np2-fecha').value = p.fecha||'';
+  document.getElementById('np2-concepto').value = p.concepto||'';
+  document.getElementById('np2-categoria').value = p.categoria||'';
+  document.getElementById('np2-monto').value = p.monto||'';
+  document.getElementById('np2-forma-pago').value = p.forma_pago||'Transferencia';
+  document.getElementById('np2-op-ref').value = p.orden_pedido_ref||'';
+  document.getElementById('np2-notas').value = p.notas||'';
+  document.getElementById('pago-modal-title').textContent = 'Editar Pago #'+p.id;
+  document.getElementById('btn-guardar-pago').textContent = 'Actualizar Pago';
+  window._skipPagoInit = true;
+  openModal('nuevo-pago');
 }
 
 function renderPagos(data) {
@@ -3068,7 +3316,6 @@ function renderPagos(data) {
   document.getElementById('pag-kpi-count').textContent = data.length;
   document.getElementById('pag-tbody').innerHTML = data.length ? data.map(p=>`
     <tr>
-      <td class="mono" style="color:var(--muted);font-size:11px">${p.id}</td>
       <td>${fmtDate(p.fecha)}</td>
       <td><b>${p.concepto||p.proveedor||'—'}</b>${p.proveedor && p.proveedor!==p.concepto ? `<br><span style="font-size:11px;color:var(--muted)">${p.proveedor}</span>`:''}</td>
       <td style="font-size:12px;color:var(--muted)">${p.categoria||'—'}</td>
@@ -3076,8 +3323,11 @@ function renderPagos(data) {
       <td style="font-size:12px">${p.forma_pago||'—'}</td>
       <td style="font-size:11px;color:var(--muted)">${p.orden_pedido_ref||'—'}</td>
       <td style="font-size:11px;color:var(--muted)">${p.notas||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="eliminar('pagos',${p.id})">✕</button></td>
-    </tr>`).join('') : '<tr><td colspan="9" class="empty">No hay pagos registrados.</td></tr>';
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editarPago(${p.id})" style="margin-right:4px">✏</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('pagos',${p.id})">✕</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="8" class="empty">No hay pagos registrados.</td></tr>';
 }
 
 function filterPagos() {
@@ -3091,23 +3341,172 @@ function filterPagos() {
 }
 
 async function guardarPago() {
+  const editId  = document.getElementById('np2-edit-id').value;
   const fecha   = document.getElementById('np2-fecha').value;
   const concepto= document.getElementById('np2-concepto').value.trim();
   const monto   = parseFloat(document.getElementById('np2-monto').value);
   if(!fecha || !concepto || !monto){ toast('Completá fecha, concepto y monto.', true); return; }
   setLoading('btn-guardar-pago', true);
-  const res = await apiPost('pagos', {
-    fecha,
-    concepto,
+  const body = {
+    fecha, concepto, monto,
     categoria: document.getElementById('np2-categoria').value,
-    monto,
     forma_pago: document.getElementById('np2-forma-pago').value,
     orden_pedido_ref: document.getElementById('np2-op-ref').value,
     notas: document.getElementById('np2-notas').value,
-  });
+  };
+  let res;
+  if(editId) {
+    res = await fetch(`${API}?tabla=pagos&id=${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({multi:true, fields:body}) }).then(r=>r.json());
+  } else {
+    res = await apiPost('pagos', body);
+  }
   setLoading('btn-guardar-pago', false);
-  if(res.ok){ closeModal('nuevo-pago'); await loadAll(); toast('✓ Pago registrado y Cash Flow actualizado'); }
+  if(res.ok){ closeModal('nuevo-pago'); await loadAll(); toast(editId ? '✓ Pago actualizado' : '✓ Pago registrado y Cash Flow actualizado'); }
   else toast('Error: '+(res.error||'desconocido'), true);
+}
+
+// ── CLIENTES ────────────────────────────────────────────────
+
+function renderClientes(data) {
+  document.getElementById('cli-count').textContent = data.length + ' cliente(s)';
+  document.getElementById('cli-tbody').innerHTML = data.length ? data.map(c=>`
+    <tr>
+      <td><b>${c.nombre}</b></td>
+      <td style="font-size:12px;color:var(--muted)">${c.empresa||'—'}</td>
+      <td style="font-size:12px">${c.telefono||'—'}</td>
+      <td style="font-size:12px">${c.mail||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${c.cuit||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${c.notas||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editarCliente(${c.id})" style="margin-right:4px">✏</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('clientes',${c.id})">✕</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="7" class="empty">No hay clientes registrados.</td></tr>';
+}
+
+function filterClientes() {
+  const q = document.getElementById('cli-search').value.toLowerCase();
+  renderClientes(_data.clientes.filter(c=>[c.nombre,c.empresa,c.mail,c.telefono,c.cuit].join(' ').toLowerCase().includes(q)));
+}
+
+function editarCliente(id) {
+  const c = _data.clientes.find(x=>x.id==id);
+  if(!c) return;
+  document.getElementById('ncli-edit-id').value = c.id;
+  document.getElementById('ncli-nombre').value  = c.nombre||'';
+  document.getElementById('ncli-empresa').value = c.empresa||'';
+  document.getElementById('ncli-tel').value     = c.telefono||'';
+  document.getElementById('ncli-mail').value    = c.mail||'';
+  document.getElementById('ncli-cuit').value    = c.cuit||'';
+  document.getElementById('ncli-dir').value     = c.direccion||'';
+  document.getElementById('ncli-notas').value   = c.notas||'';
+  document.getElementById('cli-modal-title').textContent = 'Editar Cliente';
+  document.getElementById('btn-guardar-cliente').textContent = 'Actualizar Cliente';
+  window._skipClienteInit = true;
+  openModal('nuevo-cliente');
+}
+
+async function guardarCliente() {
+  const nombre = document.getElementById('ncli-nombre').value.trim();
+  if(!nombre){ toast('Ingresá el nombre del cliente.', true); return; }
+  const editId = document.getElementById('ncli-edit-id').value;
+  setLoading('btn-guardar-cliente', true);
+  const body = {
+    nombre,
+    empresa:   document.getElementById('ncli-empresa').value,
+    telefono:  document.getElementById('ncli-tel').value,
+    mail:      document.getElementById('ncli-mail').value,
+    cuit:      document.getElementById('ncli-cuit').value,
+    direccion: document.getElementById('ncli-dir').value,
+    notas:     document.getElementById('ncli-notas').value,
+  };
+  let res;
+  if(editId) {
+    res = await fetch(`${API}?tabla=clientes&id=${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({multi:true, fields:body}) }).then(r=>r.json());
+  } else {
+    res = await apiPost('clientes', body);
+  }
+  setLoading('btn-guardar-cliente', false);
+  if(res.ok){ closeModal('nuevo-cliente'); await loadAll(); toast(editId ? '✓ Cliente actualizado' : '✓ Cliente agregado'); }
+  else toast('Error: '+(res.error||'desconocido'), true);
+}
+
+// ── PROVEEDORES ──────────────────────────────────────────────
+
+function renderProveedores(data) {
+  document.getElementById('prov-count').textContent = data.length + ' proveedor(es)';
+  document.getElementById('prov-tbody').innerHTML = data.length ? data.map(p=>`
+    <tr>
+      <td><b>${p.nombre}</b></td>
+      <td style="font-size:12px;color:var(--muted)">${p.empresa||'—'}</td>
+      <td style="font-size:12px">${p.categoria||'—'}</td>
+      <td style="font-size:12px">${p.telefono||'—'}</td>
+      <td style="font-size:12px">${p.mail||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${p.cuit||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${p.notas||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editarProveedor(${p.id})" style="margin-right:4px">✏</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar('proveedores',${p.id})">✕</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="8" class="empty">No hay proveedores registrados.</td></tr>';
+}
+
+function filterProveedores() {
+  const q = document.getElementById('prov-search').value.toLowerCase();
+  renderProveedores(_data.proveedores.filter(p=>[p.nombre,p.empresa,p.categoria,p.mail,p.telefono,p.cuit].join(' ').toLowerCase().includes(q)));
+}
+
+function editarProveedor(id) {
+  const p = _data.proveedores.find(x=>x.id==id);
+  if(!p) return;
+  document.getElementById('nprov-edit-id').value    = p.id;
+  document.getElementById('nprov-nombre').value     = p.nombre||'';
+  document.getElementById('nprov-empresa').value    = p.empresa||'';
+  document.getElementById('nprov-categoria').value  = p.categoria||'';
+  document.getElementById('nprov-tel').value        = p.telefono||'';
+  document.getElementById('nprov-mail').value       = p.mail||'';
+  document.getElementById('nprov-cuit').value       = p.cuit||'';
+  document.getElementById('nprov-dir').value        = p.direccion||'';
+  document.getElementById('nprov-notas').value      = p.notas||'';
+  document.getElementById('prov-modal-title').textContent = 'Editar Proveedor';
+  document.getElementById('btn-guardar-proveedor').textContent = 'Actualizar Proveedor';
+  window._skipProveedorInit = true;
+  openModal('nuevo-proveedor');
+}
+
+async function guardarProveedor() {
+  const nombre = document.getElementById('nprov-nombre').value.trim();
+  if(!nombre){ toast('Ingresá el nombre del proveedor.', true); return; }
+  const editId = document.getElementById('nprov-edit-id').value;
+  setLoading('btn-guardar-proveedor', true);
+  const body = {
+    nombre,
+    empresa:   document.getElementById('nprov-empresa').value,
+    categoria: document.getElementById('nprov-categoria').value,
+    telefono:  document.getElementById('nprov-tel').value,
+    mail:      document.getElementById('nprov-mail').value,
+    cuit:      document.getElementById('nprov-cuit').value,
+    direccion: document.getElementById('nprov-dir').value,
+    notas:     document.getElementById('nprov-notas').value,
+  };
+  let res;
+  if(editId) {
+    res = await fetch(`${API}?tabla=proveedores&id=${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({multi:true, fields:body}) }).then(r=>r.json());
+  } else {
+    res = await apiPost('proveedores', body);
+  }
+  setLoading('btn-guardar-proveedor', false);
+  if(res.ok){ closeModal('nuevo-proveedor'); await loadAll(); toast(editId ? '✓ Proveedor actualizado' : '✓ Proveedor agregado'); }
+  else toast('Error: '+(res.error||'desconocido'), true);
+}
+
+// ── DATALISTS AUTOCOMPLETADO ─────────────────────────────────
+
+function actualizarDataLists() {
+  const dlCli = document.getElementById('dl-clientes');
+  if(dlCli) dlCli.innerHTML = _data.clientes.map(c=>`<option value="${c.nombre}">${c.empresa?c.nombre+' — '+c.empresa:c.nombre}</option>`).join('');
+  const dlProv = document.getElementById('dl-proveedores');
+  if(dlProv) dlProv.innerHTML = _data.proveedores.map(p=>`<option value="${p.nombre}">${p.categoria?p.nombre+' ('+p.categoria+')':p.nombre}</option>`).join('');
 }
 
 // ── CUENTAS CORRIENTES ───────────────────────────────────────
@@ -3221,9 +3620,11 @@ async function loadAll() {
   document.getElementById('db-status').textContent = '● Cargando...';
   document.getElementById('db-status').style.color = 'var(--muted)';
   try {
-    const tabs = ['consultas','cotizaciones','ventas','productos','pedidos','cashflow','cobranzas','pagos'];
+    const tabs = ['consultas','cotizaciones','ventas','productos','pedidos','cashflow','cobranzas','pagos','clientes','proveedores'];
     const results = await Promise.all(tabs.map(t => fetch(API+'?tabla='+t).then(r=>r.json()).catch(()=>[])));
     tabs.forEach((t,i) => { _data[t] = Array.isArray(results[i]) ? results[i] : []; });
+    // Refresh autocomplete datalists
+    actualizarDataLists();
     document.getElementById('db-status').textContent = '● Conectado';
     document.getElementById('db-status').style.color = 'var(--green)';
     // Render current page
@@ -3250,6 +3651,8 @@ function renderPage(page) {
   if(page==='cobranzas')     renderCobranzas(_data.cobranzas);
   if(page==='pagos')         renderPagos(_data.pagos);
   if(page==='cuentas')       renderCuentas();
+  if(page==='clientes')      renderClientes(_data.clientes);
+  if(page==='proveedores')   renderProveedores(_data.proveedores);
 }
 
 
