@@ -579,7 +579,7 @@
       <!-- CLIENTES -->
       <div class="page" id="page-clientes">
         <div class="search-bar">
-          <input class="search-input" type="text" id="cli-search" placeholder="🔍  Buscar por nombre, empresa, mail..." oninput="filterClientes()">
+          <input class="search-input" type="text" id="cli-search" placeholder="🔍  Buscar por razón social, referente, CUIT, mail..." oninput="filterClientes()">
           <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-cliente')">+ Nuevo Cliente</button>
         </div>
         <div class="table-wrap">
@@ -587,7 +587,7 @@
             <div class="table-title">Cartera de Clientes</div>
             <div id="cli-count" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)"></div>
           </div>
-          <table><thead><tr><th>Nombre</th><th>Empresa</th><th>Teléfono</th><th>Mail</th><th>CUIT</th><th>Notas</th><th></th></tr></thead>
+          <table><thead><tr><th>Razón Social</th><th>Referente</th><th>Nombre Fantasía</th><th>CUIT</th><th>Teléfono</th><th>Mail</th><th></th></tr></thead>
           <tbody id="cli-tbody"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
@@ -595,7 +595,7 @@
       <!-- PROVEEDORES -->
       <div class="page" id="page-proveedores">
         <div class="search-bar">
-          <input class="search-input" type="text" id="prov-search" placeholder="🔍  Buscar por nombre, empresa, categoría..." oninput="filterProveedores()">
+          <input class="search-input" type="text" id="prov-search" placeholder="🔍  Buscar por razón social, referente, categoría..." oninput="filterProveedores()">
           <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-proveedor')">+ Nuevo Proveedor</button>
         </div>
         <div class="table-wrap">
@@ -603,7 +603,7 @@
             <div class="table-title">Directorio de Proveedores</div>
             <div id="prov-count" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)"></div>
           </div>
-          <table><thead><tr><th>Nombre</th><th>Empresa</th><th>Categoría</th><th>Teléfono</th><th>Mail</th><th>CUIT</th><th>Notas</th><th></th></tr></thead>
+          <table><thead><tr><th>Razón Social</th><th>Referente</th><th>Nombre Fantasía</th><th>Categoría</th><th>CUIT</th><th>Teléfono</th><th>Mail</th><th></th></tr></thead>
           <tbody id="prov-tbody"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
@@ -926,11 +926,12 @@
     <div class="modal-body">
       <input type="hidden" id="ncli-edit-id">
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Nombre *</label><input class="form-input" id="ncli-nombre" type="text" placeholder="Nombre completo o razón social"></div>
-        <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="ncli-empresa" type="text" placeholder="Nombre de la empresa (opcional)"></div>
+        <div class="form-group"><label class="form-label">Razón Social *</label><input class="form-input" id="ncli-razon-social" type="text" placeholder="Nombre legal o razón social"></div>
+        <div class="form-group"><label class="form-label">Referente *</label><input class="form-input" id="ncli-referente" type="text" placeholder="Nombre del contacto principal"></div>
+        <div class="form-group"><label class="form-label">Nombre Fantasía</label><input class="form-input" id="ncli-fantasia" type="text" placeholder="Nombre comercial (opcional)"></div>
+        <div class="form-group"><label class="form-label">CUIT *</label><input class="form-input" id="ncli-cuit" type="text" placeholder="30-00000000-0"></div>
         <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="ncli-tel" type="text" placeholder="+54 9 ..."></div>
         <div class="form-group"><label class="form-label">Mail</label><input class="form-input" id="ncli-mail" type="email" placeholder="cliente@mail.com"></div>
-        <div class="form-group"><label class="form-label">CUIT</label><input class="form-input" id="ncli-cuit" type="text" placeholder="30-00000000-0"></div>
         <div class="form-group"><label class="form-label">Dirección</label><input class="form-input" id="ncli-dir" type="text" placeholder="Calle, localidad"></div>
         <div class="form-group full"><label class="form-label">Notas</label><input class="form-input" id="ncli-notas" type="text" placeholder="Observaciones opcionales"></div>
       </div>
@@ -949,17 +950,18 @@
     <div class="modal-body">
       <input type="hidden" id="nprov-edit-id">
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Nombre *</label><input class="form-input" id="nprov-nombre" type="text" placeholder="Nombre del proveedor o taller"></div>
-        <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="nprov-empresa" type="text" placeholder="Razón social (opcional)"></div>
+        <div class="form-group"><label class="form-label">Razón Social *</label><input class="form-input" id="nprov-razon-social" type="text" placeholder="Nombre legal o razón social"></div>
+        <div class="form-group"><label class="form-label">Referente *</label><input class="form-input" id="nprov-referente" type="text" placeholder="Nombre del contacto principal"></div>
+        <div class="form-group"><label class="form-label">Nombre Fantasía</label><input class="form-input" id="nprov-fantasia" type="text" placeholder="Nombre comercial (opcional)"></div>
         <div class="form-group"><label class="form-label">Categoría</label>
           <select class="form-select" id="nprov-categoria">
             <option value="">Sin categoría</option>
             <option>Taller / Confección</option><option>Proveedor de telas</option><option>Proveedor de avíos</option><option>Publicidad</option><option>Servicios</option><option>Logística</option><option>Otro</option>
           </select>
         </div>
+        <div class="form-group"><label class="form-label">CUIT *</label><input class="form-input" id="nprov-cuit" type="text" placeholder="30-00000000-0"></div>
         <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="nprov-tel" type="text" placeholder="+54 9 ..."></div>
         <div class="form-group"><label class="form-label">Mail</label><input class="form-input" id="nprov-mail" type="email" placeholder="proveedor@mail.com"></div>
-        <div class="form-group"><label class="form-label">CUIT</label><input class="form-input" id="nprov-cuit" type="text" placeholder="30-00000000-0"></div>
         <div class="form-group"><label class="form-label">Dirección</label><input class="form-input" id="nprov-dir" type="text" placeholder="Calle, localidad"></div>
         <div class="form-group full"><label class="form-label">Notas</label><input class="form-input" id="nprov-notas" type="text" placeholder="Observaciones opcionales"></div>
       </div>
@@ -1093,8 +1095,8 @@ function openModal(id){
   if(id==='nueva-consulta') clearFormConsulta && clearFormConsulta();
   if(id==='nueva-cobranza'){ if(window._skipCobranzaInit){window._skipCobranzaInit=false;}else{initNuevaCobranza();} }
   if(id==='nuevo-pago'){ if(window._skipPagoInit){window._skipPagoInit=false;}else{initNuevoPago();} }
-  if(id==='nuevo-cliente'){ if(window._skipClienteInit){window._skipClienteInit=false;}else{ document.getElementById('cli-modal-title').textContent='Nuevo Cliente'; document.getElementById('ncli-edit-id').value=''; ['ncli-nombre','ncli-empresa','ncli-tel','ncli-mail','ncli-cuit','ncli-dir','ncli-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('btn-guardar-cliente').textContent='Guardar Cliente'; } }
-  if(id==='nuevo-proveedor'){ if(window._skipProveedorInit){window._skipProveedorInit=false;}else{ document.getElementById('prov-modal-title').textContent='Nuevo Proveedor'; document.getElementById('nprov-edit-id').value=''; ['nprov-nombre','nprov-empresa','nprov-tel','nprov-mail','nprov-cuit','nprov-dir','nprov-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('nprov-categoria').value=''; document.getElementById('btn-guardar-proveedor').textContent='Guardar Proveedor'; } }
+  if(id==='nuevo-cliente'){ if(window._skipClienteInit){window._skipClienteInit=false;}else{ document.getElementById('cli-modal-title').textContent='Nuevo Cliente'; document.getElementById('ncli-edit-id').value=''; ['ncli-razon-social','ncli-referente','ncli-fantasia','ncli-tel','ncli-mail','ncli-cuit','ncli-dir','ncli-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('btn-guardar-cliente').textContent='Guardar Cliente'; } }
+  if(id==='nuevo-proveedor'){ if(window._skipProveedorInit){window._skipProveedorInit=false;}else{ document.getElementById('prov-modal-title').textContent='Nuevo Proveedor'; document.getElementById('nprov-edit-id').value=''; ['nprov-razon-social','nprov-referente','nprov-fantasia','nprov-tel','nprov-mail','nprov-cuit','nprov-dir','nprov-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('nprov-categoria').value=''; document.getElementById('btn-guardar-proveedor').textContent='Guardar Proveedor'; } }
 }
 function closeModal(id){
   document.getElementById('modal-'+id).classList.remove('open');
@@ -3371,12 +3373,12 @@ function renderClientes(data) {
   document.getElementById('cli-count').textContent = data.length + ' cliente(s)';
   document.getElementById('cli-tbody').innerHTML = data.length ? data.map(c=>`
     <tr>
-      <td><b>${c.nombre}</b></td>
-      <td style="font-size:12px;color:var(--muted)">${c.empresa||'—'}</td>
+      <td><b>${c.razon_social||'—'}</b></td>
+      <td style="font-size:12px">${c.referente||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${c.nombre_fantasia||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${c.cuit||'—'}</td>
       <td style="font-size:12px">${c.telefono||'—'}</td>
       <td style="font-size:12px">${c.mail||'—'}</td>
-      <td style="font-size:12px;color:var(--muted)">${c.cuit||'—'}</td>
-      <td style="font-size:11px;color:var(--muted)">${c.notas||'—'}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="editarCliente(${c.id})" style="margin-right:4px">✏</button>
         <button class="btn btn-danger btn-sm" onclick="eliminar('clientes',${c.id})">✕</button>
@@ -3386,20 +3388,21 @@ function renderClientes(data) {
 
 function filterClientes() {
   const q = document.getElementById('cli-search').value.toLowerCase();
-  renderClientes(_data.clientes.filter(c=>[c.nombre,c.empresa,c.mail,c.telefono,c.cuit].join(' ').toLowerCase().includes(q)));
+  renderClientes(_data.clientes.filter(c=>[c.razon_social,c.referente,c.nombre_fantasia,c.mail,c.telefono,c.cuit].join(' ').toLowerCase().includes(q)));
 }
 
 function editarCliente(id) {
   const c = _data.clientes.find(x=>x.id==id);
   if(!c) return;
-  document.getElementById('ncli-edit-id').value = c.id;
-  document.getElementById('ncli-nombre').value  = c.nombre||'';
-  document.getElementById('ncli-empresa').value = c.empresa||'';
-  document.getElementById('ncli-tel').value     = c.telefono||'';
-  document.getElementById('ncli-mail').value    = c.mail||'';
-  document.getElementById('ncli-cuit').value    = c.cuit||'';
-  document.getElementById('ncli-dir').value     = c.direccion||'';
-  document.getElementById('ncli-notas').value   = c.notas||'';
+  document.getElementById('ncli-edit-id').value        = c.id;
+  document.getElementById('ncli-razon-social').value   = c.razon_social||'';
+  document.getElementById('ncli-referente').value      = c.referente||'';
+  document.getElementById('ncli-fantasia').value       = c.nombre_fantasia||'';
+  document.getElementById('ncli-cuit').value           = c.cuit||'';
+  document.getElementById('ncli-tel').value            = c.telefono||'';
+  document.getElementById('ncli-mail').value           = c.mail||'';
+  document.getElementById('ncli-dir').value            = c.direccion||'';
+  document.getElementById('ncli-notas').value          = c.notas||'';
   document.getElementById('cli-modal-title').textContent = 'Editar Cliente';
   document.getElementById('btn-guardar-cliente').textContent = 'Actualizar Cliente';
   window._skipClienteInit = true;
@@ -3407,18 +3410,19 @@ function editarCliente(id) {
 }
 
 async function guardarCliente() {
-  const nombre = document.getElementById('ncli-nombre').value.trim();
-  if(!nombre){ toast('Ingresá el nombre del cliente.', true); return; }
+  const razon_social = document.getElementById('ncli-razon-social').value.trim();
+  const referente    = document.getElementById('ncli-referente').value.trim();
+  const cuit         = document.getElementById('ncli-cuit').value.trim();
+  if(!razon_social || !referente || !cuit){ toast('Razón Social, Referente y CUIT son obligatorios.', true); return; }
   const editId = document.getElementById('ncli-edit-id').value;
   setLoading('btn-guardar-cliente', true);
   const body = {
-    nombre,
-    empresa:   document.getElementById('ncli-empresa').value,
-    telefono:  document.getElementById('ncli-tel').value,
-    mail:      document.getElementById('ncli-mail').value,
-    cuit:      document.getElementById('ncli-cuit').value,
-    direccion: document.getElementById('ncli-dir').value,
-    notas:     document.getElementById('ncli-notas').value,
+    razon_social, referente, cuit,
+    nombre_fantasia: document.getElementById('ncli-fantasia').value,
+    telefono:        document.getElementById('ncli-tel').value,
+    mail:            document.getElementById('ncli-mail').value,
+    direccion:       document.getElementById('ncli-dir').value,
+    notas:           document.getElementById('ncli-notas').value,
   };
   let res;
   if(editId) {
@@ -3437,13 +3441,13 @@ function renderProveedores(data) {
   document.getElementById('prov-count').textContent = data.length + ' proveedor(es)';
   document.getElementById('prov-tbody').innerHTML = data.length ? data.map(p=>`
     <tr>
-      <td><b>${p.nombre}</b></td>
-      <td style="font-size:12px;color:var(--muted)">${p.empresa||'—'}</td>
+      <td><b>${p.razon_social||'—'}</b></td>
+      <td style="font-size:12px">${p.referente||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${p.nombre_fantasia||'—'}</td>
       <td style="font-size:12px">${p.categoria||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${p.cuit||'—'}</td>
       <td style="font-size:12px">${p.telefono||'—'}</td>
       <td style="font-size:12px">${p.mail||'—'}</td>
-      <td style="font-size:12px;color:var(--muted)">${p.cuit||'—'}</td>
-      <td style="font-size:11px;color:var(--muted)">${p.notas||'—'}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="editarProveedor(${p.id})" style="margin-right:4px">✏</button>
         <button class="btn btn-danger btn-sm" onclick="eliminar('proveedores',${p.id})">✕</button>
@@ -3453,21 +3457,22 @@ function renderProveedores(data) {
 
 function filterProveedores() {
   const q = document.getElementById('prov-search').value.toLowerCase();
-  renderProveedores(_data.proveedores.filter(p=>[p.nombre,p.empresa,p.categoria,p.mail,p.telefono,p.cuit].join(' ').toLowerCase().includes(q)));
+  renderProveedores(_data.proveedores.filter(p=>[p.razon_social,p.referente,p.nombre_fantasia,p.categoria,p.mail,p.telefono,p.cuit].join(' ').toLowerCase().includes(q)));
 }
 
 function editarProveedor(id) {
   const p = _data.proveedores.find(x=>x.id==id);
   if(!p) return;
-  document.getElementById('nprov-edit-id').value    = p.id;
-  document.getElementById('nprov-nombre').value     = p.nombre||'';
-  document.getElementById('nprov-empresa').value    = p.empresa||'';
-  document.getElementById('nprov-categoria').value  = p.categoria||'';
-  document.getElementById('nprov-tel').value        = p.telefono||'';
-  document.getElementById('nprov-mail').value       = p.mail||'';
-  document.getElementById('nprov-cuit').value       = p.cuit||'';
-  document.getElementById('nprov-dir').value        = p.direccion||'';
-  document.getElementById('nprov-notas').value      = p.notas||'';
+  document.getElementById('nprov-edit-id').value       = p.id;
+  document.getElementById('nprov-razon-social').value  = p.razon_social||'';
+  document.getElementById('nprov-referente').value     = p.referente||'';
+  document.getElementById('nprov-fantasia').value      = p.nombre_fantasia||'';
+  document.getElementById('nprov-categoria').value     = p.categoria||'';
+  document.getElementById('nprov-cuit').value          = p.cuit||'';
+  document.getElementById('nprov-tel').value           = p.telefono||'';
+  document.getElementById('nprov-mail').value          = p.mail||'';
+  document.getElementById('nprov-dir').value           = p.direccion||'';
+  document.getElementById('nprov-notas').value         = p.notas||'';
   document.getElementById('prov-modal-title').textContent = 'Editar Proveedor';
   document.getElementById('btn-guardar-proveedor').textContent = 'Actualizar Proveedor';
   window._skipProveedorInit = true;
@@ -3475,19 +3480,20 @@ function editarProveedor(id) {
 }
 
 async function guardarProveedor() {
-  const nombre = document.getElementById('nprov-nombre').value.trim();
-  if(!nombre){ toast('Ingresá el nombre del proveedor.', true); return; }
+  const razon_social = document.getElementById('nprov-razon-social').value.trim();
+  const referente    = document.getElementById('nprov-referente').value.trim();
+  const cuit         = document.getElementById('nprov-cuit').value.trim();
+  if(!razon_social || !referente || !cuit){ toast('Razón Social, Referente y CUIT son obligatorios.', true); return; }
   const editId = document.getElementById('nprov-edit-id').value;
   setLoading('btn-guardar-proveedor', true);
   const body = {
-    nombre,
-    empresa:   document.getElementById('nprov-empresa').value,
-    categoria: document.getElementById('nprov-categoria').value,
-    telefono:  document.getElementById('nprov-tel').value,
-    mail:      document.getElementById('nprov-mail').value,
-    cuit:      document.getElementById('nprov-cuit').value,
-    direccion: document.getElementById('nprov-dir').value,
-    notas:     document.getElementById('nprov-notas').value,
+    razon_social, referente, cuit,
+    nombre_fantasia: document.getElementById('nprov-fantasia').value,
+    categoria:       document.getElementById('nprov-categoria').value,
+    telefono:        document.getElementById('nprov-tel').value,
+    mail:            document.getElementById('nprov-mail').value,
+    direccion:       document.getElementById('nprov-dir').value,
+    notas:           document.getElementById('nprov-notas').value,
   };
   let res;
   if(editId) {
@@ -3504,9 +3510,9 @@ async function guardarProveedor() {
 
 function actualizarDataLists() {
   const dlCli = document.getElementById('dl-clientes');
-  if(dlCli) dlCli.innerHTML = _data.clientes.map(c=>`<option value="${c.nombre}">${c.empresa?c.nombre+' — '+c.empresa:c.nombre}</option>`).join('');
+  if(dlCli) dlCli.innerHTML = _data.clientes.map(c=>`<option value="${c.razon_social||''}">${c.referente?c.razon_social+' — '+c.referente:c.razon_social}</option>`).join('');
   const dlProv = document.getElementById('dl-proveedores');
-  if(dlProv) dlProv.innerHTML = _data.proveedores.map(p=>`<option value="${p.nombre}">${p.categoria?p.nombre+' ('+p.categoria+')':p.nombre}</option>`).join('');
+  if(dlProv) dlProv.innerHTML = _data.proveedores.map(p=>`<option value="${p.razon_social||''}">${p.categoria?p.razon_social+' ('+p.categoria+')':p.razon_social}</option>`).join('');
 }
 
 // ── CUENTAS CORRIENTES ───────────────────────────────────────

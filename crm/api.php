@@ -307,29 +307,31 @@ try {
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
             case 'clientes':
-                $stmt = $pdo->prepare("INSERT INTO clientes (nombre,empresa,telefono,mail,cuit,direccion,notas) VALUES (:nombre,:empresa,:telefono,:mail,:cuit,:direccion,:notas)");
+                $stmt = $pdo->prepare("INSERT INTO clientes (razon_social,referente,nombre_fantasia,cuit,telefono,mail,direccion,notas) VALUES (:razon_social,:referente,:nombre_fantasia,:cuit,:telefono,:mail,:direccion,:notas)");
                 $stmt->execute([
-                    'nombre'    => $body['nombre']    ?? '',
-                    'empresa'   => $body['empresa']   ?? '',
-                    'telefono'  => $body['telefono']  ?? '',
-                    'mail'      => $body['mail']       ?? '',
-                    'cuit'      => $body['cuit']       ?? '',
-                    'direccion' => $body['direccion']  ?? '',
-                    'notas'     => $body['notas']      ?? '',
+                    'razon_social'   => $body['razon_social']   ?? '',
+                    'referente'      => $body['referente']      ?? '',
+                    'nombre_fantasia'=> $body['nombre_fantasia'] ?? '',
+                    'cuit'           => $body['cuit']            ?? '',
+                    'telefono'       => $body['telefono']        ?? '',
+                    'mail'           => $body['mail']            ?? '',
+                    'direccion'      => $body['direccion']       ?? '',
+                    'notas'          => $body['notas']           ?? '',
                 ]);
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
             case 'proveedores':
-                $stmt = $pdo->prepare("INSERT INTO proveedores (nombre,empresa,categoria,telefono,mail,cuit,direccion,notas) VALUES (:nombre,:empresa,:categoria,:telefono,:mail,:cuit,:direccion,:notas)");
+                $stmt = $pdo->prepare("INSERT INTO proveedores (razon_social,referente,nombre_fantasia,categoria,cuit,telefono,mail,direccion,notas) VALUES (:razon_social,:referente,:nombre_fantasia,:categoria,:cuit,:telefono,:mail,:direccion,:notas)");
                 $stmt->execute([
-                    'nombre'    => $body['nombre']    ?? '',
-                    'empresa'   => $body['empresa']   ?? '',
-                    'categoria' => $body['categoria'] ?? '',
-                    'telefono'  => $body['telefono']  ?? '',
-                    'mail'      => $body['mail']       ?? '',
-                    'cuit'      => $body['cuit']       ?? '',
-                    'direccion' => $body['direccion']  ?? '',
-                    'notas'     => $body['notas']      ?? '',
+                    'razon_social'   => $body['razon_social']   ?? '',
+                    'referente'      => $body['referente']      ?? '',
+                    'nombre_fantasia'=> $body['nombre_fantasia'] ?? '',
+                    'categoria'      => $body['categoria']      ?? '',
+                    'cuit'           => $body['cuit']            ?? '',
+                    'telefono'       => $body['telefono']        ?? '',
+                    'mail'           => $body['mail']            ?? '',
+                    'direccion'      => $body['direccion']       ?? '',
+                    'notas'          => $body['notas']           ?? '',
                 ]);
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
@@ -388,7 +390,7 @@ try {
                         'costo_total_neto','ganancia_bruta','margen_bruto',
                         'numero','contacto','fecha_sol','valida','plazo','monto','notas','items_json','visible_web',
                         'venta_id','concepto','orden_pedido_ref','categoria','proveedor',
-                        'nombre','empresa','telefono','mail','cuit','direccion'];
+                        'razon_social','referente','nombre_fantasia','telefono','mail','cuit','direccion'];
             $sets = []; $params = ['id' => $id];
             foreach ($body['fields'] as $k => $v) {
                 if (in_array($k, $allowed)) {
