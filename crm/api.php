@@ -46,7 +46,7 @@ try {
 
     // ── GET: listar todos ──────────────────────────────────
     if ($method === 'GET' && $tabla) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
         $stmt = $pdo->query("SELECT * FROM `$tabla` ORDER BY id DESC LIMIT 9999");
         respuesta($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -216,6 +216,79 @@ try {
                 ]);
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
+            case 'cobranzas':
+                // Crear la cobranza
+                $stmt = $pdo->prepare("INSERT INTO cobranzas (venta_id,fecha,monto,forma_pago,notas) VALUES (:venta_id,:fecha,:monto,:forma_pago,:notas)");
+                $stmt->execute([
+                    'venta_id'   => $body['venta_id'] ?? null,
+                    'fecha'      => $body['fecha'] ?? date('Y-m-d'),
+                    'monto'      => floatval($body['monto'] ?? 0),
+                    'forma_pago' => $body['forma_pago'] ?? '',
+                    'notas'      => $body['notas'] ?? '',
+                ]);
+                $cobr_id = $pdo->lastInsertId();
+
+                // Auto-insertar en cashflow como INGRESO
+                $fecha_cobr = $body['fecha'] ?? date('Y-m-d');
+                $mes_cobr = date('F', strtotime($fecha_cobr));
+                $meses_es = ['January'=>'Enero','February'=>'Febrero','March'=>'Marzo','April'=>'Abril','May'=>'Mayo','June'=>'Junio','July'=>'Julio','August'=>'Agosto','September'=>'Septiembre','October'=>'Octubre','November'=>'Noviembre','December'=>'Diciembre'];
+                $mes_esp = $meses_es[$mes_cobr] ?? $mes_cobr;
+                // Obtener cliente de la venta
+                $cliente_cobr = '';
+                if (!empty($body['venta_id'])) {
+                    $sv = $pdo->prepare("SELECT cliente, numero FROM ventas WHERE id=:id");
+                    $sv->execute(['id'=>$body['venta_id']]);
+                    $vrow = $sv->fetch(PDO::FETCH_ASSOC);
+                    if($vrow) $cliente_cobr = ' — ' . $vrow['cliente'];
+                }
+                $concepto_cobr = 'Cobro venta #' . str_pad($body['venta_id']??'', 3, '0', STR_PAD_LEFT) . $cliente_cobr;
+                $stmt2 = $pdo->prepare("INSERT INTO cashflow (fecha,mes,concepto,categoria,tipo,monto,notas,origen,ref_id) VALUES (:fecha,:mes,:concepto,:categoria,:tipo,:monto,:notas,:origen,:ref_id)");
+                $stmt2->execute([
+                    'fecha'     => $fecha_cobr,
+                    'mes'       => $mes_esp,
+                    'concepto'  => $concepto_cobr,
+                    'categoria' => 'Cobros directos',
+                    'tipo'      => 'INGRESO',
+                    'monto'     => floatval($body['monto'] ?? 0),
+                    'notas'     => $body['notas'] ?? '',
+                    'origen'    => 'cobranza',
+                    'ref_id'    => $cobr_id,
+                ]);
+                respuesta(['ok'=>true,'insert_id'=>$cobr_id,'cf_id'=>$pdo->lastInsertId()]);
+
+            case 'pagos':
+                // Crear el pago
+                $stmt = $pdo->prepare("INSERT INTO pagos (concepto,proveedor,categoria,fecha,monto,forma_pago,orden_pedido_ref,notas) VALUES (:concepto,:proveedor,:categoria,:fecha,:monto,:forma_pago,:orden_pedido_ref,:notas)");
+                $stmt->execute([
+                    'concepto'        => $body['concepto'] ?? '',
+                    'proveedor'       => $body['proveedor'] ?? ($body['concepto'] ?? ''),
+                    'categoria'       => $body['categoria'] ?? '',
+                    'fecha'           => $body['fecha'] ?? date('Y-m-d'),
+                    'monto'           => floatval($body['monto'] ?? 0),
+                    'forma_pago'      => $body['forma_pago'] ?? '',
+                    'orden_pedido_ref'=> $body['orden_pedido_ref'] ?? '',
+                    'notas'           => $body['notas'] ?? '',
+                ]);
+                $pago_id = $pdo->lastInsertId();
+
+                // Auto-insertar en cashflow como EGRESO
+                $fecha_pago = $body['fecha'] ?? date('Y-m-d');
+                $mes_pago_en = date('F', strtotime($fecha_pago));
+                $mes_pago_esp = $meses_es[$mes_pago_en] ?? $mes_pago_en;
+                $stmt3 = $pdo->prepare("INSERT INTO cashflow (fecha,mes,concepto,categoria,tipo,monto,notas,origen,ref_id) VALUES (:fecha,:mes,:concepto,:categoria,:tipo,:monto,:notas,:origen,:ref_id)");
+                $stmt3->execute([
+                    'fecha'     => $fecha_pago,
+                    'mes'       => $mes_pago_esp,
+                    'concepto'  => $body['concepto'] ?? '',
+                    'categoria' => $body['categoria'] ?? 'Otros egresos',
+                    'tipo'      => 'EGRESO',
+                    'monto'     => floatval($body['monto'] ?? 0),
+                    'notas'     => $body['notas'] ?? '',
+                    'origen'    => 'pago',
+                    'ref_id'    => $pago_id,
+                ]);
+                respuesta(['ok'=>true,'insert_id'=>$pago_id,'cf_id'=>$pdo->lastInsertId()]);
+
             case 'cashflow':
                 $sql = "INSERT INTO cashflow (fecha,mes,concepto,categoria,tipo,monto,notas)
                         VALUES (:fecha,:mes,:concepto,:categoria,:tipo,:monto,:notas)";
@@ -238,7 +311,7 @@ try {
 
     // ── PUT: actualizar campo único o múltiples campos ────
     if ($method === 'PUT' && $tabla && $id) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
 
         // Productos: actualizar costo, margen y precio
@@ -308,7 +381,7 @@ try {
 
     // ── DELETE ─────────────────────────────────────────────
     if ($method === 'DELETE' && $tabla && $id) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
         $stmt = $pdo->prepare("DELETE FROM `$tabla` WHERE id = :id");
         $stmt->execute(['id'=>$id]);

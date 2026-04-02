@@ -273,11 +273,14 @@
       <div class="nav-label" style="margin-top:8px">CRM</div>
       <div class="nav-item" onclick="goTo('consultas')"><span class="nav-icon">✉</span>Consultas</div>
       <div class="nav-item" onclick="goTo('cotizaciones')"><span class="nav-icon">📄</span>Cotizaciones</div>
+      <div class="nav-item" onclick="goTo('cobranzas')"><span class="nav-icon">💰</span>Cobranzas</div>
       <div class="nav-label" style="margin-top:8px">ERP</div>
       <div class="nav-item" onclick="goTo('productos')"><span class="nav-icon">◈</span>Productos y Precios</div>
       <div class="nav-item" onclick="goTo('pedidos')"><span class="nav-icon">◻</span>Órdenes de Pedido</div>
       <div class="nav-item" onclick="goTo('ventas')"><span class="nav-icon">↑</span>Ventas</div>
+      <div class="nav-item" onclick="goTo('pagos')"><span class="nav-icon">↓</span>Pagos</div>
       <div class="nav-item" onclick="goTo('cashflow')"><span class="nav-icon">∿</span>Cash Flow</div>
+      <div class="nav-item" onclick="goTo('cuentas')"><span class="nav-icon">⊟</span>Cuentas Ctes.</div>
     </nav>
     <div class="sidebar-footer">www.saguma.com.ar<br>CUIT 30-70949492-5</div>
   </aside>
@@ -328,6 +331,16 @@
             <div class="kpi-label">Balance Cashflow</div>
             <div class="kpi-value" id="kpi-cf">—</div>
             <div class="kpi-sub" id="kpi-cf-sub">cargando...</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Cobros del mes</div>
+            <div class="kpi-value" id="kpi-cobros">—</div>
+            <div class="kpi-sub" id="kpi-cobros-sub">cargando...</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label">Pagos del mes</div>
+            <div class="kpi-value" id="kpi-pagos">—</div>
+            <div class="kpi-sub" id="kpi-pagos-sub">cargando...</div>
           </div>
         </div>
         <div class="grid2">
@@ -469,6 +482,45 @@
         </div>
       </div>
 
+      <!-- COBRANZAS -->
+      <div class="page" id="page-cobranzas">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="cobr-search" placeholder="🔍  Buscar por cliente, venta, forma de pago..." oninput="filterCobranzas()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-cobranza')">+ Nueva Cobranza</button>
+        </div>
+        <div class="kpi-grid" style="margin-bottom:20px">
+          <div class="kpi-card green"><div class="kpi-label">Total Cobrado (mes)</div><div class="kpi-value" id="cobr-kpi-mes">—</div></div>
+          <div class="kpi-card yellow"><div class="kpi-label">Cobros Pendientes</div><div class="kpi-value" id="cobr-kpi-pendientes">—</div></div>
+          <div class="kpi-card orange"><div class="kpi-label">Cantidad de Cobros</div><div class="kpi-value" id="cobr-kpi-count">—</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Registro de Cobranzas</div></div>
+          <table><thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Venta N°</th><th>Monto</th><th>Forma de Pago</th><th>Notas</th><th></th></tr></thead>
+          <tbody id="cobr-tbody"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- PAGOS -->
+      <div class="page" id="page-pagos">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="pag-search" placeholder="🔍  Buscar por concepto, proveedor, categoría..." oninput="filterPagos()">
+          <select class="form-select" id="pag-cat" onchange="filterPagos()" style="width:200px">
+            <option value="">Todas las categorías</option>
+            <option>Producción / Taller</option><option>Telas y materias primas</option><option>Publicidad digital</option><option>Gestión publicidad</option><option>Hosting + Dominio</option><option>Avíos</option><option>Otros egresos</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-pago')">+ Nuevo Pago</button>
+        </div>
+        <div class="kpi-grid" style="margin-bottom:20px">
+          <div class="kpi-card red"><div class="kpi-label">Total Pagado (mes)</div><div class="kpi-value" id="pag-kpi-mes">—</div></div>
+          <div class="kpi-card yellow"><div class="kpi-label">Cantidad de Pagos</div><div class="kpi-value" id="pag-kpi-count">—</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Registro de Pagos</div></div>
+          <table><thead><tr><th>N°</th><th>Fecha</th><th>Concepto / Proveedor</th><th>Categoría</th><th>Monto</th><th>Forma de Pago</th><th>Ref. O/P</th><th>Notas</th><th></th></tr></thead>
+          <tbody id="pag-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
       <!-- CASHFLOW -->
       <div class="page" id="page-cashflow">
         <div class="search-bar">
@@ -507,6 +559,22 @@
             <th>Notas</th><th></th>
           </tr></thead>
           <tbody id="cf-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- CUENTAS CORRIENTES -->
+      <div class="page" id="page-cuentas">
+        <div class="search-bar">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fg)">
+            <input type="radio" name="cuentas-tipo" value="clientes" checked onchange="renderCuentas()"> Clientes
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fg)">
+            <input type="radio" name="cuentas-tipo" value="proveedores" onchange="renderCuentas()"> Proveedores
+          </label>
+          <input class="search-input" type="text" id="cuentas-search" placeholder="🔍  Buscar..." oninput="renderCuentas()" style="flex:1">
+        </div>
+        <div id="cuentas-list" style="display:flex;flex-direction:column;gap:8px">
+          <div class="loading">Cargando...</div>
         </div>
       </div>
 
@@ -739,6 +807,64 @@
   </div>
 </div>
 
+<!-- Nueva Cobranza -->
+<div class="modal-backdrop" id="modal-nueva-cobranza">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Nueva Cobranza</div><button class="modal-close" onclick="closeModal('nueva-cobranza')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" id="nc2-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Venta asociada *</label>
+          <select class="form-select" id="nc2-venta">
+            <option value="">Seleccionar venta...</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Monto (ARS $) *</label><input class="form-input" id="nc2-monto" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Forma de Pago</label>
+          <select class="form-select" id="nc2-forma-pago">
+            <option>Efectivo</option><option>Transferencia</option><option>Cheque</option><option>Tarjeta de crédito</option><option>Tarjeta de débito</option><option>Mercado Pago</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group full"><label class="form-label">Notas</label><input class="form-input" id="nc2-notas" type="text" placeholder="Observaciones opcionales"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nueva-cobranza')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-cobranza" data-label="Guardar Cobranza" onclick="guardarCobranza()">Guardar Cobranza</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nuevo Pago -->
+<div class="modal-backdrop" id="modal-nuevo-pago">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Nuevo Pago</div><button class="modal-close" onclick="closeModal('nuevo-pago')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" id="np2-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Proveedor / Concepto *</label><input class="form-input" id="np2-concepto" type="text" placeholder="Nombre del proveedor o concepto"></div>
+        <div class="form-group"><label class="form-label">Categoría</label>
+          <select class="form-select" id="np2-categoria">
+            <option>Producción / Taller</option><option>Telas y materias primas</option><option>Publicidad digital</option><option>Gestión publicidad</option><option>Hosting + Dominio</option><option>Avíos</option><option>Otros egresos</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Monto (ARS $) *</label><input class="form-input" id="np2-monto" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Forma de Pago</label>
+          <select class="form-select" id="np2-forma-pago">
+            <option>Efectivo</option><option>Transferencia</option><option>Cheque</option><option>Tarjeta de crédito</option><option>Tarjeta de débito</option><option>Mercado Pago</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Ref. Orden de Pedido</label><input class="form-input" id="np2-op-ref" type="text" placeholder="Opcional"></div>
+        <div class="form-group full"><label class="form-label">Notas</label><input class="form-input" id="np2-notas" type="text" placeholder="Observaciones opcionales"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nuevo-pago')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-pago" data-label="Guardar Pago" onclick="guardarPago()">Guardar Pago</button>
+    </div>
+  </div>
+</div>
+
 <!-- Nueva Transacción -->
 <div class="modal-backdrop" id="modal-nueva-transaccion">
   <div class="modal">
@@ -773,7 +899,7 @@ const API = 'https://saguma.com.ar/crm/api.php';
 // ============================================================
 
 // Cache de datos
-let _data = { consultas:[], cotizaciones:[], ventas:[], pedidos:[], cashflow:[], productos:[] };
+let _data = { consultas:[], cotizaciones:[], ventas:[], pedidos:[], cashflow:[], productos:[], cobranzas:[], pagos:[] };
 const _cotizDismissed = new Set();
 
 // ── API helpers ──────────────────────────────────────────────
@@ -808,6 +934,9 @@ const pageInfo = {
   pedidos:     ['Órdenes de Pedido','ERP · Producción con talleres'],
   productos:   ['Catálogo de Productos','ERP · Precios, costos y margen'],
   cashflow:    ['Cash Flow 2026','ERP · Movimientos financieros'],
+  cobranzas:   ['Cobranzas','CRM · Cobros recibidos de clientes'],
+  pagos:       ['Pagos a Proveedores','ERP · Egresos y pagos registrados'],
+  cuentas:     ['Cuentas Corrientes','ERP · Saldo por cliente y proveedor'],
 };
 
 function toggleSidebar(){
@@ -850,6 +979,8 @@ function openModal(id){
   if(id==='nuevo-producto'){ if(window._editingProducto){window._editingProducto=false;}else{document.getElementById('prod-modal-title').textContent='Nuevo Producto'; document.getElementById('np-id').value=''; ['np-categoria','np-tela','np-marca','np-costo','np-margen','np-precio','np-precio-iva','np-descripcion','np-img-url'].forEach(x=>{const el=document.getElementById(x);if(el) el.value=''}); quitarImagenProducto(); } }
   if(id==='nueva-orden') initNuevaOrden();
   if(id==='nueva-consulta') clearFormConsulta && clearFormConsulta();
+  if(id==='nueva-cobranza') initNuevaCobranza();
+  if(id==='nuevo-pago') initNuevoPago();
 }
 function closeModal(id){
   document.getElementById('modal-'+id).classList.remove('open');
@@ -1699,7 +1830,7 @@ function renderCF(data) {
       <td>${statusPill(t.tipo)}</td>
       <td class="${t.tipo==='INGRESO'?'cf-positive':'cf-negative'}">${t.tipo==='INGRESO'?'+':'-'}${fmtARS(t.monto)}</td>
       <td style="font-size:11px;color:var(--muted)">${t.notas||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="eliminar('cashflow',${t.id})">✕</button></td>
+      <td>${t.origen && t.origen!=='manual' ? '<span title="Generado automáticamente" style="font-size:16px;color:var(--muted)">🔒</span>' : `<button class="btn btn-danger btn-sm" onclick="eliminar('cashflow',${t.id})">✕</button>`}</td>
     </tr>`).join('') : '<tr><td colspan="9" class="empty">No hay transacciones.</td></tr>';
 }
 
@@ -1824,6 +1955,8 @@ function renderDashboard() {
   const c = _data.consultas;
   const co= _data.cotizaciones;
   const cf= _data.cashflow;
+  const cobr = _data.cobranzas;
+  const pags = _data.pagos;
   const netoTotal = v.reduce((s,x)=>s+(parseFloat(x.ingreso_neto)||0),0);
   document.getElementById('kpi-ventas').textContent = fmtARS(netoTotal);
   document.getElementById('kpi-ventas-sub').textContent = `${v.length} operación${v.length!==1?'es':''} registrada${v.length!==1?'s':''}`;
@@ -1838,6 +1971,13 @@ function renderDashboard() {
   const bal = ing - eg;
   document.getElementById('kpi-cf').textContent = fmtARS(Math.abs(bal));
   document.getElementById('kpi-cf-sub').textContent = bal >= 0 ? '↑ Saldo positivo' : '↓ Saldo negativo';
+  const mesActual = new Date().getMonth();
+  const cobrMes = cobr.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
+  document.getElementById('kpi-cobros').textContent = fmtARS(cobrMes);
+  document.getElementById('kpi-cobros-sub').textContent = cobr.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).length + ' cobro(s) este mes';
+  const pagsMes = pags.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
+  document.getElementById('kpi-pagos').textContent = fmtARS(pagsMes);
+  document.getElementById('kpi-pagos-sub').textContent = pags.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).length + ' pago(s) este mes';
 
   // Canales chart
   const canales = {};
@@ -2775,7 +2915,7 @@ function registrarCobroDesdeVenta(id) {
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
   document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
-  document.getElementById('nt-mes').value = meses[hoy.getMonth()];
+  const ntMesH = document.getElementById('nt-mes-hidden'); if(ntMesH) ntMesH.value = meses[hoy.getMonth()];
   document.getElementById('nt-concepto').value = 'Cobro venta #' + String(v.numero||v.id).padStart(3,'0') + ' — ' + v.cliente;
   document.getElementById('nt-cat').value = 'Cobros directos';
   document.getElementById('nt-tipo').value = 'INGRESO';
@@ -2795,7 +2935,7 @@ function registrarAnticipoDesdePedido(id) {
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
   document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
-  document.getElementById('nt-mes').value = meses[hoy.getMonth()];
+  const ntMesH2 = document.getElementById('nt-mes-hidden'); if(ntMesH2) ntMesH2.value = meses[hoy.getMonth()];
   document.getElementById('nt-concepto').value = 'Anticipo orden ' + p.numero + ' — ' + p.proveedor;
   document.getElementById('nt-cat').value = 'Producción / Taller';
   document.getElementById('nt-tipo').value = 'EGRESO';
@@ -2816,7 +2956,7 @@ function registrarSaldoPedido(id) {
   const saldo = (parseFloat(p.total)||0) - (parseFloat(p.anticipo)||0);
 
   document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
-  document.getElementById('nt-mes').value = meses[hoy.getMonth()];
+  const ntMesH3 = document.getElementById('nt-mes-hidden'); if(ntMesH3) ntMesH3.value = meses[hoy.getMonth()];
   document.getElementById('nt-concepto').value = 'Saldo orden ' + p.numero + ' — ' + p.proveedor;
   document.getElementById('nt-cat').value = 'Producción / Taller';
   document.getElementById('nt-tipo').value = 'EGRESO';
@@ -2841,6 +2981,239 @@ cambiarEstadoCotiz = async function(id, val) {
   }
 };
 
+// ── COBRANZAS ────────────────────────────────────────────────
+
+function initNuevaCobranza() {
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('nc2-fecha').value = hoy;
+  document.getElementById('nc2-monto').value = '';
+  document.getElementById('nc2-notas').value = '';
+  document.getElementById('nc2-forma-pago').value = 'Transferencia';
+  // Populate ventas select
+  const sel = document.getElementById('nc2-venta');
+  sel.innerHTML = '<option value="">Seleccionar venta...</option>' +
+    _data.ventas.map(v=>`<option value="${v.id}">#${String(v.numero||v.id).padStart(3,'0')} — ${v.cliente} (${fmtARS(v.total_con_iva)})</option>`).join('');
+}
+
+function renderCobranzas(data) {
+  const mesActual = new Date().getMonth();
+  const cobrMes = data.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
+  document.getElementById('cobr-kpi-mes').textContent = fmtARS(cobrMes);
+  // Cobros pendientes: ventas sin cobro completo
+  const cobradas = new Set(data.map(x=>x.venta_id));
+  const pendientes = _data.ventas.filter(v=>!cobradas.has(String(v.id))).length;
+  document.getElementById('cobr-kpi-pendientes').textContent = pendientes;
+  document.getElementById('cobr-kpi-count').textContent = data.length;
+  document.getElementById('cobr-tbody').innerHTML = data.length ? data.map(c=>{
+    const venta = _data.ventas.find(v=>v.id==c.venta_id);
+    const ventaLabel = venta ? `#${String(venta.numero||venta.id).padStart(3,'0')}` : (c.venta_id ? '#'+c.venta_id : '—');
+    const cliente = venta ? venta.cliente : (c.cliente||'—');
+    return `<tr>
+      <td class="mono" style="color:var(--muted);font-size:11px">${c.id}</td>
+      <td>${fmtDate(c.fecha)}</td>
+      <td><b>${cliente}</b></td>
+      <td class="mono">${ventaLabel}</td>
+      <td class="mono" style="color:var(--accent2)">${fmtARS(c.monto)}</td>
+      <td style="font-size:12px">${c.forma_pago||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${c.notas||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="eliminar('cobranzas',${c.id})">✕</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="8" class="empty">No hay cobranzas registradas.</td></tr>';
+}
+
+function filterCobranzas() {
+  const q = document.getElementById('cobr-search').value.toLowerCase();
+  const data = _data.cobranzas.filter(c=>{
+    const venta = _data.ventas.find(v=>v.id==c.venta_id);
+    const txt = [c.forma_pago, c.notas, venta?.cliente, venta?.numero, c.venta_id].join(' ').toLowerCase();
+    return txt.includes(q);
+  });
+  renderCobranzas(data);
+}
+
+async function guardarCobranza() {
+  const fecha  = document.getElementById('nc2-fecha').value;
+  const ventaId = document.getElementById('nc2-venta').value;
+  const monto  = parseFloat(document.getElementById('nc2-monto').value);
+  if(!fecha || !ventaId || !monto){ toast('Completá fecha, venta y monto.', true); return; }
+  setLoading('btn-guardar-cobranza', true);
+  const res = await apiPost('cobranzas', {
+    fecha,
+    venta_id: ventaId,
+    monto,
+    forma_pago: document.getElementById('nc2-forma-pago').value,
+    notas: document.getElementById('nc2-notas').value,
+  });
+  setLoading('btn-guardar-cobranza', false);
+  if(res.ok){ closeModal('nueva-cobranza'); await loadAll(); toast('✓ Cobranza registrada y Cash Flow actualizado'); }
+  else toast('Error: '+(res.error||'desconocido'), true);
+}
+
+// ── PAGOS ────────────────────────────────────────────────────
+
+function initNuevoPago() {
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('np2-fecha').value = hoy;
+  document.getElementById('np2-concepto').value = '';
+  document.getElementById('np2-monto').value = '';
+  document.getElementById('np2-notas').value = '';
+  document.getElementById('np2-op-ref').value = '';
+  document.getElementById('np2-forma-pago').value = 'Transferencia';
+}
+
+function renderPagos(data) {
+  const mesActual = new Date().getMonth();
+  const pagsMes = data.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
+  document.getElementById('pag-kpi-mes').textContent = fmtARS(pagsMes);
+  document.getElementById('pag-kpi-count').textContent = data.length;
+  document.getElementById('pag-tbody').innerHTML = data.length ? data.map(p=>`
+    <tr>
+      <td class="mono" style="color:var(--muted);font-size:11px">${p.id}</td>
+      <td>${fmtDate(p.fecha)}</td>
+      <td><b>${p.concepto||p.proveedor||'—'}</b>${p.proveedor && p.proveedor!==p.concepto ? `<br><span style="font-size:11px;color:var(--muted)">${p.proveedor}</span>`:''}</td>
+      <td style="font-size:12px;color:var(--muted)">${p.categoria||'—'}</td>
+      <td class="mono" style="color:var(--red)">-${fmtARS(p.monto)}</td>
+      <td style="font-size:12px">${p.forma_pago||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${p.orden_pedido_ref||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${p.notas||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="eliminar('pagos',${p.id})">✕</button></td>
+    </tr>`).join('') : '<tr><td colspan="9" class="empty">No hay pagos registrados.</td></tr>';
+}
+
+function filterPagos() {
+  const q   = document.getElementById('pag-search').value.toLowerCase();
+  const cat = document.getElementById('pag-cat').value;
+  const data = _data.pagos.filter(p=>{
+    const txt = [p.concepto, p.proveedor, p.categoria, p.notas, p.orden_pedido_ref].join(' ').toLowerCase();
+    return txt.includes(q) && (!cat || p.categoria===cat);
+  });
+  renderPagos(data);
+}
+
+async function guardarPago() {
+  const fecha   = document.getElementById('np2-fecha').value;
+  const concepto= document.getElementById('np2-concepto').value.trim();
+  const monto   = parseFloat(document.getElementById('np2-monto').value);
+  if(!fecha || !concepto || !monto){ toast('Completá fecha, concepto y monto.', true); return; }
+  setLoading('btn-guardar-pago', true);
+  const res = await apiPost('pagos', {
+    fecha,
+    concepto,
+    categoria: document.getElementById('np2-categoria').value,
+    monto,
+    forma_pago: document.getElementById('np2-forma-pago').value,
+    orden_pedido_ref: document.getElementById('np2-op-ref').value,
+    notas: document.getElementById('np2-notas').value,
+  });
+  setLoading('btn-guardar-pago', false);
+  if(res.ok){ closeModal('nuevo-pago'); await loadAll(); toast('✓ Pago registrado y Cash Flow actualizado'); }
+  else toast('Error: '+(res.error||'desconocido'), true);
+}
+
+// ── CUENTAS CORRIENTES ───────────────────────────────────────
+
+function renderCuentas() {
+  const tipo = document.querySelector('input[name="cuentas-tipo"]:checked')?.value || 'clientes';
+  const q    = (document.getElementById('cuentas-search')?.value||'').toLowerCase();
+  const el   = document.getElementById('cuentas-list');
+
+  if(tipo === 'clientes') {
+    // Build per-client movements from ventas + cobranzas
+    const clientMap = {};
+    _data.ventas.forEach(v=>{
+      if(!v.cliente) return;
+      if(!clientMap[v.cliente]) clientMap[v.cliente] = { movimientos:[] };
+      clientMap[v.cliente].movimientos.push({ fecha:v.fecha, tipo:'CARGO', concepto:'Venta #'+String(v.numero||v.id).padStart(3,'0')+' — '+v.producto, monto:parseFloat(v.total_con_iva)||0 });
+    });
+    _data.cobranzas.forEach(c=>{
+      const venta = _data.ventas.find(v=>v.id==c.venta_id);
+      const nombre = venta?.cliente || 'Sin cliente';
+      if(!clientMap[nombre]) clientMap[nombre] = { movimientos:[] };
+      clientMap[nombre].movimientos.push({ fecha:c.fecha, tipo:'COBRO', concepto:'Cobro'+( venta ? ' Venta #'+String(venta.numero||venta.id).padStart(3,'0') : ''), monto:parseFloat(c.monto)||0 });
+    });
+    let entries = Object.entries(clientMap)
+      .filter(([k])=>k.toLowerCase().includes(q))
+      .map(([nombre,{movimientos}])=>{
+        movimientos.sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+        let saldo = 0;
+        const rows = movimientos.map(m=>{
+          if(m.tipo==='CARGO') saldo += m.monto; else saldo -= m.monto;
+          return { ...m, saldo };
+        });
+        return { nombre, saldo, rows };
+      }).sort((a,b)=>b.saldo-a.saldo);
+
+    el.innerHTML = entries.length ? entries.map((e,i)=>`
+      <div class="table-wrap" style="cursor:pointer" onclick="toggleCuenta('cc-${i}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px">
+          <div style="font-weight:600">${e.nombre}</div>
+          <div style="display:flex;gap:20px;align-items:center">
+            <span style="font-size:12px;color:var(--muted)">${e.rows.length} movimiento(s)</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;color:${e.saldo>0?'var(--red)':e.saldo<0?'var(--accent2)':'var(--muted)'}">${e.saldo>0?'Debe':'Saldo a favor'} ${fmtARS(Math.abs(e.saldo))}</span>
+            <span style="color:var(--muted)">▼</span>
+          </div>
+        </div>
+        <div id="cc-${i}" style="display:none;border-top:1px solid var(--border)">
+          <table style="width:100%"><thead><tr><th>Fecha</th><th>Concepto</th><th>Cargo</th><th>Cobro</th><th>Saldo</th></tr></thead>
+          <tbody>${e.rows.map(r=>`
+            <tr>
+              <td>${fmtDate(r.fecha)}</td>
+              <td style="font-size:12px">${r.concepto}</td>
+              <td class="mono" style="color:var(--red)">${r.tipo==='CARGO'?fmtARS(r.monto):'—'}</td>
+              <td class="mono" style="color:var(--accent2)">${r.tipo==='COBRO'?fmtARS(r.monto):'—'}</td>
+              <td class="mono" style="font-weight:600;color:${r.saldo>0?'var(--red)':r.saldo<0?'var(--accent2)':'var(--muted)'}">${fmtARS(Math.abs(r.saldo))}</td>
+            </tr>`).join('')}
+          </tbody></table>
+        </div>
+      </div>`).join('') : '<div style="padding:40px;text-align:center;color:var(--muted)">Sin datos de clientes.</div>';
+
+  } else {
+    // Proveedores: from pagos
+    const provMap = {};
+    _data.pagos.forEach(p=>{
+      const nombre = p.proveedor || p.concepto || 'Sin proveedor';
+      if(!provMap[nombre]) provMap[nombre] = { movimientos:[] };
+      provMap[nombre].movimientos.push({ fecha:p.fecha, concepto:p.concepto||nombre, monto:parseFloat(p.monto)||0, categoria:p.categoria });
+    });
+    let entries = Object.entries(provMap)
+      .filter(([k])=>k.toLowerCase().includes(q))
+      .map(([nombre,{movimientos}])=>{
+        movimientos.sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+        const total = movimientos.reduce((s,m)=>s+m.monto,0);
+        return { nombre, total, movimientos };
+      }).sort((a,b)=>b.total-a.total);
+
+    el.innerHTML = entries.length ? entries.map((e,i)=>`
+      <div class="table-wrap" style="cursor:pointer" onclick="toggleCuenta('cp-${i}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px">
+          <div style="font-weight:600">${e.nombre}</div>
+          <div style="display:flex;gap:20px;align-items:center">
+            <span style="font-size:12px;color:var(--muted)">${e.movimientos.length} pago(s)</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">Total pagado ${fmtARS(e.total)}</span>
+            <span style="color:var(--muted)">▼</span>
+          </div>
+        </div>
+        <div id="cp-${i}" style="display:none;border-top:1px solid var(--border)">
+          <table style="width:100%"><thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Monto</th></tr></thead>
+          <tbody>${e.movimientos.map(m=>`
+            <tr>
+              <td>${fmtDate(m.fecha)}</td>
+              <td style="font-size:12px">${m.concepto}</td>
+              <td style="font-size:11px;color:var(--muted)">${m.categoria||'—'}</td>
+              <td class="mono" style="color:var(--red)">${fmtARS(m.monto)}</td>
+            </tr>`).join('')}
+          </tbody></table>
+        </div>
+      </div>`).join('') : '<div style="padding:40px;text-align:center;color:var(--muted)">Sin datos de proveedores.</div>';
+  }
+}
+
+function toggleCuenta(id) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
 // ── LOAD ALL DATA ────────────────────────────────────────────
 
 
@@ -2848,7 +3221,7 @@ async function loadAll() {
   document.getElementById('db-status').textContent = '● Cargando...';
   document.getElementById('db-status').style.color = 'var(--muted)';
   try {
-    const tabs = ['consultas','cotizaciones','ventas','productos','pedidos','cashflow'];
+    const tabs = ['consultas','cotizaciones','ventas','productos','pedidos','cashflow','cobranzas','pagos'];
     const results = await Promise.all(tabs.map(t => fetch(API+'?tabla='+t).then(r=>r.json()).catch(()=>[])));
     tabs.forEach((t,i) => { _data[t] = Array.isArray(results[i]) ? results[i] : []; });
     document.getElementById('db-status').textContent = '● Conectado';
@@ -2874,6 +3247,9 @@ function renderPage(page) {
   if(page==='pedidos')       renderPedidos(_data.pedidos);
   if(page==='cashflow')      renderCF(_data.cashflow);
   if(page==='pipeline')      renderPipeline();
+  if(page==='cobranzas')     renderCobranzas(_data.cobranzas);
+  if(page==='pagos')         renderPagos(_data.pagos);
+  if(page==='cuentas')       renderCuentas();
 }
 
 
