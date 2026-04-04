@@ -277,7 +277,7 @@
       <div class="nav-item" onclick="goTo('clientes')"><span class="nav-icon">👤</span>Clientes</div>
       <div class="nav-label" style="margin-top:8px">ERP</div>
       <div class="nav-item" onclick="goTo('productos')"><span class="nav-icon">◈</span>Productos y Precios</div>
-      <div class="nav-item" onclick="goTo('pedidos')"><span class="nav-icon">◻</span>Órdenes de Pedido</div>
+      <div class="nav-item" onclick="goTo('compras')"><span class="nav-icon">🛒</span>Compras</div>
       <div class="nav-item" onclick="goTo('ventas')"><span class="nav-icon">↑</span>Ventas</div>
       <div class="nav-item" onclick="goTo('pagos')"><span class="nav-icon">↓</span>Pagos</div>
       <div class="nav-item" onclick="goTo('proveedores')"><span class="nav-icon">🏭</span>Proveedores</div>
@@ -343,6 +343,11 @@
             <div class="kpi-label">Pagos del mes</div>
             <div class="kpi-value" id="kpi-pagos">—</div>
             <div class="kpi-sub" id="kpi-pagos-sub">cargando...</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-label">Compras del mes</div>
+            <div class="kpi-value" id="kpi-compras">—</div>
+            <div class="kpi-sub" id="kpi-compras-sub">cargando...</div>
           </div>
         </div>
         <div class="grid2">
@@ -438,17 +443,57 @@
         </div>
       </div>
 
-      <!-- PEDIDOS -->
-      <div class="page" id="page-pedidos">
+      <!-- COMPRAS -->
+      <div class="page" id="page-compras">
+        <div class="kpi-grid" style="margin-bottom:20px">
+          <div class="kpi-card red"><div class="kpi-label">Comprado este mes</div><div class="kpi-value" id="comp-kpi-mes">—</div><div class="kpi-sub" id="comp-kpi-mes-sub">cargando...</div></div>
+          <div class="kpi-card orange"><div class="kpi-label">Órdenes activas</div><div class="kpi-value" id="comp-kpi-activas">—</div><div class="kpi-sub" id="comp-kpi-activas-sub">tipo taller</div></div>
+          <div class="kpi-card yellow"><div class="kpi-label">Saldo pendiente</div><div class="kpi-value" id="comp-kpi-saldo">—</div><div class="kpi-sub" id="comp-kpi-saldo-sub">anticipo sin saldo</div></div>
+          <div class="kpi-card blue"><div class="kpi-label">Servicios del mes</div><div class="kpi-value" id="comp-kpi-serv">—</div><div class="kpi-sub" id="comp-kpi-serv-sub">cargando...</div></div>
+        </div>
         <div class="search-bar">
-          <input class="search-input" type="text" id="pedidos-search" placeholder="🔍  Buscar orden..." oninput="filterPedidos()">
-          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-orden')">+ Nueva Orden</button>
+          <input class="search-input" type="text" id="comp-search" placeholder="🔍  Buscar por proveedor, orden, concepto..." oninput="filterCompras()">
+          <select class="form-select" id="comp-filter-tipo" onchange="filterCompras()" style="width:180px">
+            <option value="">Todos los tipos</option>
+            <option value="taller">Pedido a Taller</option>
+            <option value="servicio">Servicio / Gasto</option>
+          </select>
+          <select class="form-select" id="comp-filter-estado" onchange="filterCompras()" style="width:180px">
+            <option value="">Todos los estados</option>
+            <option>Pendiente</option>
+            <option>En producción</option>
+            <option>Entregado parcial</option>
+            <option>Entregado total</option>
+            <option>Cerrado</option>
+            <option>Pagado</option>
+          </select>
+          <select class="form-select" id="comp-filter-mes" onchange="filterCompras()" style="width:150px">
+            <option value="">Todos los meses</option>
+            <option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option>
+            <option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option>
+            <option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openModal('nueva-compra-tipo')">+ Nueva Compra</button>
         </div>
         <div class="table-wrap">
-          <div class="table-header"><div class="table-title">Órdenes de Trabajo</div></div>
+          <div class="table-header"><div class="table-title">Registro de Compras</div></div>
           <div style="overflow-x:auto">
-          <table style="table-layout:fixed;width:100%;min-width:1000px"><thead><tr><th style="width:70px">N° Orden</th><th style="width:130px">Proveedor</th><th style="width:70px">Fecha</th><th>Prendas / Descripción</th><th style="width:90px">Subtotal s/IVA</th><th style="width:90px">Total c/IVA</th><th style="width:70px">Anticipo</th><th style="width:110px">Estado</th><th style="width:160px">Acciones</th></tr></thead>
-          <tbody id="pedidos-tbody"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+          <table style="table-layout:fixed;width:100%;min-width:1100px">
+            <thead><tr>
+              <th style="width:90px">N° / Orden</th>
+              <th style="width:80px">Tipo</th>
+              <th style="width:75px">Fecha</th>
+              <th style="width:130px">Proveedor</th>
+              <th>Concepto / Prendas</th>
+              <th style="width:95px">Total</th>
+              <th style="width:85px">Anticipo</th>
+              <th style="width:85px">Saldo</th>
+              <th style="width:55px;text-align:center">Factura</th>
+              <th style="width:110px">Estado</th>
+              <th style="width:140px">Acciones</th>
+            </tr></thead>
+            <tbody id="comp-tbody"><tr><td colspan="11" class="loading">Cargando...</td></tr></tbody>
+          </table>
           </div>
         </div>
       </div>
@@ -708,7 +753,13 @@
         <div class="form-group"><label class="form-label">Estado</label>
           <select class="form-select" id="nv-estado"><option>Pendiente</option><option>En producción</option><option>Entregado</option><option>Cancelado</option></select></div>
         <div class="form-group"><label class="form-label">N° Orden Fabricante</label><input class="form-input" id="nv-orden" type="text" placeholder="OP-001"></div>
-        <div class="form-group"><label class="form-label">N° Factura</label><input class="form-input" id="nv-factura" type="text"></div>
+        <div class="form-group full">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+            Facturas
+            <button type="button" class="btn btn-ghost btn-sm" onclick="agregarFacturaRow()" style="font-size:11px;padding:2px 8px">+ Agregar</button>
+          </label>
+          <div id="nv-facturas-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
         <div class="form-group full"><label class="form-label">Observaciones</label><textarea class="form-textarea" id="nv-obs" style="min-height:50px"></textarea></div>
       </div>
       <!-- COSTOS -->
@@ -797,58 +848,226 @@
   </div>
 </div>
 
-<!-- Nueva Orden -->
-<div class="modal-backdrop" id="modal-nueva-orden">
-  <div class="modal" style="width:820px;max-width:98vw">
+<!-- COMPRAS: Modal selector de tipo -->
+<div class="modal-backdrop" id="modal-nueva-compra-tipo">
+  <div class="modal" style="width:520px;max-width:95vw">
+    <div class="modal-head">
+      <div class="modal-title">Nueva Compra — Seleccioná el tipo</div>
+      <button class="modal-close" onclick="closeModal('nueva-compra-tipo')">✕</button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px">
+      <div onclick="seleccionarTipoCompra('taller')" style="border:2px solid var(--border);border-radius:10px;padding:24px 20px;cursor:pointer;text-align:center;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--bg-hover)'" onmouseout="this.style.borderColor='var(--border)';this.style.background=''">
+        <div style="font-size:36px;margin-bottom:10px">🏭</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Pedido a Taller</div>
+        <div style="font-size:12px;color:var(--muted)">Genera orden de pedido con ítems detallados</div>
+      </div>
+      <div onclick="seleccionarTipoCompra('servicio')" style="border:2px solid var(--border);border-radius:10px;padding:24px 20px;cursor:pointer;text-align:center;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--bg-hover)'" onmouseout="this.style.borderColor='var(--border)';this.style.background=''">
+        <div style="font-size:36px;margin-bottom:10px">📋</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Servicio / Gasto</div>
+        <div style="font-size:12px;color:var(--muted)">Publicidad, flete, hosting y otros servicios</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPRAS: Modal formulario TALLER -->
+<div class="modal-backdrop" id="modal-nueva-compra-taller">
+  <div class="modal" style="width:860px;max-width:98vw">
     <div class="modal-head">
       <div>
-        <div class="modal-title">Nueva Orden de Pedido</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px" id="no-num-display"></div>
+        <div class="modal-title" id="comp-taller-title">Pedido a Taller</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px" id="comp-taller-nro-display">N° Orden: se asignará al guardar</div>
       </div>
-      <button class="modal-close" onclick="closeModal('nueva-orden')">✕</button>
+      <button class="modal-close" onclick="closeModal('nueva-compra-taller')">✕</button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="no-num">
-      <div class="form-grid" style="margin-bottom:18px">
-        <div class="form-group"><label class="form-label">Proveedor / Taller *</label><input class="form-input" id="no-prov" type="text" placeholder="Nombre del fabricante o taller" list="dl-proveedores"></div>
-        <div class="form-group"><label class="form-label">Dirección Proveedor</label><input class="form-input" id="no-dir-prov" type="text" placeholder="Calle, localidad"></div>
-        <div class="form-group"><label class="form-label">Fecha Orden</label><input class="form-input" id="no-fecha" type="date"></div>
-        <div class="form-group"><label class="form-label">Fecha Entrega Estimada</label><input class="form-input" id="no-fecha-entrega" type="date"></div>
-        <div class="form-group"><label class="form-label">N° Venta Relacionada</label><input class="form-input" id="no-venta-ref" type="text" placeholder="Ej: #001"></div>
+      <input type="hidden" id="ct-edit-id">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Datos del Pedido</div>
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group"><label class="form-label">Proveedor / Taller *</label>
+          <select class="form-select" id="ct-proveedor-id"><option value="">Seleccionar proveedor...</option></select></div>
+        <div class="form-group"><label class="form-label">Fecha del pedido</label>
+          <input class="form-input" id="ct-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Fecha entrega estimada</label>
+          <input class="form-input" id="ct-fecha-entrega" type="date"></div>
+        <div class="form-group"><label class="form-label">Venta asociada <span style="color:var(--muted);font-size:10px">(opcional)</span></label>
+          <select class="form-select" id="ct-venta-id"><option value="">Sin venta asociada</option></select></div>
         <div class="form-group"><label class="form-label">Estado</label>
-          <select class="form-select" id="no-estado"><option>En producción</option><option>Entregado</option><option>Cancelado</option></select></div>
+          <select class="form-select" id="ct-estado">
+            <option>Pendiente</option><option>En producción</option><option>Entregado parcial</option><option>Entregado total</option><option>Cerrado</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">N° Orden</label>
+          <input class="form-input" id="ct-nro-orden" type="text" placeholder="Se asigna al guardar" readonly style="color:var(--muted)"></div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Prendas / Ítems del Pedido</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Ítems de la Orden</div>
       <div class="cotiz-table-wrap">
-      <table class="cotiz-items-table">
-        <thead><tr>
-          <th style="width:24px">#</th>
-          <th style="width:45px">Cód.</th>
-          <th style="min-width:160px">Descripción / Prenda</th>
-          <th style="width:55px">Talle</th>
-          <th style="width:65px">Color</th>
-          <th style="width:55px">Cant.</th>
-          <th style="width:105px">P. Unit. s/IVA</th>
-          <th style="width:105px">Subtotal s/IVA</th>
-          <th style="width:20px"></th>
-        </tr></thead>
-        <tbody id="no-items-tbody"></tbody>
-      </table>
+        <table class="cotiz-items-table">
+          <thead><tr>
+            <th style="width:24px">#</th>
+            <th style="min-width:160px">Descripción / Prenda</th>
+            <th style="width:55px">Talle</th>
+            <th style="width:65px">Color</th>
+            <th style="width:55px">Cant.</th>
+            <th style="width:115px">P.Unit. s/IVA</th>
+            <th style="width:115px">Subtotal s/IVA</th>
+            <th style="width:20px"></th>
+          </tr></thead>
+          <tbody id="ct-items-tbody"></tbody>
+        </table>
       </div>
-      <button class="cotiz-add-row" onclick="agregarItemOrden()">+ Agregar ítem</button>
+      <button class="cotiz-add-row" onclick="agregarItemCompra()">+ Agregar ítem</button>
       <div class="cotiz-totals" style="margin-top:14px">
-        <div class="cotiz-total-row"><span class="lbl">Subtotal s/IVA</span><span class="val" id="no-t-sub">$0</span></div>
-        <div class="cotiz-total-row"><span class="lbl">IVA 21%</span><span class="val" id="no-t-iva">$0</span></div>
-        <div class="cotiz-total-row grand"><span class="lbl">TOTAL c/IVA</span><span class="val" id="no-t-total">$0</span></div>
+        <div class="cotiz-total-row"><span class="lbl">Subtotal s/IVA</span><span class="val" id="ct-t-sub">$0</span></div>
+        <div class="cotiz-total-row"><span class="lbl">IVA 21%</span><span class="val" id="ct-t-iva">$0</span></div>
+        <div class="cotiz-total-row grand"><span class="lbl">TOTAL c/IVA</span><span class="val" id="ct-t-total">$0</span></div>
       </div>
-      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="form-group"><label class="form-label">Anticipo ($)</label><input class="form-input" id="no-anticipo" type="number" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Notas / Condiciones</label><textarea class="form-textarea" id="no-notas" style="min-height:44px"></textarea></div>
+      <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--border);border-radius:8px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Factura de compra</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <input type="checkbox" id="ct-tiene-factura" onchange="toggleFacturaTaller()" style="cursor:pointer">
+          <label for="ct-tiene-factura" style="font-size:13px;cursor:pointer">¿Tiene factura de compra?</label>
+        </div>
+        <div id="ct-factura-fields" style="display:none">
+          <input class="form-input" id="ct-nro-factura" type="text" placeholder="N° de Factura (ej: A0001-00012345)">
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Sin factura, el IVA no es computable como crédito fiscal.</div>
+      </div>
+      <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--border);border-radius:8px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Anticipo</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Monto anticipo ($)</label>
+            <input class="form-input" id="ct-anticipo-monto" type="number" placeholder="0" oninput="recalcCompraAnticipo()"></div>
+          <div class="form-group"><label class="form-label">Fecha anticipo</label>
+            <input class="form-input" id="ct-anticipo-fecha" type="date"></div>
+          <div class="form-group"><label class="form-label">Forma de pago anticipo</label>
+            <select class="form-select" id="ct-anticipo-forma">
+              <option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Mercado Pago</option>
+            </select></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">El saldo se registra desde el detalle del pedido.</div>
+      </div>
+      <div class="form-group full" style="margin-top:16px">
+        <label class="form-label">Observaciones</label>
+        <textarea class="form-textarea" id="ct-observaciones" style="min-height:60px"></textarea>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('nueva-orden')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-guardar-orden" onclick="guardarOrden()">Guardar Orden</button>
+      <button class="btn btn-ghost" onclick="closeModal('nueva-compra-taller')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-compra-taller" onclick="guardarCompraTaller()">Guardar Pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPRAS: Modal formulario SERVICIO -->
+<div class="modal-backdrop" id="modal-nueva-compra-servicio">
+  <div class="modal" style="width:620px;max-width:98vw">
+    <div class="modal-head">
+      <div class="modal-title" id="comp-serv-title">Servicio / Gasto</div>
+      <button class="modal-close" onclick="closeModal('nueva-compra-servicio')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cs-edit-id">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Proveedor *</label>
+          <select class="form-select" id="cs-proveedor-id"><option value="">Seleccionar proveedor...</option></select></div>
+        <div class="form-group"><label class="form-label">Concepto *</label>
+          <input class="form-input" id="cs-concepto" type="text" placeholder="Descripción del servicio"></div>
+        <div class="form-group"><label class="form-label">Categoría</label>
+          <select class="form-select" id="cs-categoria">
+            <option>Publicidad digital</option>
+            <option>Gestión publicidad</option>
+            <option>Logística / Flete</option>
+            <option>Hosting + Dominio</option>
+            <option>Avíos</option>
+            <option>Otros servicios</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Fecha</label>
+          <input class="form-input" id="cs-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Monto total ($)</label>
+          <input class="form-input" id="cs-monto" type="number" placeholder="0" oninput="recalcServicio()"></div>
+        <div class="form-group"><label class="form-label">¿Tiene IVA?</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+            <input type="checkbox" id="cs-tiene-iva" onchange="recalcServicio()" style="cursor:pointer">
+            <label for="cs-tiene-iva" style="font-size:12px;cursor:pointer">Calcular IVA 21%</label>
+          </div></div>
+        <div class="form-group"><label class="form-label">Forma de pago</label>
+          <select class="form-select" id="cs-forma-pago">
+            <option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Mercado Pago</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Estado de pago</label>
+          <select class="form-select" id="cs-estado">
+            <option>Pagado</option><option>Pendiente</option>
+          </select></div>
+      </div>
+      <div id="cs-iva-breakdown" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg-secondary);border-radius:6px;font-size:12px">
+        <span>Subtotal s/IVA: <b id="cs-sub-display">—</b></span>
+        <span style="margin-left:16px">IVA 21%: <b id="cs-iva-display">—</b></span>
+        <span style="margin-left:16px">Total: <b id="cs-total-display">—</b></span>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;border:1px solid var(--border);border-radius:8px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <input type="checkbox" id="cs-tiene-factura" onchange="toggleFacturaServicio()" style="cursor:pointer">
+          <label for="cs-tiene-factura" style="font-size:13px;cursor:pointer">¿Tiene factura de compra?</label>
+        </div>
+        <div id="cs-factura-fields" style="display:none">
+          <input class="form-input" id="cs-nro-factura" type="text" placeholder="N° de Factura">
+        </div>
+      </div>
+      <div class="form-group full" style="margin-top:14px">
+        <label class="form-label">Observaciones</label>
+        <textarea class="form-textarea" id="cs-observaciones" style="min-height:55px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('nueva-compra-servicio')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-compra-serv" onclick="guardarCompraServicio()">Guardar Servicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPRAS: Modal detalle -->
+<div class="modal-backdrop" id="modal-detalle-compra">
+  <div class="modal" style="width:720px;max-width:98vw">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="det-comp-title">Detalle de Compra</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px" id="det-comp-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('detalle-compra')">✕</button>
+    </div>
+    <div class="modal-body" id="det-comp-body">
+      <!-- Populated by JS -->
+    </div>
+    <div class="modal-footer" id="det-comp-footer">
+      <button class="btn btn-ghost" onclick="closeModal('detalle-compra')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPRAS: Modal registrar saldo -->
+<div class="modal-backdrop" id="modal-saldo-compra">
+  <div class="modal" style="width:460px;max-width:95vw">
+    <div class="modal-head">
+      <div class="modal-title" id="saldo-comp-title">Registrar Pago de Saldo</div>
+      <button class="modal-close" onclick="closeModal('saldo-compra')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="saldo-comp-id">
+      <div id="saldo-comp-info" style="padding:10px 12px;background:var(--bg-secondary);border-radius:6px;margin-bottom:14px;font-size:12px"></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Monto saldo ($) *</label>
+          <input class="form-input" id="saldo-comp-monto" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Fecha pago *</label>
+          <input class="form-input" id="saldo-comp-fecha" type="date"></div>
+        <div class="form-group full"><label class="form-label">Forma de pago</label>
+          <select class="form-select" id="saldo-comp-forma">
+            <option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Mercado Pago</option>
+          </select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('saldo-compra')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-saldo-comp" onclick="guardarSaldoCompra()">Registrar Saldo</button>
     </div>
   </div>
 </div>
@@ -1011,7 +1230,7 @@ const API = 'https://saguma.com.ar/crm/api.php';
 // ============================================================
 
 // Cache de datos
-let _data = { consultas:[], cotizaciones:[], ventas:[], pedidos:[], cashflow:[], productos:[], cobranzas:[], pagos:[], clientes:[], proveedores:[] };
+let _data = { consultas:[], cotizaciones:[], ventas:[], compras:[], cashflow:[], productos:[], cobranzas:[], pagos:[], clientes:[], proveedores:[] };
 const _cotizDismissed = new Set();
 
 // ── API helpers ──────────────────────────────────────────────
@@ -1043,7 +1262,7 @@ const pageInfo = {
   pipeline:    ['Pipeline Comercial','CRM · Estado del proceso de ventas'],
   cotizaciones:['Cotizaciones','CRM · Cotizaciones emitidas'],
   ventas:      ['Ventas & Rentabilidad','ERP · Registro de ventas y margen'],
-  pedidos:     ['Órdenes de Pedido','ERP · Producción con talleres'],
+  compras:     ['Compras','ERP · Pedidos a taller y servicios'],
   productos:   ['Catálogo de Productos','ERP · Precios, costos y margen'],
   cashflow:    ['Cash Flow 2026','ERP · Movimientos financieros'],
   cobranzas:   ['Cobranzas','CRM · Cobros recibidos de clientes'],
@@ -1091,7 +1310,9 @@ function openModal(id){
   if(id==='nueva-venta' && !window._skipVentaInit) initNuevaVenta();
   window._skipVentaInit = false;
   if(id==='nuevo-producto'){ if(window._editingProducto){window._editingProducto=false;}else{document.getElementById('prod-modal-title').textContent='Nuevo Producto'; document.getElementById('np-id').value=''; ['np-categoria','np-tela','np-marca','np-costo','np-margen','np-precio','np-precio-iva','np-descripcion','np-img-url'].forEach(x=>{const el=document.getElementById(x);if(el) el.value=''}); quitarImagenProducto(); } }
-  if(id==='nueva-orden') initNuevaOrden();
+  if(id==='nueva-compra-tipo') { /* nothing to init */ }
+  if(id==='nueva-compra-taller'){ if(window._skipCompraTallerInit){window._skipCompraTallerInit=false;}else{initCompraTaller();} }
+  if(id==='nueva-compra-servicio'){ if(window._skipCompraServInit){window._skipCompraServInit=false;}else{initCompraServicio();} }
   if(id==='nueva-consulta') clearFormConsulta && clearFormConsulta();
   if(id==='nueva-cobranza'){ if(window._skipCobranzaInit){window._skipCobranzaInit=false;}else{initNuevaCobranza();} }
   if(id==='nuevo-pago'){ if(window._skipPagoInit){window._skipPagoInit=false;}else{initNuevoPago();} }
@@ -1353,7 +1574,7 @@ function editarVenta(id) {
   }
   document.getElementById('nv-pago').value      = v.forma_pago||'Transferencia';
   document.getElementById('nv-orden').value     = v.orden_fabricante||'';
-  document.getElementById('nv-factura').value   = v.factura||'';
+  poblarFacturas(v.factura);
   document.getElementById('nv-obs').value       = v.observaciones||'';
   setSelectVal('nv-estado', v.estado);
   setSelectVal('nv-fab-tipo', v.fab_tipo||'RI');
@@ -1410,7 +1631,7 @@ async function actualizarVenta(id) {
       forma_pago: document.getElementById('nv-pago').value,
       estado: document.getElementById('nv-estado').value,
       orden_fabricante: document.getElementById('nv-orden').value,
-      factura: document.getElementById('nv-factura').value,
+      factura: getFacturasJSON(),
       observaciones: document.getElementById('nv-obs').value,
       fab_tipo: fabTipo,
       costo_fab_neto: costoFab||null, flete: flete||null,
@@ -1470,7 +1691,7 @@ function verDetalleVenta(id) {
       ${row('IVA 21% (Débito Fiscal)', fmtN(v.iva), 'color:#7c3aed')}
       ${row('Total c/IVA', fmtN(v.total_con_iva), 'color:var(--accent2);font-weight:600')}
       ${row('Forma de Pago', v.forma_pago||'—')}
-      ${v.factura?row('N° Factura', v.factura):''}
+      ${parseFacturas(v.factura).filter(f=>f.numero).map(f=>row('Factura'+(f.tipo?' ('+f.tipo+')':''), f.numero)).join('')}
       ${v.orden_fabricante?row('N° Orden Fabricante', v.orden_fabricante):''}
     </table>
 
@@ -1653,61 +1874,6 @@ async function guardarSeguimiento() {
   toast(nuevaObs ? 'Seguimiento actualizado' : 'Estado actualizado');
 }
 
-function renderPedidos(data) {
-  document.getElementById('pedidos-tbody').innerHTML = data.length ? data.map(p=>{
-    let items=[];
-    try{ items=p.items_json?JSON.parse(p.items_json):[]; }catch(e){}
-    const totalCant = items.reduce((s,it)=>s+(parseInt(it.cant)||0),0);
-    const resumen = items.length
-      ? items.slice(0,2).map(it=>`${it.desc||'—'} ×${it.cant||0}`).join(', ')+(items.length>2?` +${items.length-2} más`:'')
-      : (p.notas||'—');
-    const estadoOpts = ['En producción','Entregado','Cancelado'].map(e=>
-      `<option value="${e}" ${p.estado===e?'selected':''}>${e}</option>`).join('');
-    return `<tr>
-      <td class="mono" style="color:var(--accent);font-weight:600;font-size:12px">${p.numero}</td>
-      <td style="font-size:12px"><b>${p.proveedor}</b>${p.direccion_proveedor?`<br><span style="font-size:10px;color:var(--muted)">${p.direccion_proveedor}</span>`:''}</td>
-      <td style="font-size:12px">${fmtDate(p.fecha)}</td>
-      <td style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)" title="${resumen}">${resumen}${totalCant?` <span style="color:var(--muted);font-size:10px">(${totalCant} u.)</span>`:''}</td>
-      <td class="mono" style="font-size:12px">${fmtARS(p.subtotal)}</td>
-      <td class="mono" style="color:var(--accent2);font-weight:600;font-size:12px">${fmtARS(p.total)}</td>
-      <td class="mono" style="color:var(--muted);font-size:11px">${p.anticipo?fmtARS(p.anticipo):'—'}</td>
-      <td>
-        <select class="form-select" style="font-size:11px;padding:3px 6px;border-radius:4px" onchange="actualizarEstadoPedido(${p.id},this.value)">
-          ${estadoOpts}
-        </select>
-      </td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="exportarPedidoPDF(${p.id})" title="Descargar PDF" style="font-size:11px">📄</button>
-        <button class="btn btn-sm" style="background:#ea580c;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="registrarAnticipoDesdePedido(${p.id})" title="Registrar anticipo en cashflow">💸 Ant.</button>
-        <button class="btn btn-sm" style="background:#7c3aed;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="registrarSaldoPedido(${p.id})" title="Registrar pago saldo en cashflow">💸 Saldo</button>
-        <button class="btn btn-danger btn-sm" onclick="eliminar('pedidos',${p.id})" style="margin-left:2px">✕</button>
-      </td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="9" class="empty">No hay órdenes.</td></tr>';
-}
-
-
-async function actualizarEstadoPedido(id, estado) {
-  const res = await fetch(`${API}?tabla=pedidos&id=${id}`, {
-    method: 'PUT',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({estado})
-  });
-  const data = await res.json();
-  if(data.ok) {
-    const p = _data.pedidos.find(x=>x.id==id);
-    if(p) p.estado = estado;
-    toast('✓ Estado actualizado');
-  } else {
-    toast('Error al actualizar estado', true);
-    await loadAll();
-  }
-}
-
-function filterPedidos() {
-  const q = document.getElementById('pedidos-search').value.toLowerCase();
-  renderPedidos(_data.pedidos.filter(p=>[p.numero,p.proveedor].join(' ').toLowerCase().includes(q)));
-}
 
 function calcPrecioProducto(costo, margenPct) {
   // margenPct = 20 means 20% markup over cost → precio = costo * 1.20
@@ -2178,6 +2344,10 @@ function renderDashboard() {
   const pagsMes = pags.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
   document.getElementById('kpi-pagos').textContent = fmtARS(pagsMes);
   document.getElementById('kpi-pagos-sub').textContent = pags.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).length + ' pago(s) este mes';
+  const compras = _data.compras || [];
+  const comprasMes = compras.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.total)||0),0);
+  const kpiComp = document.getElementById('kpi-compras');
+  if(kpiComp) { kpiComp.textContent = fmtARS(comprasMes); document.getElementById('kpi-compras-sub').textContent = compras.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).length + ' compra(s) este mes'; }
 
   // Canales chart
   const canales = {};
@@ -2274,11 +2444,58 @@ async function guardarConsulta() {
   else toast('Error: '+res.error, true);
 }
 
+// ── FACTURAS (múltiples por venta) ───────────────────────────
+function parseFacturas(val) {
+  if(!val) return [];
+  try {
+    const parsed = JSON.parse(val);
+    if(Array.isArray(parsed)) return parsed;
+  } catch(e) {}
+  // Backward compat: plain string → single entry without tipo
+  return [{ tipo:'', numero: val }];
+}
+
+function getFacturasJSON() {
+  const rows = document.querySelectorAll('#nv-facturas-list .factura-row');
+  const items = Array.from(rows).map(r=>({
+    tipo:   r.querySelector('.factura-tipo').value,
+    numero: r.querySelector('.factura-num').value.trim(),
+  })).filter(f=>f.numero);
+  return items.length ? JSON.stringify(items) : '';
+}
+
+function agregarFacturaRow(tipo='', numero='') {
+  const div = document.createElement('div');
+  div.className = 'factura-row';
+  div.style.cssText = 'display:flex;gap:6px;align-items:center';
+  div.innerHTML = `
+    <select class="form-select factura-tipo" style="width:130px;flex-shrink:0">
+      <option value="">Tipo</option>
+      <option${tipo==='Anticipo'?' selected':''}>Anticipo</option>
+      <option${tipo==='Saldo'?' selected':''}>Saldo</option>
+      <option${tipo==='Otro'?' selected':''}>Otro</option>
+    </select>
+    <input class="form-input factura-num" type="text" placeholder="N° Factura" value="${numero}" style="flex:1">
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.factura-row').remove()" style="flex-shrink:0">✕</button>`;
+  document.getElementById('nv-facturas-list').appendChild(div);
+}
+
+function poblarFacturas(val) {
+  const list = document.getElementById('nv-facturas-list');
+  list.innerHTML = '';
+  const items = parseFacturas(val);
+  if(items.length === 0) { agregarFacturaRow(); return; }
+  items.forEach(f => agregarFacturaRow(f.tipo||'', f.numero||''));
+}
+// ─────────────────────────────────────────────────────────────
+
 let _ventaItems = [];
 function initNuevaVenta() {
   _ventaItems = [];
   document.getElementById('nv-items-tbody').innerHTML = '';
-  ['nv-cliente','nv-orden','nv-factura','nv-obs','nv-costo-fab','nv-flete','nv-comisiones','nv-otros'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+  ['nv-cliente','nv-orden','nv-obs','nv-costo-fab','nv-flete','nv-comisiones','nv-otros'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+  document.getElementById('nv-facturas-list').innerHTML = '';
+  agregarFacturaRow();
   document.getElementById('nv-neto').textContent = '$0';
   document.getElementById('nv-iva').textContent = '$0';
   document.getElementById('nv-total').textContent = '$0';
@@ -2405,7 +2622,7 @@ async function guardarVenta() {
     forma_pago: document.getElementById('nv-pago').value,
     estado: document.getElementById('nv-estado').value,
     orden_fabricante: document.getElementById('nv-orden').value,
-    factura: document.getElementById('nv-factura').value,
+    factura: getFacturasJSON(),
     observaciones: document.getElementById('nv-obs').value,
     fab_tipo: fabTipo2,
     costo_fab_neto: costoFab2||null,
@@ -2587,85 +2804,6 @@ function renderItemCotizRow(idx, it) {
   tbody.appendChild(tr);
 }
 
-function calcOrden() {
-  // kept for compatibility
-}
-
-// ── ORDEN ITEMS SYSTEM ──────────────────────────────────────
-let _ordenItems = [];
-
-function generarNumeroOrden(){
-  const n = 100 + (_data.pedidos.length||0);
-  return 'OP-' + String(n).padStart(3,'0');
-}
-
-function initNuevaOrden(){
-  _ordenItems = [];
-  document.getElementById('no-items-tbody').innerHTML = '';
-  ['no-prov','no-dir-prov','no-venta-ref','no-notas'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  document.getElementById('no-t-sub').textContent = '$0';
-  document.getElementById('no-t-iva').textContent = '$0';
-  document.getElementById('no-t-total').textContent = '$0';
-  document.getElementById('no-anticipo').value = '';
-  const num = generarNumeroOrden();
-  const numEl = document.getElementById('no-num-display');
-  if(numEl) numEl.textContent = 'N° ' + num;
-  const numInput = document.getElementById('no-num');
-  if(numInput) numInput.value = num;
-  const hoy = new Date().toISOString().split('T')[0];
-  document.getElementById('no-fecha').value = hoy;
-  document.getElementById('no-fecha-entrega').value = '';
-  document.getElementById('no-estado').value = 'En producción';
-  document.querySelector('#modal-nueva-orden .modal-title').textContent = 'Nueva Orden de Pedido';
-  agregarItemOrden();
-}
-
-function agregarItemOrden(){
-  const idx = _ordenItems.length;
-  _ordenItems.push({cod:'',desc:'',talle:'',color:'',cant:'',precio:''});
-  const tbody = document.getElementById('no-items-tbody');
-  const tr = document.createElement('tr');
-  tr.id = 'orden-row-' + idx;
-  tr.innerHTML = `
-    <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;text-align:center">${idx+1}</td>
-    <td><input type="text" placeholder="Cód." style="width:100%" oninput="_ordenItems[${idx}].cod=this.value"></td>
-    <td><input type="text" placeholder="Descripción" style="width:100%" oninput="_ordenItems[${idx}].desc=this.value"></td>
-    <td><input type="text" placeholder="XL" style="width:100%" oninput="_ordenItems[${idx}].talle=this.value"></td>
-    <td><input type="text" placeholder="Color" style="width:100%" oninput="_ordenItems[${idx}].color=this.value"></td>
-    <td><input type="number" placeholder="0" style="width:100%" oninput="_ordenItems[${idx}].cant=this.value;recalcOrden()"></td>
-    <td><input type="number" placeholder="0" style="width:100%" oninput="_ordenItems[${idx}].precio=this.value;recalcOrden()"></td>
-    <td class="td-calc" id="orden-sub-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
-    <td><button class="cotiz-del-btn" onclick="eliminarItemOrden(${idx})">✕</button></td>`;
-  tbody.appendChild(tr);
-  tr.querySelector('input').focus();
-}
-
-function eliminarItemOrden(idx){
-  const tr = document.getElementById('orden-row-'+idx);
-  if(tr) tr.remove();
-  _ordenItems[idx] = null;
-  recalcOrden();
-}
-
-function recalcOrden(){
-  let ts=0;
-  const fn = n => n>0 ? '$'+Math.round(n).toLocaleString('es-AR') : '—';
-  _ordenItems.forEach((it,idx)=>{
-    if(!it) return;
-    const cant=parseFloat(it.cant)||0, precio=parseFloat(it.precio)||0;
-    const sub=cant*precio;
-    ts+=sub;
-    const el=document.getElementById('orden-sub-'+idx);
-    if(el) el.innerHTML = sub>0 ? fn(sub) : '<span style="color:var(--muted);font-size:10px">—</span>';
-  });
-  const iva = ts*0.21;
-  const tot = ts+iva;
-  document.getElementById('no-t-sub').textContent = ts>0 ? fn(ts) : '$0';
-  document.getElementById('no-t-iva').textContent = iva>0 ? fn(iva) : '$0';
-  document.getElementById('no-t-total').textContent = tot>0 ? fn(tot) : '$0';
-}
 
 // ── CLEAR CONSULTA FORM ─────────────────────────────────────
 function clearFormConsulta(){
@@ -2678,31 +2816,6 @@ function clearFormConsulta(){
   document.querySelectorAll('#nc-prenda-list input[type=checkbox]').forEach(cb=>cb.checked=false);
 }
 
-async function guardarOrden() {
-  const prov = document.getElementById('no-prov').value.trim();
-  if(!prov){ toast('Ingresá el proveedor.', true); return; }
-  document.getElementById('btn-guardar-orden').dataset.label = 'Guardar';
-  setLoading('btn-guardar-orden', true);
-  const items = _ordenItems.filter(Boolean);
-  const sub = items.reduce((s,it)=>s+(parseFloat(it.cant)||0)*(parseFloat(it.precio)||0),0);
-  const num = document.getElementById('no-num')?.value || generarNumeroOrden();
-  const res = await apiPost('pedidos',{
-    numero: num,
-    proveedor: prov,
-    direccion_proveedor: document.getElementById('no-dir-prov').value,
-    fecha: document.getElementById('no-fecha').value,
-    fecha_entrega: document.getElementById('no-fecha-entrega').value,
-    venta_ref: document.getElementById('no-venta-ref').value,
-    subtotal: sub||null, iva21: sub?sub*0.21:null, total: sub?sub*1.21:null,
-    anticipo: parseFloat(document.getElementById('no-anticipo').value)||null,
-    estado: document.getElementById('no-estado').value,
-    notas: document.getElementById('no-notas').value,
-    items_json: JSON.stringify(items),
-  });
-  setLoading('btn-guardar-orden', false);
-  if(res.ok){ closeModal('nueva-orden'); _ordenItems=[]; await loadAll(); toast('✓ Orden guardada'); }
-  else toast('Error: '+res.error, true);
-}
 
 async function guardarTransaccion() {
   const concepto = document.getElementById('nt-concepto').value.trim();
@@ -2734,145 +2847,6 @@ async function eliminar(tabla, id) {
 
 
 
-function exportarPedidoPDF(id) {
-  const p = _data.pedidos.find(x=>x.id==id);
-  if(!p){ toast('Orden no encontrada', true); return; }
-  let items = [];
-  try { items = p.items_json ? JSON.parse(p.items_json) : []; } catch(e){}
-  const fmtN = n => n ? '$'+parseFloat(n).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
-  const fmtD = s => s ? s.toString().substring(0,10).split('-').reverse().join('/') : '—';
-  let totalCant=0, totalSub=0;
-  const itemRows = items.map((it,i)=>{
-    const cant=parseFloat(it.cant)||0, precio=parseFloat(it.precio)||0;
-    const sub=cant*precio;
-    totalCant+=cant; totalSub+=sub;
-    return `<tr><td style="text-align:center">${i+1}</td><td style="text-align:center;color:#666">${it.cod||''}</td><td>${it.desc||''}</td><td>${it.talle||''}</td><td>${it.color||''}</td><td style="text-align:center">${cant||''}</td><td style="text-align:right">${precio?fmtN(precio):''}</td><td style="text-align:right">${sub?fmtN(sub):''}</td></tr>`;
-  }).join('');
-  const emptyRows = Math.max(0, 18-items.length);
-  const emptyHtml = Array(emptyRows).fill(`<tr><td colspan="7" style="height:22px"></td></tr>`).join('');
-  const saldo = (parseFloat(p.total)||0) - (parseFloat(p.anticipo)||0);
-
-  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Orden ${p.numero||''}</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff;}
-  #pdf-content{width:210mm;margin:0 auto;background:#fff;}
-  .pdf-header{background:linear-gradient(135deg,#0f2447 0%,#1a3a6b 60%,#2563b0 100%)!important;color:#fff;padding:18px 28px 16px;display:flex;align-items:center;justify-content:space-between;}
-  .brand{font-size:22px;font-weight:900;letter-spacing:3px;color:#fff;}
-  .tagline{font-size:9px;color:rgba(255,255,255,.65);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
-  .contact{text-align:right;font-size:9.5px;color:rgba(255,255,255,.88);line-height:1.7;}
-  .pdf-sub{background:#e8eef7!important;border-bottom:3px solid #1a3a6b;padding:7px 28px;display:flex;justify-content:space-between;align-items:center;}
-  .pdf-sub-title{font-size:11px;font-weight:700;color:#1a3a6b;letter-spacing:.5px;text-transform:uppercase;}
-  .pdf-sub-num{font-family:monospace;font-size:12px;font-weight:700;color:#0f2447;}
-  .body{padding:16px 28px 20px;}
-  .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:14px;}
-  .hcell{padding:5px 8px;border:1px solid #d0d8e8;font-size:10.5px;background:#fff;}
-  .hcell:nth-child(odd){background:#f7f9fc!important;}
-  .hcell .lbl{color:#1a3a6b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px;}
-  table.items{width:100%;border-collapse:collapse;margin-bottom:12px;}
-  table.items thead th{background:#1a3a6b!important;color:#fff!important;padding:8px 6px;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;text-align:left;}
-  table.items tbody td{padding:5px 6px;border-bottom:1px solid #e8ecf0;font-size:10.5px;vertical-align:middle;}
-  table.items tbody tr:nth-child(even) td{background:#f4f7fb!important;}
-  .tfoot td{background:#0f2447!important;color:#fff!important;font-weight:700;padding:7px 6px;}
-  .totbox{display:flex;justify-content:flex-end;margin-bottom:14px;}
-  .tbox{border:1px solid #d0d8e8;border-radius:4px;overflow:hidden;min-width:280px;}
-  .trow{display:flex;justify-content:space-between;padding:6px 14px;font-size:11px;border-bottom:1px solid #eee;}
-  .trow.g{background:#1a3a6b!important;color:#fff!important;font-weight:700;font-size:13px;border:none;}
-  .trow.saldo{background:#f0f9ff!important;color:#0f2447;font-weight:700;}
-  .cond{padding:10px 14px;background:#f5f7fb!important;border:1px solid #d0d8e8;border-left:3px solid #1a3a6b;font-size:10px;line-height:1.75;margin-bottom:16px;}
-  .cond b{display:block;color:#1a3a6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
-  .firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px;}
-  .fbox{border-top:2px solid #1a3a6b;padding-top:8px;font-size:10px;color:#555;}
-  .nota{text-align:center;font-size:9px;color:#aaa;margin-top:16px;padding-top:10px;border-top:1px solid #eee;}
-  .dl-bar{background:#f0f3f8;padding:10px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d0d8e8;}
-  .dl-btn{background:linear-gradient(135deg,#0f2447,#2563b0);color:#fff;border:none;padding:8px 20px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;}
-  .dl-btn:hover{filter:brightness(1.15);}
-  .dl-info{font-size:11px;color:#666;}
-  @media print{.dl-bar{display:none!important;}@page{size:A4;margin:0;}body{margin:0!important;}}
-</style></head><body>
-<div class="dl-bar">
-  <div class="dl-info">Orden de Pedido <strong>${p.numero||'—'}</strong> — ${p.proveedor||''}</div>
-  <button class="dl-btn" onclick="descargarPDF()">⬇ Descargar PDF</button>
-</div>
-<div id="pdf-content">
-<div class="pdf-header">
-  <div><div class="brand">SAGUMA</div><div class="tagline">Indumentaria Laboral · Mayorista</div></div>
-  <div class="contact">Organización Crima SA &nbsp;·&nbsp; CUIT 30-70949492-5<br>Av. Córdoba 391 9°B – CABA<br>ventas@saguma.com.ar &nbsp;·&nbsp; +54 11 6112-5719</div>
-</div>
-<div class="pdf-sub">
-  <span class="pdf-sub-title">Orden de Pedido a Fabricante</span>
-  <span class="pdf-sub-num">${p.numero||'—'}</span>
-</div>
-<div class="body">
-  <div class="hgrid">
-    <div class="hcell"><span class="lbl">Proveedor / Taller</span><strong>${p.proveedor||'—'}</strong>${p.direccion_proveedor?`<br><span style="font-size:9px;color:#555">${p.direccion_proveedor}</span>`:''}</div>
-    <div class="hcell"><span class="lbl">N° Orden</span><strong>${p.numero||'—'}</strong></div>
-    <div class="hcell"><span class="lbl">Fecha Orden</span>${fmtD(p.fecha)}</div>
-    <div class="hcell"><span class="lbl">Fecha Entrega Estimada</span>${fmtD(p.fecha_entrega)}</div>
-    <div class="hcell"><span class="lbl">Venta Relacionada</span>${p.venta_ref||'—'}</div>
-    <div class="hcell"><span class="lbl">Estado</span>${p.estado||''}</div>
-  </div>
-
-  <table class="items">
-    <thead><tr>
-      <th style="width:28px;text-align:center">#</th>
-      <th style="width:40px;text-align:center">Cód.</th>
-      <th>Descripción / Prenda</th>
-      <th style="width:60px">Talle</th>
-      <th style="width:65px">Color</th>
-      <th style="width:50px;text-align:center">Cant.</th>
-      <th style="width:100px;text-align:right">P. Unit. s/IVA</th>
-      <th style="width:100px;text-align:right">Subtotal s/IVA</th>
-    </tr></thead>
-    <tbody>
-      ${itemRows}${emptyHtml}
-      <tr class="tfoot">
-        <td colspan="5" style="text-align:right;padding-right:8px">TOTAL</td>
-        <td style="text-align:center">${totalCant||''}</td>
-        <td></td>
-        <td style="text-align:right">${totalSub?fmtN(totalSub):''}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="totbox">
-    <div class="tbox">
-      <div class="trow"><span>Subtotal s/IVA</span><span>${fmtN(p.subtotal)}</span></div>
-      <div class="trow"><span>IVA 21%</span><span>${fmtN(p.iva21)}</span></div>
-      <div class="trow g"><span>TOTAL c/IVA</span><span>${fmtN(p.total)}</span></div>
-      ${p.anticipo?`<div class="trow"><span>Anticipo</span><span>${fmtN(p.anticipo)}</span></div><div class="trow saldo"><span>Saldo a Pagar</span><span>${fmtN(saldo)}</span></div>`:''}
-    </div>
-  </div>
-
-  ${p.notas?`<div class="cond"><b>Notas y Condiciones</b>${p.notas}</div>`:''}
-
-  <div class="firmas">
-    <div class="fbox">Firma y Sello del Proveedor &nbsp;·&nbsp; ${p.proveedor||''}</div>
-    <div class="fbox">Firma y Sello &nbsp;·&nbsp; Organización Crima SA</div>
-  </div>
-  <div class="nota">Documento interno — Orden de pedido a fabricante. No tiene valor fiscal.</div>
-</div>
-</div>
-<script>
-function descargarPDF(){
-  const el = document.getElementById('pdf-content');
-  const opt = {
-    margin: 0,
-    filename: 'Orden_${(p.numero||'SAGUMA').replace(/[^a-zA-Z0-9_-]/g,'_')}.pdf',
-    image: { type:'jpeg', quality:0.98 },
-    html2canvas: { scale:2, useCORS:true, backgroundColor:'#fff' },
-    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
-  };
-  html2pdf().set(opt).from(el).save();
-}
-window.addEventListener('load', ()=>{ setTimeout(descargarPDF, 800); });
-<\/script>
-</body></html>`;
-  const win = window.open('','_blank','width=900,height=700');
-  win.document.write(html);
-  win.document.close();
-}
 
 function exportarCotizPDF(id) {
   const co = _data.cotizaciones.find(x=>x.id==id);
@@ -3052,7 +3026,7 @@ function generarVentaDesdeCotiz(id) {
   document.getElementById('nv-obs').value = 'Generada desde Cotización ' + co.numero;
 
   // Clear cost fields
-  ['nv-costo-fab','nv-flete','nv-comisiones','nv-otros','nv-orden','nv-factura'].forEach(id=>{
+  ['nv-costo-fab','nv-flete','nv-comisiones','nv-otros','nv-orden'].forEach(id=>{
     const el = document.getElementById(id); if(el) el.value = '';
   });
   document.getElementById('nv-fab-tipo').value = 'RI';
@@ -3063,47 +3037,10 @@ function generarVentaDesdeCotiz(id) {
   toast('📋 Datos pre-cargados desde cotización ' + co.numero);
 }
 
-// ── 2) VENTA → GENERAR ORDEN DE PEDIDO ──────────────────────
+// ── 2) VENTA → GENERAR COMPRA ───────────────────────────────
 function generarOrdenDesdeVenta(id) {
-  const v = _data.ventas.find(x=>x.id==id);
-  if(!v){ toast('Venta no encontrada', true); return; }
-
-  // Init the order form
-  initNuevaOrden();
-  document.querySelector('#modal-nueva-orden .modal-title').textContent = 'Orden de Pedido desde Venta #' + String(v.numero||v.id).padStart(3,'0');
-
-  // Pre-fill
-  document.getElementById('no-venta-ref').value = '#' + String(v.numero||v.id).padStart(3,'0');
-  document.getElementById('no-notas').value = 'Pedido para venta a ' + v.cliente;
-
-  // Set delivery date 30 days from now
-  const entrega = new Date();
-  entrega.setDate(entrega.getDate() + 30);
-  document.getElementById('no-fecha-entrega').value = entrega.toISOString().split('T')[0];
-
-  // Pre-fill the first item row with sale product
-  setTimeout(() => {
-    const firstRow = document.querySelector('#no-items-tbody tr');
-    if(firstRow) {
-      const inputs = firstRow.querySelectorAll('input');
-      // inputs: [cod, desc, talle, color, cant, precio]
-      if(inputs[1]) inputs[1].value = v.producto || '';
-      if(inputs[2]) inputs[2].value = v.talle || '';
-      if(inputs[3]) inputs[3].value = v.color || '';
-      if(inputs[4]) inputs[4].value = v.cantidad || '';
-      // Trigger _ordenItems update
-      if(_ordenItems && _ordenItems[0]) {
-        _ordenItems[0].desc = v.producto || '';
-        _ordenItems[0].talle = v.talle || '';
-        _ordenItems[0].color = v.color || '';
-        _ordenItems[0].cant = v.cantidad || '';
-      }
-      recalcOrden && recalcOrden();
-    }
-  }, 100);
-
-  openModal('nueva-orden');
-  toast('📋 Datos pre-cargados desde venta #' + String(v.numero||v.id).padStart(3,'0'));
+  // Redirect to new compras module
+  openModal('nueva-compra-tipo');
 }
 
 // ── 3) VENTA → REGISTRAR COBRO EN CASHFLOW ──────────────────
@@ -3127,45 +3064,7 @@ function registrarCobroDesdeVenta(id) {
 }
 
 // ── 4) PEDIDO → REGISTRAR ANTICIPO EN CASHFLOW ──────────────
-function registrarAnticipoDesdePedido(id) {
-  const p = _data.pedidos.find(x=>x.id==id);
-  if(!p){ toast('Orden no encontrada', true); return; }
-
-  const hoy = new Date();
-  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-  document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
-  const ntMesH2 = document.getElementById('nt-mes-hidden'); if(ntMesH2) ntMesH2.value = meses[hoy.getMonth()];
-  document.getElementById('nt-concepto').value = 'Anticipo orden ' + p.numero + ' — ' + p.proveedor;
-  document.getElementById('nt-cat').value = 'Producción / Taller';
-  document.getElementById('nt-tipo').value = 'EGRESO';
-  document.getElementById('nt-monto').value = Math.round(parseFloat(p.anticipo) || (parseFloat(p.total)||0) * 0.5);
-  document.getElementById('nt-notas').value = 'Anticipo pedido a ' + p.proveedor;
-
-  openModal('nueva-transaccion');
-  toast('💸 Anticipo pre-cargado para ' + p.proveedor);
-}
-
-// ── 5) PEDIDO → REGISTRAR PAGO SALDO EN CASHFLOW ────────────
-function registrarSaldoPedido(id) {
-  const p = _data.pedidos.find(x=>x.id==id);
-  if(!p){ toast('Orden no encontrada', true); return; }
-
-  const hoy = new Date();
-  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const saldo = (parseFloat(p.total)||0) - (parseFloat(p.anticipo)||0);
-
-  document.getElementById('nt-fecha').value = hoy.toISOString().split('T')[0];
-  const ntMesH3 = document.getElementById('nt-mes-hidden'); if(ntMesH3) ntMesH3.value = meses[hoy.getMonth()];
-  document.getElementById('nt-concepto').value = 'Saldo orden ' + p.numero + ' — ' + p.proveedor;
-  document.getElementById('nt-cat').value = 'Producción / Taller';
-  document.getElementById('nt-tipo').value = 'EGRESO';
-  document.getElementById('nt-monto').value = Math.round(saldo > 0 ? saldo : parseFloat(p.total)||0);
-  document.getElementById('nt-notas').value = 'Pago saldo contra entrega · ' + p.proveedor;
-
-  openModal('nueva-transaccion');
-  toast('💸 Saldo pre-cargado: ' + fmtARS(saldo));
-}
+// (deprecated — replaced by compras module)
 
 // ── 6) AUTO-PROMPT: After cotización marked as Aceptada ──────
 const _origCambiarEstadoCotiz = cambiarEstadoCotiz;
@@ -3619,6 +3518,535 @@ function toggleCuenta(id) {
   el.style.display = el.style.display==='none' ? 'block' : 'none';
 }
 
+// ══════════════════════════════════════════════════════════════
+// COMPRAS
+// ══════════════════════════════════════════════════════════════
+
+let _compraItems = [];
+
+// ── Estado color pills ──────────────────────────────────────
+function compraEstadoPill(comp) {
+  if (comp.tipo === 'servicio') {
+    const col = comp.estado === 'Pagado' ? 'var(--green)' : '#f59e0b';
+    return `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${col}20;color:${col}">${comp.estado||'—'}</span>`;
+  }
+  const cols = { 'Pendiente':'#f59e0b','En producción':'#3b82f6','Entregado parcial':'#f97316','Entregado total':'#22c55e','Cerrado':'#6b7280' };
+  const c = cols[comp.estado] || '#6b7280';
+  return `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${c}20;color:${c}">${comp.estado||'—'}</span>`;
+}
+
+// ── KPIs de la página ────────────────────────────────────────
+function renderComprasKPIs(data) {
+  const mesActual = new Date().getMonth();
+  const delMes = data.filter(x => x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual);
+  const totalMes = delMes.reduce((s,x)=>s+(parseFloat(x.total)||0),0);
+  document.getElementById('comp-kpi-mes').textContent = fmtARS(totalMes);
+  document.getElementById('comp-kpi-mes-sub').textContent = delMes.length + ' compra(s)';
+
+  const activas = data.filter(x=>x.tipo==='taller' && x.estado!=='Cerrado');
+  document.getElementById('comp-kpi-activas').textContent = activas.length;
+  document.getElementById('comp-kpi-activas-sub').textContent = 'en curso';
+
+  const saldoPend = data.filter(x=>x.tipo==='taller' && x.estado!=='Cerrado' && parseFloat(x.saldo_monto||0)===0 && parseFloat(x.anticipo_monto||0)>0)
+    .reduce((s,x)=>s+(parseFloat(x.total||0)-parseFloat(x.anticipo_monto||0)),0);
+  document.getElementById('comp-kpi-saldo').textContent = fmtARS(saldoPend);
+
+  const servMes = delMes.filter(x=>x.tipo==='servicio').reduce((s,x)=>s+(parseFloat(x.total)||0),0);
+  document.getElementById('comp-kpi-serv').textContent = fmtARS(servMes);
+  document.getElementById('comp-kpi-serv-sub').textContent = delMes.filter(x=>x.tipo==='servicio').length + ' servicio(s)';
+}
+
+// ── Render tabla ─────────────────────────────────────────────
+function renderCompras(data) {
+  renderComprasKPIs(data);
+  const tbody = document.getElementById('comp-tbody');
+  if (!tbody) return;
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="11" class="empty">No hay compras registradas.</td></tr>'; return; }
+  tbody.innerHTML = data.map(c => {
+    const prov = c.prov_display || c.proveedor_nombre || '—';
+    const nroDisplay = c.tipo === 'taller' ? (c.nro_orden || '—') : `SRV-${String(c.id).padStart(3,'0')}`;
+    const tipoPill = c.tipo === 'taller'
+      ? `<span style="display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;background:#1a3a6b20;color:#1a3a6b;font-weight:600">Taller</span>`
+      : `<span style="display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;background:#3b82f620;color:#2563b0;font-weight:600">Servicio</span>`;
+    let concepto = '—';
+    if (c.tipo === 'taller') {
+      let items = [];
+      try { items = c.items_json ? JSON.parse(c.items_json) : []; } catch(e){}
+      if (items.length) concepto = items.slice(0,2).map(it=>`${it.desc||'—'} ×${it.cant||0}`).join(', ') + (items.length>2 ? ` +${items.length-2} más` : '');
+    } else {
+      concepto = c.concepto || '—';
+    }
+    const anticipo = parseFloat(c.anticipo_monto||0);
+    const saldo_pag = parseFloat(c.saldo_monto||0);
+    const saldo_pend = parseFloat(c.total||0) - anticipo - saldo_pag;
+    const saldoDisplay = saldo_pend > 0.5
+      ? `<span style="color:var(--red);font-weight:600">${fmtARS(saldo_pend)}</span>`
+      : `<span style="color:var(--green)">✓ Saldado</span>`;
+    const factDisplay = c.tiene_factura ? `<span title="${c.nro_factura||''}" style="color:var(--green);font-size:14px">✓</span>` : `<span style="color:var(--red);font-size:14px">✗</span>`;
+    return `<tr>
+      <td class="mono" style="color:var(--accent);font-weight:600;font-size:12px">${nroDisplay}</td>
+      <td>${tipoPill}</td>
+      <td style="font-size:12px">${fmtDate(c.fecha)}</td>
+      <td style="font-size:12px"><b>${prov}</b></td>
+      <td style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${concepto}">${concepto}</td>
+      <td class="mono" style="color:var(--accent2);font-weight:600;font-size:12px">${fmtARS(c.total)}</td>
+      <td class="mono" style="font-size:11px">${anticipo>0?fmtARS(anticipo):'—'}</td>
+      <td style="font-size:11px">${saldoDisplay}</td>
+      <td style="text-align:center">${factDisplay}</td>
+      <td>${compraEstadoPill(c)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="verDetalleCompra(${c.id})" title="Ver detalle" style="font-size:11px">👁</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarCompra(${c.id})" title="Editar" style="font-size:11px;margin-left:2px">✏</button>
+        ${c.tipo==='taller' && saldo_pend > 0.5 ? `<button class="btn btn-sm" style="background:#7c3aed;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="abrirSaldoCompra(${c.id})" title="Registrar saldo">$</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="eliminarCompra(${c.id})" style="margin-left:2px">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterCompras() {
+  const q = (document.getElementById('comp-search')?.value || '').toLowerCase();
+  const tipo = document.getElementById('comp-filter-tipo')?.value || '';
+  const estado = document.getElementById('comp-filter-estado')?.value || '';
+  const mes = document.getElementById('comp-filter-mes')?.value || '';
+  const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let data = _data.compras.filter(c => {
+    const prov = (c.prov_display||c.proveedor_nombre||'').toLowerCase();
+    const matchQ = !q || [c.nro_orden,prov,c.concepto,c.nro_factura].join(' ').toLowerCase().includes(q);
+    const matchTipo = !tipo || c.tipo===tipo;
+    const matchEstado = !estado || c.estado===estado;
+    const matchMes = !mes || (c.fecha && MESES_ES[new Date(c.fecha+'T12:00:00').getMonth()]===mes);
+    return matchQ && matchTipo && matchEstado && matchMes;
+  });
+  renderCompras(data);
+}
+
+// ── Init formulario taller ───────────────────────────────────
+function cargarSelectProveedores(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Seleccionar proveedor...</option>' +
+    _data.proveedores.map(p=>`<option value="${p.id}">${p.razon_social||p.nombre_fantasia||'—'}</option>`).join('');
+}
+
+function cargarSelectVentas(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Sin venta asociada</option>' +
+    _data.ventas.map(v=>`<option value="${v.id}">N°${String(v.numero||v.id).padStart(3,'0')} — ${v.cliente||'—'}</option>`).join('');
+}
+
+function initCompraTaller() {
+  _compraItems = [];
+  document.getElementById('ct-items-tbody').innerHTML = '';
+  document.getElementById('ct-edit-id').value = '';
+  document.getElementById('ct-nro-orden').value = '';
+  document.getElementById('comp-taller-nro-display').textContent = 'N° Orden: se asignará al guardar';
+  document.getElementById('comp-taller-title').textContent = 'Pedido a Taller';
+  ['ct-fecha-entrega','ct-anticipo-monto','ct-nro-factura','ct-observaciones'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ct-anticipo-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ct-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ct-estado').value = 'Pendiente';
+  document.getElementById('ct-tiene-factura').checked = false;
+  document.getElementById('ct-factura-fields').style.display = 'none';
+  document.getElementById('ct-anticipo-forma').value = 'Transferencia';
+  document.getElementById('ct-t-sub').textContent = '$0';
+  document.getElementById('ct-t-iva').textContent = '$0';
+  document.getElementById('ct-t-total').textContent = '$0';
+  document.getElementById('btn-guardar-compra-taller').textContent = 'Guardar Pedido';
+  cargarSelectProveedores('ct-proveedor-id');
+  cargarSelectVentas('ct-venta-id');
+  agregarItemCompra();
+}
+
+function initCompraServicio() {
+  document.getElementById('cs-edit-id').value = '';
+  document.getElementById('comp-serv-title').textContent = 'Servicio / Gasto';
+  ['cs-concepto','cs-monto','cs-nro-factura','cs-observaciones'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('cs-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('cs-categoria').value = 'Publicidad digital';
+  document.getElementById('cs-forma-pago').value = 'Transferencia';
+  document.getElementById('cs-estado').value = 'Pagado';
+  document.getElementById('cs-tiene-iva').checked = false;
+  document.getElementById('cs-tiene-factura').checked = false;
+  document.getElementById('cs-iva-breakdown').style.display = 'none';
+  document.getElementById('cs-factura-fields').style.display = 'none';
+  document.getElementById('btn-guardar-compra-serv').textContent = 'Guardar Servicio';
+  cargarSelectProveedores('cs-proveedor-id');
+}
+
+function seleccionarTipoCompra(tipo) {
+  closeModal('nueva-compra-tipo');
+  if (tipo === 'taller') openModal('nueva-compra-taller');
+  else openModal('nueva-compra-servicio');
+}
+
+// ── Items tabla taller ───────────────────────────────────────
+function agregarItemCompra() {
+  const idx = _compraItems.length;
+  _compraItems.push({desc:'',talle:'',color:'',cant:'',precio:''});
+  const tbody = document.getElementById('ct-items-tbody');
+  const tr = document.createElement('tr');
+  tr.id = 'comp-row-' + idx;
+  tr.innerHTML = `
+    <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;text-align:center">${idx+1}</td>
+    <td><input type="text" placeholder="Descripción" style="width:100%" oninput="_compraItems[${idx}].desc=this.value"></td>
+    <td><input type="text" placeholder="XL" style="width:100%" oninput="_compraItems[${idx}].talle=this.value"></td>
+    <td><input type="text" placeholder="Color" style="width:100%" oninput="_compraItems[${idx}].color=this.value"></td>
+    <td><input type="number" placeholder="0" style="width:100%" oninput="_compraItems[${idx}].cant=this.value;recalcCompra()"></td>
+    <td><input type="number" placeholder="0" style="width:100%" oninput="_compraItems[${idx}].precio=this.value;recalcCompra()"></td>
+    <td class="td-calc" id="comp-sub-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
+    <td><button class="cotiz-del-btn" onclick="eliminarItemCompra(${idx})">✕</button></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').focus();
+}
+
+function eliminarItemCompra(idx) {
+  const tr = document.getElementById('comp-row-'+idx);
+  if (tr) tr.remove();
+  _compraItems[idx] = null;
+  recalcCompra();
+}
+
+function recalcCompra() {
+  let ts = 0;
+  const fn = n => n > 0 ? '$'+Math.round(n).toLocaleString('es-AR') : '—';
+  _compraItems.forEach((it,idx) => {
+    if (!it) return;
+    const cant = parseFloat(it.cant)||0, precio = parseFloat(it.precio)||0;
+    const sub = cant * precio;
+    ts += sub;
+    const el = document.getElementById('comp-sub-'+idx);
+    if (el) el.innerHTML = sub > 0 ? fn(sub) : '<span style="color:var(--muted);font-size:10px">—</span>';
+  });
+  const iva = ts * 0.21;
+  document.getElementById('ct-t-sub').textContent = fn(ts) || '$0';
+  document.getElementById('ct-t-iva').textContent = fn(iva) || '$0';
+  document.getElementById('ct-t-total').textContent = fn(ts + iva) || '$0';
+}
+
+function recalcCompraAnticipo() { /* anticipo validation only */ }
+
+function toggleFacturaTaller() {
+  document.getElementById('ct-factura-fields').style.display = document.getElementById('ct-tiene-factura').checked ? 'block' : 'none';
+}
+function toggleFacturaServicio() {
+  document.getElementById('cs-factura-fields').style.display = document.getElementById('cs-tiene-factura').checked ? 'block' : 'none';
+}
+
+function recalcServicio() {
+  const monto = parseFloat(document.getElementById('cs-monto').value) || 0;
+  const tieneIva = document.getElementById('cs-tiene-iva').checked;
+  const breakdown = document.getElementById('cs-iva-breakdown');
+  if (tieneIva && monto > 0) {
+    const sub = monto / 1.21;
+    const iva = monto - sub;
+    breakdown.style.display = 'block';
+    document.getElementById('cs-sub-display').textContent = fmtARS(sub);
+    document.getElementById('cs-iva-display').textContent = fmtARS(iva);
+    document.getElementById('cs-total-display').textContent = fmtARS(monto);
+  } else {
+    breakdown.style.display = 'none';
+  }
+}
+
+// ── Guardar compra taller ────────────────────────────────────
+async function guardarCompraTaller() {
+  const provId = document.getElementById('ct-proveedor-id').value;
+  if (!provId) { toast('Seleccioná un proveedor.', true); return; }
+  const editId = document.getElementById('ct-edit-id').value;
+  const btn = document.getElementById('btn-guardar-compra-taller');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const items = _compraItems.filter(Boolean);
+  const sub = items.reduce((s,it)=>s+(parseFloat(it.cant)||0)*(parseFloat(it.precio)||0),0);
+  const iva = sub * 0.21;
+  const total = sub + iva;
+  const anticipo_m = parseFloat(document.getElementById('ct-anticipo-monto').value) || 0;
+  const anticipo_f = document.getElementById('ct-anticipo-fecha').value;
+  const fields = {
+    tipo: 'taller',
+    proveedor_id: provId,
+    venta_id: document.getElementById('ct-venta-id').value || null,
+    fecha: document.getElementById('ct-fecha').value,
+    fecha_entrega_estimada: document.getElementById('ct-fecha-entrega').value || null,
+    estado: document.getElementById('ct-estado').value,
+    subtotal_sin_iva: sub,
+    iva: iva,
+    total: total,
+    tiene_factura: document.getElementById('ct-tiene-factura').checked ? 1 : 0,
+    nro_factura: document.getElementById('ct-nro-factura').value || null,
+    items_json: JSON.stringify(items),
+    anticipo_monto: anticipo_m,
+    anticipo_fecha: anticipo_m > 0 ? anticipo_f : null,
+    anticipo_forma_pago: anticipo_m > 0 ? document.getElementById('ct-anticipo-forma').value : null,
+    observaciones: document.getElementById('ct-observaciones').value,
+  };
+  let res;
+  if (editId) {
+    res = await fetch(`${API}?tabla=compras&id=${editId}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({multi:true, fields})
+    }).then(r=>r.json());
+  } else {
+    res = await apiPost('compras', fields);
+  }
+  btn.disabled = false; btn.textContent = editId ? 'Actualizar Pedido' : 'Guardar Pedido';
+  if (res.ok) {
+    closeModal('nueva-compra-taller');
+    await loadAll();
+    toast(editId ? '✓ Pedido actualizado' : ('✓ Pedido ' + (res.nro_orden||'') + ' guardado' + (res.cf_anticipo_id ? ' · Anticipo en Cash Flow' : '')));
+  } else toast('Error: ' + (res.error || 'desconocido'), true);
+}
+
+// ── Guardar compra servicio ──────────────────────────────────
+async function guardarCompraServicio() {
+  const provId = document.getElementById('cs-proveedor-id').value;
+  const concepto = document.getElementById('cs-concepto').value.trim();
+  if (!provId) { toast('Seleccioná un proveedor.', true); return; }
+  if (!concepto) { toast('Ingresá el concepto del servicio.', true); return; }
+  const editId = document.getElementById('cs-edit-id').value;
+  const btn = document.getElementById('btn-guardar-compra-serv');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const monto = parseFloat(document.getElementById('cs-monto').value) || 0;
+  const tieneIva = document.getElementById('cs-tiene-iva').checked;
+  const sub = tieneIva ? monto / 1.21 : monto;
+  const iva = tieneIva ? monto - sub : 0;
+  const fields = {
+    tipo: 'servicio',
+    proveedor_id: provId,
+    concepto: concepto,
+    categoria: document.getElementById('cs-categoria').value,
+    fecha: document.getElementById('cs-fecha').value,
+    subtotal_sin_iva: sub,
+    iva: iva,
+    total: monto,
+    tiene_factura: document.getElementById('cs-tiene-factura').checked ? 1 : 0,
+    nro_factura: document.getElementById('cs-nro-factura').value || null,
+    estado: document.getElementById('cs-estado').value,
+    forma_pago: document.getElementById('cs-forma-pago').value,
+    observaciones: document.getElementById('cs-observaciones').value,
+  };
+  let res;
+  if (editId) {
+    res = await fetch(`${API}?tabla=compras&id=${editId}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({multi:true, fields})
+    }).then(r=>r.json());
+  } else {
+    res = await apiPost('compras', fields);
+  }
+  btn.disabled = false; btn.textContent = editId ? 'Actualizar Servicio' : 'Guardar Servicio';
+  if (res.ok) {
+    closeModal('nueva-compra-servicio');
+    await loadAll();
+    toast(editId ? '✓ Servicio actualizado' : ('✓ Servicio guardado' + (res.cf_serv_id ? ' · Cash Flow actualizado' : '')));
+  } else toast('Error: ' + (res.error || 'desconocido'), true);
+}
+
+// ── Editar compra ────────────────────────────────────────────
+function editarCompra(id) {
+  const c = _data.compras.find(x=>x.id==id);
+  if (!c) { toast('Compra no encontrada', true); return; }
+  if (c.tipo === 'taller') {
+    window._skipCompraTallerInit = true;
+    initCompraTaller();
+    document.getElementById('ct-edit-id').value = c.id;
+    document.getElementById('comp-taller-title').textContent = 'Editar Pedido';
+    document.getElementById('comp-taller-nro-display').textContent = 'N° Orden: ' + (c.nro_orden||'—');
+    document.getElementById('ct-nro-orden').value = c.nro_orden||'';
+    document.getElementById('ct-fecha').value = c.fecha||'';
+    document.getElementById('ct-fecha-entrega').value = c.fecha_entrega_estimada||'';
+    document.getElementById('ct-estado').value = c.estado||'Pendiente';
+    document.getElementById('ct-tiene-factura').checked = !!parseInt(c.tiene_factura);
+    document.getElementById('ct-factura-fields').style.display = parseInt(c.tiene_factura) ? 'block' : 'none';
+    document.getElementById('ct-nro-factura').value = c.nro_factura||'';
+    document.getElementById('ct-anticipo-monto').value = c.anticipo_monto||'';
+    document.getElementById('ct-anticipo-fecha').value = c.anticipo_fecha||'';
+    document.getElementById('ct-anticipo-forma').value = c.anticipo_forma_pago||'Transferencia';
+    document.getElementById('ct-observaciones').value = c.observaciones||'';
+    document.getElementById('btn-guardar-compra-taller').textContent = 'Actualizar Pedido';
+    cargarSelectProveedores('ct-proveedor-id');
+    cargarSelectVentas('ct-venta-id');
+    setTimeout(()=>{
+      document.getElementById('ct-proveedor-id').value = c.proveedor_id||'';
+      document.getElementById('ct-venta-id').value = c.venta_id||'';
+    },50);
+    // Populate items
+    _compraItems = [];
+    document.getElementById('ct-items-tbody').innerHTML = '';
+    let items = [];
+    try { items = c.items_json ? JSON.parse(c.items_json) : []; } catch(e){}
+    if (items.length) {
+      items.forEach(it => {
+        const idx = _compraItems.length;
+        _compraItems.push(it);
+        const tbody = document.getElementById('ct-items-tbody');
+        const tr = document.createElement('tr');
+        tr.id = 'comp-row-' + idx;
+        tr.innerHTML = `
+          <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;text-align:center">${idx+1}</td>
+          <td><input type="text" placeholder="Descripción" style="width:100%" value="${it.desc||''}" oninput="_compraItems[${idx}].desc=this.value"></td>
+          <td><input type="text" placeholder="XL" style="width:100%" value="${it.talle||''}" oninput="_compraItems[${idx}].talle=this.value"></td>
+          <td><input type="text" placeholder="Color" style="width:100%" value="${it.color||''}" oninput="_compraItems[${idx}].color=this.value"></td>
+          <td><input type="number" placeholder="0" style="width:100%" value="${it.cant||''}" oninput="_compraItems[${idx}].cant=this.value;recalcCompra()"></td>
+          <td><input type="number" placeholder="0" style="width:100%" value="${it.precio||''}" oninput="_compraItems[${idx}].precio=this.value;recalcCompra()"></td>
+          <td class="td-calc" id="comp-sub-${idx}"></td>
+          <td><button class="cotiz-del-btn" onclick="eliminarItemCompra(${idx})">✕</button></td>`;
+        tbody.appendChild(tr);
+      });
+      recalcCompra();
+    } else {
+      agregarItemCompra();
+    }
+    openModal('nueva-compra-taller');
+  } else {
+    window._skipCompraServInit = true;
+    initCompraServicio();
+    document.getElementById('cs-edit-id').value = c.id;
+    document.getElementById('comp-serv-title').textContent = 'Editar Servicio';
+    document.getElementById('cs-concepto').value = c.concepto||'';
+    document.getElementById('cs-fecha').value = c.fecha||'';
+    document.getElementById('cs-monto').value = c.total||'';
+    document.getElementById('cs-categoria').value = c.categoria||'Publicidad digital';
+    document.getElementById('cs-forma-pago').value = c.forma_pago||'Transferencia';
+    document.getElementById('cs-estado').value = c.estado||'Pagado';
+    document.getElementById('cs-tiene-factura').checked = !!parseInt(c.tiene_factura);
+    document.getElementById('cs-factura-fields').style.display = parseInt(c.tiene_factura) ? 'block' : 'none';
+    document.getElementById('cs-nro-factura').value = c.nro_factura||'';
+    document.getElementById('cs-observaciones').value = c.observaciones||'';
+    document.getElementById('btn-guardar-compra-serv').textContent = 'Actualizar Servicio';
+    cargarSelectProveedores('cs-proveedor-id');
+    setTimeout(()=>{ document.getElementById('cs-proveedor-id').value = c.proveedor_id||''; },50);
+    openModal('nueva-compra-servicio');
+  }
+}
+
+// ── Ver detalle ──────────────────────────────────────────────
+function verDetalleCompra(id) {
+  const c = _data.compras.find(x=>x.id==id);
+  if (!c) return;
+  const prov = c.prov_display || c.proveedor_nombre || '—';
+  const anticipo = parseFloat(c.anticipo_monto||0);
+  const saldo_pag = parseFloat(c.saldo_monto||0);
+  const total = parseFloat(c.total||0);
+  const saldo_pend = total - anticipo - saldo_pag;
+  document.getElementById('det-comp-title').textContent = c.tipo==='taller' ? ('Pedido '+c.nro_orden) : ('Servicio — '+c.concepto);
+  document.getElementById('det-comp-sub').textContent = prov + ' · ' + fmtDate(c.fecha);
+  let html = '';
+  if (c.tipo === 'taller') {
+    const ventaInfo = c.venta_id ? `<div style="margin-bottom:12px"><span style="display:inline-block;padding:3px 10px;border-radius:12px;background:#2563b020;color:#2563b0;font-size:12px;font-weight:600">Vinculado a Venta N°${String(c.venta_numero||c.venta_id).padStart(3,'0')} — ${c.venta_cliente||'—'}</span></div>` : '';
+    let items = [];
+    try { items = c.items_json ? JSON.parse(c.items_json) : []; } catch(e){}
+    const itemsHtml = items.length ? `
+      <div class="cotiz-table-wrap" style="margin-bottom:16px">
+        <table class="cotiz-items-table">
+          <thead><tr><th>#</th><th>Descripción</th><th>Talle</th><th>Color</th><th>Cant.</th><th>P.Unit</th><th>Subtotal</th></tr></thead>
+          <tbody>${items.map((it,i)=>`<tr><td style="text-align:center;color:var(--muted)">${i+1}</td><td>${it.desc||'—'}</td><td>${it.talle||'—'}</td><td>${it.color||'—'}</td><td style="text-align:center">${it.cant||0}</td><td>${fmtARS((parseFloat(it.precio)||0))}</td><td>${fmtARS((parseFloat(it.cant)||0)*(parseFloat(it.precio)||0))}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>` : '<p style="color:var(--muted);font-size:12px;margin-bottom:12px">Sin ítems detallados.</p>';
+    html = `
+      ${ventaInfo}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Estado</span>${compraEstadoPill(c)}</div>
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Entrega estimada</span><b>${fmtDate(c.fecha_entrega_estimada)||'—'}</b></div>
+      </div>
+      ${itemsHtml}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+        <div style="padding:10px 12px;background:var(--bg-secondary);border-radius:6px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Total</div>
+          <div style="font-size:16px;font-weight:700;font-family:'DM Mono',monospace">${fmtARS(total)}</div>
+        </div>
+        <div style="padding:10px 12px;background:var(--bg-secondary);border-radius:6px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Anticipo pagado</div>
+          <div style="font-size:14px;font-weight:600;color:${anticipo>0?'var(--green)':'var(--muted)'}">${anticipo>0?fmtARS(anticipo):'—'}</div>
+          ${c.anticipo_fecha?`<div style="font-size:10px;color:var(--muted)">${fmtDate(c.anticipo_fecha)} · ${c.anticipo_forma_pago||''}</div>`:''}
+        </div>
+        <div style="padding:10px 12px;background:${saldo_pend>0.5?'#ef444420':'#22c55e20'};border-radius:6px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Saldo pendiente</div>
+          <div style="font-size:14px;font-weight:700;color:${saldo_pend>0.5?'var(--red)':'var(--green)'}">${saldo_pend>0.5?fmtARS(saldo_pend):'✓ Saldado'}</div>
+          ${saldo_pag>0?`<div style="font-size:10px;color:var(--muted)">Saldo pag: ${fmtARS(saldo_pag)} · ${fmtDate(c.saldo_fecha)}</div>`:''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Factura</span>${c.tiene_factura?`<span style="color:var(--green)">✓ Tiene factura</span>${c.nro_factura?` — ${c.nro_factura}`:''}` : '<span style="color:var(--muted)">Sin factura (compra en negro)</span>'}</div>
+        ${c.observaciones?`<div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Observaciones</span><span style="font-size:12px">${c.observaciones}</span></div>`:'<div></div>'}
+      </div>`;
+  } else {
+    html = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Categoría</span><b>${c.categoria||'—'}</b></div>
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Estado</span>${compraEstadoPill(c)}</div>
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Monto</span><b style="font-size:16px">${fmtARS(total)}</b></div>
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Forma de pago</span>${c.forma_pago||'—'}</div>
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Factura</span>${c.tiene_factura?`✓ ${c.nro_factura||'S/N'}`:'Sin factura'}</div>
+        ${c.observaciones?`<div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Observaciones</span>${c.observaciones}</div>`:'<div></div>'}
+      </div>`;
+  }
+  document.getElementById('det-comp-body').innerHTML = html;
+  const footer = document.getElementById('det-comp-footer');
+  footer.innerHTML = '';
+  if (c.tipo === 'taller' && saldo_pend > 0.5) {
+    const btnS = document.createElement('button');
+    btnS.className = 'btn btn-primary';
+    btnS.textContent = '$ Registrar pago de saldo';
+    btnS.onclick = () => { closeModal('detalle-compra'); abrirSaldoCompra(id); };
+    footer.appendChild(btnS);
+  }
+  const btnCerrar = document.createElement('button');
+  btnCerrar.className = 'btn btn-ghost';
+  btnCerrar.textContent = 'Cerrar';
+  btnCerrar.onclick = () => closeModal('detalle-compra');
+  footer.appendChild(btnCerrar);
+  openModal('detalle-compra');
+}
+
+// ── Registrar saldo ──────────────────────────────────────────
+function abrirSaldoCompra(id) {
+  const c = _data.compras.find(x=>x.id==id);
+  if (!c) return;
+  const prov = c.prov_display || c.proveedor_nombre || '—';
+  const anticipo = parseFloat(c.anticipo_monto||0);
+  const total = parseFloat(c.total||0);
+  const saldo_pend = total - anticipo - parseFloat(c.saldo_monto||0);
+  document.getElementById('saldo-comp-id').value = id;
+  document.getElementById('saldo-comp-title').textContent = 'Saldo — ' + (c.nro_orden||prov);
+  document.getElementById('saldo-comp-info').innerHTML = `<b>${prov}</b> · Total: ${fmtARS(total)} · Anticipo: ${fmtARS(anticipo)} · <span style="color:var(--red)">Saldo pendiente: ${fmtARS(saldo_pend)}</span>`;
+  document.getElementById('saldo-comp-monto').value = Math.round(saldo_pend) || '';
+  document.getElementById('saldo-comp-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('saldo-comp-forma').value = 'Transferencia';
+  openModal('saldo-compra');
+}
+
+async function guardarSaldoCompra() {
+  const id = document.getElementById('saldo-comp-id').value;
+  const monto = parseFloat(document.getElementById('saldo-comp-monto').value) || 0;
+  const fecha = document.getElementById('saldo-comp-fecha').value;
+  if (!monto || !fecha) { toast('Completá monto y fecha.', true); return; }
+  const btn = document.getElementById('btn-guardar-saldo-comp');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const res = await apiPost('compras', {
+    action: 'saldo',
+    id: id,
+    saldo_monto: monto,
+    saldo_fecha: fecha,
+    saldo_forma_pago: document.getElementById('saldo-comp-forma').value,
+  });
+  btn.disabled = false; btn.textContent = 'Registrar Saldo';
+  if (res.ok) {
+    closeModal('saldo-compra');
+    await loadAll();
+    toast('✓ Saldo registrado · Cash Flow actualizado');
+  } else toast('Error: ' + (res.error||'desconocido'), true);
+}
+
+// ── Eliminar compra ──────────────────────────────────────────
+async function eliminarCompra(id) {
+  if (!confirm('¿Eliminar esta compra? También se eliminarán los movimientos asociados en Cash Flow.')) return;
+  const res = await apiDelete('compras', id);
+  if (res.ok) { await loadAll(); toast('Compra eliminada'); }
+  else toast('Error al eliminar', true);
+}
+
 // ── LOAD ALL DATA ────────────────────────────────────────────
 
 
@@ -3626,7 +4054,7 @@ async function loadAll() {
   document.getElementById('db-status').textContent = '● Cargando...';
   document.getElementById('db-status').style.color = 'var(--muted)';
   try {
-    const tabs = ['consultas','cotizaciones','ventas','productos','pedidos','cashflow','cobranzas','pagos','clientes','proveedores'];
+    const tabs = ['consultas','cotizaciones','ventas','productos','compras','cashflow','cobranzas','pagos','clientes','proveedores'];
     const results = await Promise.all(tabs.map(t => fetch(API+'?tabla='+t).then(r=>r.json()).catch(()=>[])));
     tabs.forEach((t,i) => { _data[t] = Array.isArray(results[i]) ? results[i] : []; });
     // Refresh autocomplete datalists
@@ -3651,7 +4079,7 @@ function renderPage(page) {
   if(page==='cotizaciones')  renderCotizaciones(_data.cotizaciones);
   if(page==='ventas')        renderVentas(_data.ventas);
   if(page==='productos')     renderProductos(_data.productos);
-  if(page==='pedidos')       renderPedidos(_data.pedidos);
+  if(page==='compras')      renderCompras(_data.compras);
   if(page==='cashflow')      renderCF(_data.cashflow);
   if(page==='pipeline')      renderPipeline();
   if(page==='cobranzas')     renderCobranzas(_data.cobranzas);

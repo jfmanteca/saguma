@@ -44,9 +44,52 @@ $body   = json_decode(file_get_contents('php://input'), true) ?? [];
 try {
     $pdo = conectar();
 
+    // ── CREATE TABLE compras (IF NOT EXISTS) ──────────────────
+    $pdo->exec("CREATE TABLE IF NOT EXISTS compras (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      tipo ENUM('taller','servicio') NOT NULL,
+      nro_orden VARCHAR(20),
+      proveedor_id INT,
+      proveedor_nombre VARCHAR(150),
+      venta_id INT DEFAULT NULL,
+      fecha DATE NOT NULL,
+      fecha_entrega_estimada DATE,
+      concepto VARCHAR(200),
+      categoria VARCHAR(100),
+      subtotal_sin_iva DECIMAL(12,2) DEFAULT 0,
+      iva DECIMAL(12,2) DEFAULT 0,
+      total DECIMAL(12,2) NOT NULL DEFAULT 0,
+      tiene_factura TINYINT(1) DEFAULT 0,
+      nro_factura VARCHAR(50),
+      estado VARCHAR(50) DEFAULT 'Pendiente',
+      items_json LONGTEXT,
+      anticipo_monto DECIMAL(12,2) DEFAULT 0,
+      anticipo_fecha DATE,
+      anticipo_forma_pago VARCHAR(50),
+      saldo_monto DECIMAL(12,2) DEFAULT 0,
+      saldo_fecha DATE,
+      saldo_forma_pago VARCHAR(50),
+      forma_pago VARCHAR(50),
+      observaciones TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    // ── GET especial: compras (con JOINs) ─────────────────────
+    if ($method === 'GET' && $tabla === 'compras') {
+        $stmt = $pdo->query("SELECT c.*,
+            COALESCE(p.razon_social, c.proveedor_nombre) as prov_display,
+            v.cliente as venta_cliente,
+            v.numero as venta_numero
+            FROM compras c
+            LEFT JOIN proveedores p ON c.proveedor_id = p.id
+            LEFT JOIN ventas v ON c.venta_id = v.id
+            ORDER BY c.fecha DESC, c.id DESC LIMIT 9999");
+        respuesta($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
     // ── GET: listar todos ──────────────────────────────────
     if ($method === 'GET' && $tabla) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores','compras'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
         $stmt = $pdo->query("SELECT * FROM `$tabla` ORDER BY id DESC LIMIT 9999");
         respuesta($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -335,6 +378,103 @@ try {
                 ]);
                 respuesta(['ok'=>true,'insert_id'=>$pdo->lastInsertId()]);
 
+            case 'compras':
+                $meses_comp = ['January'=>'Enero','February'=>'Febrero','March'=>'Marzo','April'=>'Abril','May'=>'Mayo','June'=>'Junio','July'=>'Julio','August'=>'Agosto','September'=>'Septiembre','October'=>'Octubre','November'=>'Noviembre','December'=>'Diciembre'];
+                $tipo_comp = $body['tipo'] ?? 'taller';
+                $nro_orden_comp = null;
+
+                // Check for saldo action
+                if (!empty($body['action']) && $body['action'] === 'saldo') {
+                    $comp_id = intval($body['id'] ?? 0);
+                    if (!$comp_id) respuesta(['error'=>'ID requerido'], 400);
+                    // Get current compra data
+                    $sc = $pdo->prepare("SELECT * FROM compras WHERE id=:id");
+                    $sc->execute(['id'=>$comp_id]);
+                    $comp_row = $sc->fetch(PDO::FETCH_ASSOC);
+                    if (!$comp_row) respuesta(['error'=>'Compra no encontrada'], 404);
+                    $saldo_m = floatval($body['saldo_monto'] ?? 0);
+                    $saldo_f = $body['saldo_fecha'] ?? date('Y-m-d');
+                    $saldo_fp = $body['saldo_forma_pago'] ?? '';
+                    $pdo->prepare("UPDATE compras SET saldo_monto=:sm, saldo_fecha=:sf, saldo_forma_pago=:sfp WHERE id=:id")
+                        ->execute(['sm'=>$saldo_m,'sf'=>$saldo_f,'sfp'=>$saldo_fp,'id'=>$comp_id]);
+                    // Insert cashflow EGRESO for saldo
+                    $mes_s = $meses_comp[date('F', strtotime($saldo_f))] ?? date('F', strtotime($saldo_f));
+                    $nro_o = $comp_row['nro_orden'] ?? '';
+                    $prov_n = $comp_row['proveedor_nombre'] ?? '';
+                    $concepto_s = 'Saldo ' . ($nro_o ? $nro_o . ' — ' : '') . $prov_n;
+                    $pdo->prepare("INSERT INTO cashflow (fecha,mes,concepto,categoria,tipo,monto,notas,origen,ref_id) VALUES (:fecha,:mes,:concepto,:categoria,:tipo,:monto,:notas,:origen,:ref_id)")
+                        ->execute(['fecha'=>$saldo_f,'mes'=>$mes_s,'concepto'=>$concepto_s,'categoria'=>'Producción / Taller','tipo'=>'EGRESO','monto'=>$saldo_m,'notas'=>$body['notas']??'','origen'=>'compra','ref_id'=>$comp_id]);
+                    respuesta(['ok'=>true,'cf_id'=>$pdo->lastInsertId()]);
+                }
+
+                // Auto-generate nro_orden for taller
+                if ($tipo_comp === 'taller') {
+                    $stmtMaxOp = $pdo->query("SELECT MAX(CAST(SUBSTRING(nro_orden, 4) AS UNSIGNED)) FROM compras WHERE tipo='taller' AND nro_orden LIKE 'OP-%'");
+                    $maxOp = $stmtMaxOp->fetchColumn();
+                    $nro_orden_comp = 'OP-' . str_pad(($maxOp ?: 0) + 1, 3, '0', STR_PAD_LEFT);
+                }
+
+                // Resolve proveedor_nombre
+                $prov_nombre_comp = $body['proveedor_nombre'] ?? '';
+                if (!empty($body['proveedor_id'])) {
+                    $sp = $pdo->prepare("SELECT razon_social FROM proveedores WHERE id=:id");
+                    $sp->execute(['id'=>$body['proveedor_id']]);
+                    $pr = $sp->fetch(PDO::FETCH_ASSOC);
+                    if ($pr) $prov_nombre_comp = $pr['razon_social'];
+                }
+
+                $total_comp = floatval($body['total'] ?? 0);
+                $stmt = $pdo->prepare("INSERT INTO compras (tipo,nro_orden,proveedor_id,proveedor_nombre,venta_id,fecha,fecha_entrega_estimada,concepto,categoria,subtotal_sin_iva,iva,total,tiene_factura,nro_factura,estado,items_json,anticipo_monto,anticipo_fecha,anticipo_forma_pago,forma_pago,observaciones) VALUES (:tipo,:nro_orden,:proveedor_id,:proveedor_nombre,:venta_id,:fecha,:fecha_entrega_estimada,:concepto,:categoria,:subtotal_sin_iva,:iva,:total,:tiene_factura,:nro_factura,:estado,:items_json,:anticipo_monto,:anticipo_fecha,:anticipo_forma_pago,:forma_pago,:observaciones)");
+                $stmt->execute([
+                    'tipo'                 => $tipo_comp,
+                    'nro_orden'            => $nro_orden_comp,
+                    'proveedor_id'         => $body['proveedor_id'] ?: null,
+                    'proveedor_nombre'     => $prov_nombre_comp,
+                    'venta_id'             => $body['venta_id'] ?: null,
+                    'fecha'                => $body['fecha'] ?? date('Y-m-d'),
+                    'fecha_entrega_estimada'=> $body['fecha_entrega_estimada'] ?: null,
+                    'concepto'             => $body['concepto'] ?? null,
+                    'categoria'            => $body['categoria'] ?? null,
+                    'subtotal_sin_iva'     => floatval($body['subtotal_sin_iva'] ?? 0),
+                    'iva'                  => floatval($body['iva'] ?? 0),
+                    'total'                => $total_comp,
+                    'tiene_factura'        => intval($body['tiene_factura'] ?? 0),
+                    'nro_factura'          => $body['nro_factura'] ?? null,
+                    'estado'               => $body['estado'] ?? ($tipo_comp === 'taller' ? 'Pendiente' : 'Pendiente'),
+                    'items_json'           => $body['items_json'] ?? null,
+                    'anticipo_monto'       => floatval($body['anticipo_monto'] ?? 0),
+                    'anticipo_fecha'       => $body['anticipo_fecha'] ?: null,
+                    'anticipo_forma_pago'  => $body['anticipo_forma_pago'] ?? null,
+                    'forma_pago'           => $body['forma_pago'] ?? null,
+                    'observaciones'        => $body['observaciones'] ?? null,
+                ]);
+                $comp_id_new = $pdo->lastInsertId();
+
+                // Auto-insert cashflow EGRESO for anticipo (taller)
+                $cf_anticipo_id = null;
+                $anticipo_m = floatval($body['anticipo_monto'] ?? 0);
+                if ($tipo_comp === 'taller' && $anticipo_m > 0) {
+                    $ant_fecha = $body['anticipo_fecha'] ?? date('Y-m-d');
+                    $mes_ant = $meses_comp[date('F', strtotime($ant_fecha))] ?? date('F', strtotime($ant_fecha));
+                    $concepto_ant = 'Anticipo ' . $nro_orden_comp . ' — ' . $prov_nombre_comp;
+                    $pdo->prepare("INSERT INTO cashflow (fecha,mes,concepto,categoria,tipo,monto,notas,origen,ref_id) VALUES (:fecha,:mes,:concepto,:categoria,:tipo,:monto,:notas,:origen,:ref_id)")
+                        ->execute(['fecha'=>$ant_fecha,'mes'=>$mes_ant,'concepto'=>$concepto_ant,'categoria'=>'Producción / Taller','tipo'=>'EGRESO','monto'=>$anticipo_m,'notas'=>$body['observaciones']??'','origen'=>'compra','ref_id'=>$comp_id_new]);
+                    $cf_anticipo_id = $pdo->lastInsertId();
+                }
+
+                // Auto-insert cashflow EGRESO for servicio pagado
+                $cf_serv_id = null;
+                if ($tipo_comp === 'servicio' && ($body['estado'] ?? '') === 'Pagado') {
+                    $serv_fecha = $body['fecha'] ?? date('Y-m-d');
+                    $mes_serv = $meses_comp[date('F', strtotime($serv_fecha))] ?? date('F', strtotime($serv_fecha));
+                    $concepto_serv = ($body['concepto'] ?? 'Servicio') . ' — ' . $prov_nombre_comp;
+                    $pdo->prepare("INSERT INTO cashflow (fecha,mes,concepto,categoria,tipo,monto,notas,origen,ref_id) VALUES (:fecha,:mes,:concepto,:categoria,:tipo,:monto,:notas,:origen,:ref_id)")
+                        ->execute(['fecha'=>$serv_fecha,'mes'=>$mes_serv,'concepto'=>$concepto_serv,'categoria'=>$body['categoria']??'Otros egresos','tipo'=>'EGRESO','monto'=>$total_comp,'notas'=>$body['observaciones']??'','origen'=>'compra','ref_id'=>$comp_id_new]);
+                    $cf_serv_id = $pdo->lastInsertId();
+                }
+
+                respuesta(['ok'=>true,'insert_id'=>$comp_id_new,'nro_orden'=>$nro_orden_comp,'cf_anticipo_id'=>$cf_anticipo_id,'cf_serv_id'=>$cf_serv_id]);
+
             default:
                 respuesta(['error'=>'Tabla no soportada'], 400);
         }
@@ -342,7 +482,7 @@ try {
 
     // ── PUT: actualizar campo único o múltiples campos ────
     if ($method === 'PUT' && $tabla && $id) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores','compras'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
 
         // Productos: actualizar costo, margen y precio
@@ -380,6 +520,96 @@ try {
             respuesta(['ok'=>true]);
         }
 
+        // Cobranzas: update + sync cashflow
+        if ($tabla === 'cobranzas' && !empty($body['multi']) && !empty($body['fields'])) {
+            $f = $body['fields'];
+            $stmt = $pdo->prepare("UPDATE cobranzas SET venta_id=:venta_id, fecha=:fecha, monto=:monto, forma_pago=:forma_pago, concepto=:concepto, notas=:notas WHERE id=:id");
+            $stmt->execute([
+                'venta_id'   => $f['venta_id'] ?? null,
+                'fecha'      => $f['fecha'] ?? date('Y-m-d'),
+                'monto'      => floatval($f['monto'] ?? 0),
+                'forma_pago' => $f['forma_pago'] ?? '',
+                'concepto'   => $f['concepto'] ?? 'Saldo',
+                'notas'      => $f['notas'] ?? '',
+                'id'         => $id,
+            ]);
+            // Sync cashflow entry
+            $fecha_c = $f['fecha'] ?? date('Y-m-d');
+            $meses_es2 = ['January'=>'Enero','February'=>'Febrero','March'=>'Marzo','April'=>'Abril','May'=>'Mayo','June'=>'Junio','July'=>'Julio','August'=>'Agosto','September'=>'Septiembre','October'=>'Octubre','November'=>'Noviembre','December'=>'Diciembre'];
+            $mes_c = $meses_es2[date('F', strtotime($fecha_c))] ?? date('F', strtotime($fecha_c));
+            $cliente_c = '';
+            if (!empty($f['venta_id'])) {
+                $sv2 = $pdo->prepare("SELECT cliente FROM ventas WHERE id=:id");
+                $sv2->execute(['id'=>$f['venta_id']]);
+                $vrow2 = $sv2->fetch(PDO::FETCH_ASSOC);
+                if($vrow2) $cliente_c = ' — ' . $vrow2['cliente'];
+            }
+            $concepto_c = ($f['concepto'] ?? 'Saldo') . ' venta #' . str_pad($f['venta_id']??'', 3, '0', STR_PAD_LEFT) . $cliente_c;
+            $pdo->prepare("UPDATE cashflow SET fecha=:fecha, mes=:mes, concepto=:concepto, monto=:monto, notas=:notas WHERE origen='cobranza' AND ref_id=:ref_id")
+                ->execute(['fecha'=>$fecha_c,'mes'=>$mes_c,'concepto'=>$concepto_c,'monto'=>floatval($f['monto']??0),'notas'=>$f['notas']??'','ref_id'=>$id]);
+            respuesta(['ok'=>true]);
+        }
+
+        // Pagos: update + sync cashflow
+        if ($tabla === 'pagos' && !empty($body['multi']) && !empty($body['fields'])) {
+            $f = $body['fields'];
+            $stmt = $pdo->prepare("UPDATE pagos SET concepto=:concepto, proveedor=:proveedor, categoria=:categoria, fecha=:fecha, monto=:monto, forma_pago=:forma_pago, orden_pedido_ref=:orden_pedido_ref, notas=:notas WHERE id=:id");
+            $stmt->execute([
+                'concepto'        => $f['concepto'] ?? '',
+                'proveedor'       => $f['concepto'] ?? '',
+                'categoria'       => $f['categoria'] ?? '',
+                'fecha'           => $f['fecha'] ?? date('Y-m-d'),
+                'monto'           => floatval($f['monto'] ?? 0),
+                'forma_pago'      => $f['forma_pago'] ?? '',
+                'orden_pedido_ref'=> $f['orden_pedido_ref'] ?? '',
+                'notas'           => $f['notas'] ?? '',
+                'id'              => $id,
+            ]);
+            // Sync cashflow entry
+            $fecha_p = $f['fecha'] ?? date('Y-m-d');
+            $meses_es3 = ['January'=>'Enero','February'=>'Febrero','March'=>'Marzo','April'=>'Abril','May'=>'Mayo','June'=>'Junio','July'=>'Julio','August'=>'Agosto','September'=>'Septiembre','October'=>'Octubre','November'=>'Noviembre','December'=>'Diciembre'];
+            $mes_p = $meses_es3[date('F', strtotime($fecha_p))] ?? date('F', strtotime($fecha_p));
+            $pdo->prepare("UPDATE cashflow SET fecha=:fecha, mes=:mes, concepto=:concepto, categoria=:categoria, monto=:monto, notas=:notas WHERE origen='pago' AND ref_id=:ref_id")
+                ->execute(['fecha'=>$fecha_p,'mes'=>$mes_p,'concepto'=>$f['concepto']??'','categoria'=>$f['categoria']??'Otros egresos','monto'=>floatval($f['monto']??0),'notas'=>$f['notas']??'','ref_id'=>$id]);
+            respuesta(['ok'=>true]);
+        }
+
+        // Compras: update general
+        if ($tabla === 'compras' && !empty($body['multi']) && !empty($body['fields'])) {
+            $f = $body['fields'];
+            $prov_n_upd = $f['proveedor_nombre'] ?? '';
+            if (!empty($f['proveedor_id'])) {
+                $spUpd = $pdo->prepare("SELECT razon_social FROM proveedores WHERE id=:id");
+                $spUpd->execute(['id'=>$f['proveedor_id']]);
+                $prUpd = $spUpd->fetch(PDO::FETCH_ASSOC);
+                if ($prUpd) $prov_n_upd = $prUpd['razon_social'];
+            }
+            $pdo->prepare("UPDATE compras SET proveedor_id=:proveedor_id, proveedor_nombre=:proveedor_nombre, venta_id=:venta_id, fecha=:fecha, fecha_entrega_estimada=:fecha_entrega_estimada, concepto=:concepto, categoria=:categoria, subtotal_sin_iva=:subtotal_sin_iva, iva=:iva, total=:total, tiene_factura=:tiene_factura, nro_factura=:nro_factura, estado=:estado, items_json=:items_json, anticipo_monto=:anticipo_monto, anticipo_fecha=:anticipo_fecha, anticipo_forma_pago=:anticipo_forma_pago, forma_pago=:forma_pago, observaciones=:observaciones WHERE id=:id")
+                ->execute([
+                    'proveedor_id'          => $f['proveedor_id'] ?: null,
+                    'proveedor_nombre'      => $prov_n_upd,
+                    'venta_id'              => $f['venta_id'] ?: null,
+                    'fecha'                 => $f['fecha'] ?? date('Y-m-d'),
+                    'fecha_entrega_estimada'=> $f['fecha_entrega_estimada'] ?: null,
+                    'concepto'              => $f['concepto'] ?? null,
+                    'categoria'             => $f['categoria'] ?? null,
+                    'subtotal_sin_iva'      => floatval($f['subtotal_sin_iva'] ?? 0),
+                    'iva'                   => floatval($f['iva'] ?? 0),
+                    'total'                 => floatval($f['total'] ?? 0),
+                    'tiene_factura'         => intval($f['tiene_factura'] ?? 0),
+                    'nro_factura'           => $f['nro_factura'] ?? null,
+                    'estado'                => $f['estado'] ?? 'Pendiente',
+                    'items_json'            => $f['items_json'] ?? null,
+                    'anticipo_monto'        => floatval($f['anticipo_monto'] ?? 0),
+                    'anticipo_fecha'        => $f['anticipo_fecha'] ?: null,
+                    'anticipo_forma_pago'   => $f['anticipo_forma_pago'] ?? null,
+                    'forma_pago'            => $f['forma_pago'] ?? null,
+                    'observaciones'         => $f['observaciones'] ?? null,
+                    'id'                    => $id,
+                ]);
+            respuesta(['ok'=>true]);
+        }
+
         if (!empty($body['multi']) && !empty($body['fields'])) {
             // Multi-field update (used by editar consulta)
             $allowed = ['nombre','empresa','telefono','mail','canal','estado','calificada',
@@ -414,8 +644,14 @@ try {
 
     // ── DELETE ─────────────────────────────────────────────
     if ($method === 'DELETE' && $tabla && $id) {
-        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores'];
+        $tablas_ok = ['consultas','cotizaciones','ventas','pedidos','cashflow','productos','cobranzas','pagos','clientes','proveedores','compras'];
         if (!in_array($tabla, $tablas_ok)) respuesta(['error'=>'Tabla inválida'], 400);
+        // Compras: cascade delete from cashflow
+        if ($tabla === 'compras') {
+            $pdo->prepare("DELETE FROM cashflow WHERE origen='compra' AND ref_id=:id")->execute(['id'=>$id]);
+            $pdo->prepare("DELETE FROM compras WHERE id=:id")->execute(['id'=>$id]);
+            respuesta(['ok'=>true]);
+        }
         $stmt = $pdo->prepare("DELETE FROM `$tabla` WHERE id = :id");
         $stmt->execute(['id'=>$id]);
         respuesta(['ok'=>true]);
