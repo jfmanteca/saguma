@@ -5,6 +5,8 @@
 //  IMPORTANTE: Editá las 4 líneas de configuración abajo
 // ============================================================
 
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');

@@ -922,13 +922,14 @@
         <div class="cotiz-total-row grand"><span class="lbl">TOTAL c/IVA</span><span class="val" id="ct-t-total">$0</span></div>
       </div>
       <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--border);border-radius:8px">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Factura de compra</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Facturas de compra</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           <input type="checkbox" id="ct-tiene-factura" onchange="toggleFacturaTaller()" style="cursor:pointer">
-          <label for="ct-tiene-factura" style="font-size:13px;cursor:pointer">¿Tiene factura de compra?</label>
+          <label for="ct-tiene-factura" style="font-size:13px;cursor:pointer">¿Tiene factura(s) de compra?</label>
         </div>
         <div id="ct-factura-fields" style="display:none">
-          <input class="form-input" id="ct-nro-factura" type="text" placeholder="N° de Factura (ej: A0001-00012345)">
+          <div id="ct-facturas-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="agregarFacturaCompra('ct')" style="font-size:11px;padding:2px 8px">+ Agregar factura</button>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:6px">Sin factura, el IVA no es computable como crédito fiscal.</div>
       </div>
@@ -1007,10 +1008,11 @@
       <div style="margin-top:14px;padding:12px 14px;border:1px solid var(--border);border-radius:8px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           <input type="checkbox" id="cs-tiene-factura" onchange="toggleFacturaServicio()" style="cursor:pointer">
-          <label for="cs-tiene-factura" style="font-size:13px;cursor:pointer">¿Tiene factura de compra?</label>
+          <label for="cs-tiene-factura" style="font-size:13px;cursor:pointer">¿Tiene factura(s) de compra?</label>
         </div>
         <div id="cs-factura-fields" style="display:none">
-          <input class="form-input" id="cs-nro-factura" type="text" placeholder="N° de Factura">
+          <div id="cs-facturas-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="agregarFacturaCompra('cs')" style="font-size:11px;padding:2px 8px">+ Agregar factura</button>
         </div>
       </div>
       <div class="form-group full" style="margin-top:14px">
@@ -1886,8 +1888,8 @@ function renderProductos(data) {
   const tbody = document.getElementById('productos-tbody');
   if(!tbody) return;
   if(!data.length){ tbody.innerHTML='<tr><td colspan="9" class="empty">No hay productos.</td></tr>'; return; }
-  // Poblar filtro de categorías
-  const cats = [...new Set(data.map(p=>p.categoria).filter(Boolean))].sort();
+  // Poblar filtro de categorías (siempre desde la lista completa para no perder opciones)
+  const cats = [...new Set(_data.productos.map(p=>p.categoria).filter(Boolean))].sort();
   const catSelect = document.getElementById('prod-cat');
   if(catSelect) {
     const currentVal = catSelect.value;
@@ -2896,8 +2898,7 @@ function exportarCotizPDF(id) {
   .trow.g{background:#1a3a6b!important;color:#fff!important;font-weight:700;font-size:13px;border:none;}
   .cond{padding:10px 14px;background:#f5f7fb!important;border:1px solid #d0d8e8;border-left:3px solid #1a3a6b;font-size:10px;line-height:1.75;}
   .cond b{display:block;color:#1a3a6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
-  .cond ul{padding-left:16px;}.firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:28px;}
-  .fbox{border-top:2px solid #1a3a6b;padding-top:8px;font-size:10px;color:#555;}
+  .cond ul{padding-left:16px;}
   .nota{text-align:center;font-size:9px;color:#aaa;margin-top:18px;padding-top:10px;border-top:1px solid #eee;}
   .dl-bar{background:#f0f3f8;padding:10px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d0d8e8;}
   .dl-btn{background:linear-gradient(135deg,#0f2447,#2563b0);color:#fff;border:none;padding:8px 20px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;}
@@ -2963,10 +2964,6 @@ function exportarCotizPDF(id) {
   <li>Validez: 7 días corridos desde fecha de envío</li>
   <li>Talle XXXL: +12% sobre precio unitario</li>
 </ul>${co.notas?`<div style="margin-top:6px"><strong>Obs:</strong> ${co.notas}</div>`:''}</div>
-<div class="firmas">
-  <div class="fbox">Aclaración y Firma del Cliente</div>
-  <div class="fbox">Firma y Sello · Organización Crima SA</div>
-</div>
 <div class="nota">Cotización sin valor fiscal. Precios válidos por el período indicado.</div>
 </div>
 </div>
@@ -3667,7 +3664,8 @@ function initCompraTaller() {
   document.getElementById('ct-nro-orden').value = '';
   document.getElementById('comp-taller-nro-display').textContent = 'N° Orden: se asignará al guardar';
   document.getElementById('comp-taller-title').textContent = 'Pedido a Taller';
-  ['ct-fecha-entrega','ct-anticipo-monto','ct-nro-factura','ct-observaciones'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['ct-fecha-entrega','ct-anticipo-monto','ct-observaciones'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ct-facturas-list').innerHTML = '';
   document.getElementById('ct-anticipo-fecha').value = new Date().toISOString().split('T')[0];
   document.getElementById('ct-fecha').value = new Date().toISOString().split('T')[0];
   document.getElementById('ct-estado').value = 'Pendiente';
@@ -3686,7 +3684,7 @@ function initCompraTaller() {
 function initCompraServicio() {
   document.getElementById('cs-edit-id').value = '';
   document.getElementById('comp-serv-title').textContent = 'Servicio / Gasto';
-  ['cs-concepto','cs-monto','cs-nro-factura','cs-observaciones'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['cs-concepto','cs-monto','cs-observaciones'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('cs-fecha').value = new Date().toISOString().split('T')[0];
   document.getElementById('cs-categoria').value = 'Publicidad digital';
   document.getElementById('cs-forma-pago').value = 'Transferencia';
@@ -3695,6 +3693,7 @@ function initCompraServicio() {
   document.getElementById('cs-tiene-factura').checked = false;
   document.getElementById('cs-iva-breakdown').style.display = 'none';
   document.getElementById('cs-factura-fields').style.display = 'none';
+  document.getElementById('cs-facturas-list').innerHTML = '';
   document.getElementById('btn-guardar-compra-serv').textContent = 'Guardar Servicio';
   cargarSelectProveedores('cs-proveedor-id');
 }
@@ -3752,10 +3751,51 @@ function recalcCompra() {
 function recalcCompraAnticipo() { /* anticipo validation only */ }
 
 function toggleFacturaTaller() {
-  document.getElementById('ct-factura-fields').style.display = document.getElementById('ct-tiene-factura').checked ? 'block' : 'none';
+  const show = document.getElementById('ct-tiene-factura').checked;
+  document.getElementById('ct-factura-fields').style.display = show ? 'block' : 'none';
+  if (show && !document.getElementById('ct-facturas-list').children.length) agregarFacturaCompra('ct');
 }
 function toggleFacturaServicio() {
-  document.getElementById('cs-factura-fields').style.display = document.getElementById('cs-tiene-factura').checked ? 'block' : 'none';
+  const show = document.getElementById('cs-tiene-factura').checked;
+  document.getElementById('cs-factura-fields').style.display = show ? 'block' : 'none';
+  if (show && !document.getElementById('cs-facturas-list').children.length) agregarFacturaCompra('cs');
+}
+
+function agregarFacturaCompra(prefix) {
+  const list = document.getElementById(prefix + '-facturas-list');
+  if (!list) return;
+  const idx = list.children.length;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:6px;align-items:center';
+  div.innerHTML = `<input class="form-input" type="text" placeholder="N° de Factura (ej: A0001-00012345)" style="flex:1" data-factura-idx="${idx}">
+    <button type="button" class="btn btn-ghost btn-sm" style="padding:3px 8px;color:var(--red)" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(div);
+  div.querySelector('input').focus();
+}
+
+function getFacturasCompraJSON(prefix) {
+  const list = document.getElementById(prefix + '-facturas-list');
+  if (!list) return null;
+  const vals = Array.from(list.querySelectorAll('input[data-factura-idx]'))
+    .map(el => el.value.trim()).filter(Boolean);
+  if (!vals.length) return null;
+  return vals.length === 1 ? vals[0] : JSON.stringify(vals);
+}
+
+function poblarFacturasCompra(prefix, stored) {
+  const list = document.getElementById(prefix + '-facturas-list');
+  if (!list || !stored) return;
+  list.innerHTML = '';
+  let vals = [];
+  try { vals = JSON.parse(stored); if (!Array.isArray(vals)) vals = [stored]; } catch(e) { vals = [stored]; }
+  vals.filter(Boolean).forEach(v => {
+    const idx = list.children.length;
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;gap:6px;align-items:center';
+    div.innerHTML = `<input class="form-input" type="text" placeholder="N° de Factura" style="flex:1" value="${v.replace(/"/g,'&quot;')}" data-factura-idx="${idx}">
+      <button type="button" class="btn btn-ghost btn-sm" style="padding:3px 8px;color:var(--red)" onclick="this.parentElement.remove()">✕</button>`;
+    list.appendChild(div);
+  });
 }
 
 function recalcServicio() {
@@ -3798,7 +3838,7 @@ async function guardarCompraTaller() {
     iva: iva,
     total: total,
     tiene_factura: document.getElementById('ct-tiene-factura').checked ? 1 : 0,
-    nro_factura: document.getElementById('ct-nro-factura').value || null,
+    nro_factura: getFacturasCompraJSON('ct') || null,
     items_json: JSON.stringify(items),
     anticipo_monto: anticipo_m,
     anticipo_fecha: anticipo_m > 0 ? anticipo_f : null,
@@ -3845,7 +3885,7 @@ async function guardarCompraServicio() {
     iva: iva,
     total: monto,
     tiene_factura: document.getElementById('cs-tiene-factura').checked ? 1 : 0,
-    nro_factura: document.getElementById('cs-nro-factura').value || null,
+    nro_factura: getFacturasCompraJSON('cs') || null,
     estado: document.getElementById('cs-estado').value,
     forma_pago: document.getElementById('cs-forma-pago').value,
     observaciones: document.getElementById('cs-observaciones').value,
@@ -3883,7 +3923,8 @@ function editarCompra(id) {
     document.getElementById('ct-estado').value = c.estado||'Pendiente';
     document.getElementById('ct-tiene-factura').checked = !!parseInt(c.tiene_factura);
     document.getElementById('ct-factura-fields').style.display = parseInt(c.tiene_factura) ? 'block' : 'none';
-    document.getElementById('ct-nro-factura').value = c.nro_factura||'';
+    document.getElementById('ct-facturas-list').innerHTML = '';
+    poblarFacturasCompra('ct', c.nro_factura||'');
     document.getElementById('ct-anticipo-monto').value = c.anticipo_monto||'';
     document.getElementById('ct-anticipo-fecha').value = c.anticipo_fecha||'';
     document.getElementById('ct-anticipo-forma').value = c.anticipo_forma_pago||'Transferencia';
@@ -3936,7 +3977,8 @@ function editarCompra(id) {
     document.getElementById('cs-estado').value = c.estado||'Pagado';
     document.getElementById('cs-tiene-factura').checked = !!parseInt(c.tiene_factura);
     document.getElementById('cs-factura-fields').style.display = parseInt(c.tiene_factura) ? 'block' : 'none';
-    document.getElementById('cs-nro-factura').value = c.nro_factura||'';
+    document.getElementById('cs-facturas-list').innerHTML = '';
+    poblarFacturasCompra('cs', c.nro_factura||'');
     document.getElementById('cs-observaciones').value = c.observaciones||'';
     document.getElementById('btn-guardar-compra-serv').textContent = 'Actualizar Servicio';
     cargarSelectProveedores('cs-proveedor-id');
@@ -3945,6 +3987,15 @@ function editarCompra(id) {
   }
 }
 
+
+function fmtFacturasCompra(stored) {
+  if (!stored) return '—';
+  try {
+    const arr = JSON.parse(stored);
+    if (Array.isArray(arr)) return arr.join(', ');
+  } catch(e){}
+  return stored;
+}
 // ── Ver detalle ──────────────────────────────────────────────
 function verDetalleCompra(id) {
   const c = _data.compras.find(x=>x.id==id);
@@ -3992,7 +4043,7 @@ function verDetalleCompra(id) {
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Factura</span>${c.tiene_factura?`<span style="color:var(--green)">✓ Tiene factura</span>${c.nro_factura?` — ${c.nro_factura}`:''}` : '<span style="color:var(--muted)">Sin factura (compra en negro)</span>'}</div>
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Factura(s)</span>${c.tiene_factura?`<span style="color:var(--green)">✓</span> ${fmtFacturasCompra(c.nro_factura)}` : '<span style="color:var(--muted)">Sin factura (compra en negro)</span>'}</div>
         ${c.observaciones?`<div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Observaciones</span><span style="font-size:12px">${c.observaciones}</span></div>`:'<div></div>'}
       </div>`;
   } else {
@@ -4002,7 +4053,7 @@ function verDetalleCompra(id) {
         <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Estado</span>${compraEstadoPill(c)}</div>
         <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Monto</span><b style="font-size:16px">${fmtARS(total)}</b></div>
         <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Forma de pago</span>${c.forma_pago||'—'}</div>
-        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Factura</span>${c.tiene_factura?`✓ ${c.nro_factura||'S/N'}`:'Sin factura'}</div>
+        <div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Factura(s)</span>${c.tiene_factura?`✓ ${fmtFacturasCompra(c.nro_factura)}`:'Sin factura'}</div>
         ${c.observaciones?`<div style="padding:8px 12px;background:var(--bg-secondary);border-radius:6px"><span style="font-size:10px;color:var(--muted);display:block;margin-bottom:2px">Observaciones</span>${c.observaciones}</div>`:'<div></div>'}
       </div>`;
   }

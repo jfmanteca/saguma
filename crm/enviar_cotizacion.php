@@ -58,14 +58,14 @@ function enviarMailCotizacion($pdo, $data, $cotizacion_id, $numero) {
 function _generarPDFCRM($data, $items, $numero, $fecha) {
     $fecha_envio  = date('d/m/Y');
     $fecha_valida = date('d/m/Y', strtotime('+7 days'));
-    $plazo        = '30 dias habiles';
-    $cliente  = $data['cliente'] ?? '';
-    $contacto = $data['contacto'] ?? '';
-    $telefono = $data['telefono'] ?? '';
-    $mail     = $data['mail'] ?? '';
-    $notas    = $data['notas'] ?? '';
+    $plazo        = '30 días hábiles';
+    $cliente  = htmlspecialchars($data['cliente'] ?? '', ENT_QUOTES);
+    $contacto = htmlspecialchars($data['contacto'] ?? '', ENT_QUOTES);
+    $telefono = htmlspecialchars($data['telefono'] ?? '', ENT_QUOTES);
+    $mail     = htmlspecialchars($data['mail'] ?? '', ENT_QUOTES);
+    $notas    = htmlspecialchars($data['notas'] ?? '', ENT_QUOTES);
 
-    // Calcular totales con IVA
+    // Calcular totales
     $subtotal_gen = 0;
     $total_prendas = 0;
     foreach ($items as &$it) {
@@ -76,229 +76,195 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
         $subtotal_gen += $sub;
         $total_prendas += $cant;
     }
-    unset($it); // evita que $it quede como referencia al último elemento
+    unset($it);
     $iva_gen   = $subtotal_gen * 0.21;
     $total_gen = $subtotal_gen + $iva_gen;
     $hay_precios = $subtotal_gen > 0;
+    $fmt = fn($n) => '$' . number_format($n, 0, ',', '.');
+
+    // ── Filas de productos ───────────────────────────────────
+    $filas_html = '';
+    $n = 1;
+    foreach ($items as $it) {
+        if (!empty($it['desc'])) {
+            $desc = ucfirst($it['desc']);
+        } else {
+            $cat    = $it['categoria'] ?? '';
+            $prod   = $it['producto'] ?? '';
+            $custom = $it['personalizacion'] ?? 'Sin personalizar';
+            $desc   = trim($cat . ' ' . strtolower($prod));
+            if ($custom === 'Bordado')   $desc .= ' c/ bordado';
+            elseif ($custom === 'Estampado') $desc .= ' c/ estampado';
+            elseif ($custom === 'Ambos')     $desc .= ' c/ bordado y estampado';
+            $desc = ucfirst($desc);
+        }
+        $cant  = intval($it['cantidad'] ?? $it['cant'] ?? 0);
+        $talle = htmlspecialchars($it['talle'] ?? '', ENT_QUOTES);
+        $color = htmlspecialchars($it['color'] ?? '', ENT_QUOTES);
+        $bg = ($n % 2 === 0) ? 'background:#f4f7fb' : 'background:#fff';
+        $filas_html .= '<tr style="'.$bg.'">
+            <td style="text-align:center;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$n.'</td>
+            <td style="padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.htmlspecialchars($desc,ENT_QUOTES).'</td>
+            <td style="text-align:center;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$talle.'</td>
+            <td style="text-align:center;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$color.'</td>
+            <td style="text-align:center;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$cant.'</td>';
+        if ($hay_precios) {
+            $filas_html .=
+                '<td style="text-align:right;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$fmt($it['_pu']).'</td>'.
+                '<td style="text-align:right;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$fmt($it['_sub']).'</td>'.
+                '<td style="text-align:right;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$fmt($it['_iva']).'</td>'.
+                '<td style="text-align:right;padding:5px 4px;border-bottom:1px solid #e8ecf0;font-size:10px">'.$fmt($it['_tot']).'</td>';
+        } else {
+            $filas_html .= '<td colspan="4" style="border-bottom:1px solid #e8ecf0"></td>';
+        }
+        $filas_html .= '</tr>';
+        $n++;
+    }
+    // Filas vacías
+    $max_rows = max(count($items) + 2, 8);
+    for ($i = count($items); $i < $max_rows; $i++) {
+        $bg = ($i % 2 === 0) ? 'background:#f4f7fb' : 'background:#fff';
+        $filas_html .= '<tr style="'.$bg.'"><td colspan="9" style="height:19px;border-bottom:1px solid #e8ecf0"></td></tr>';
+    }
+
+    // Fila total general
+    $filas_html .= '<tr style="background:#0f2447">
+        <td colspan="4" style="text-align:right;padding:6px 4px;color:#fff;font-weight:bold;font-size:10px">TOTAL GENERAL</td>
+        <td style="text-align:center;padding:6px 4px;color:#fff;font-weight:bold;font-size:10px">'.$total_prendas.'</td>
+        <td style="padding:6px 4px;color:#fff"></td>';
+    if ($hay_precios) {
+        $filas_html .=
+            '<td style="text-align:right;padding:6px 4px;color:#fff;font-weight:bold;font-size:10px">'.$fmt($subtotal_gen).'</td>'.
+            '<td style="text-align:right;padding:6px 4px;color:#fff;font-weight:bold;font-size:10px">'.$fmt($iva_gen).'</td>'.
+            '<td style="text-align:right;padding:6px 4px;color:#fff;font-weight:bold;font-size:10px">'.$fmt($total_gen).'</td>';
+    } else {
+        $filas_html .= '<td colspan="3" style="padding:6px 4px;color:#fff"></td>';
+    }
+    $filas_html .= '</tr>';
+
+    // ── Bloque de totales ────────────────────────────────────
+    $totales_html = '';
+    if ($hay_precios) {
+        $totales_html = '
+        <table style="width:100%;margin-top:8px;margin-bottom:12px">
+          <tr><td style="width:60%"></td><td style="width:40%">
+            <table style="width:100%;border-collapse:collapse;border:1px solid #d0d8e8;border-radius:4px">
+              <tr><td style="padding:5px 12px;font-size:11px;border-bottom:1px solid #eee">Subtotal s/IVA</td><td style="padding:5px 12px;font-size:11px;text-align:right;border-bottom:1px solid #eee">'.$fmt($subtotal_gen).'</td></tr>
+              <tr><td style="padding:5px 12px;font-size:11px;border-bottom:1px solid #eee">IVA 21%</td><td style="padding:5px 12px;font-size:11px;text-align:right;border-bottom:1px solid #eee">'.$fmt($iva_gen).'</td></tr>
+              <tr style="background:#1a3a6b"><td style="padding:6px 12px;font-size:12px;font-weight:bold;color:#fff">TOTAL c/IVA</td><td style="padding:6px 12px;font-size:12px;font-weight:bold;color:#fff;text-align:right">'.$fmt($total_gen).'</td></tr>
+            </table>
+          </td></tr>
+        </table>';
+    } else {
+        $totales_html = '<p style="font-size:11px;color:#666;margin:8px 0 12px;font-style:italic">Los precios serán confirmados por nuestro equipo comercial a la brevedad.</p>';
+    }
+
+    // ── Notas ────────────────────────────────────────────────
+    $notas_html = $notas ? '<div style="margin-bottom:10px;padding:8px 12px;background:#fffbeb;border:1px solid #fcd34d;border-radius:4px;font-size:10px"><strong>Observaciones:</strong> '.$notas.'</div>' : '';
+
+    // ── HTML completo ────────────────────────────────────────
+    $html = '
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: helvetica, Arial, sans-serif; font-size: 11px; color: #111; margin: 0; padding: 0; }
+  table { border-collapse: collapse; }
+</style>
+
+<!-- HEADER -->
+<table style="width:100%;background:#1a3a6b;margin-bottom:0" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="padding:14px 16px 10px;color:#fff">
+      <div style="font-size:22px;font-weight:bold;letter-spacing:3px;color:#fff">SAGUMA</div>
+      <div style="font-size:8px;color:rgba(255,255,255,.6);letter-spacing:2px;text-transform:uppercase;margin-top:2px">INDUMENTARIA LABORAL · MAYORISTA</div>
+    </td>
+    <td style="padding:14px 16px 10px;color:#fff;text-align:right;font-size:9px;line-height:1.8;vertical-align:top">
+      Organizacion Crima SA &nbsp;·&nbsp; CUIT 30-70949492-5<br>
+      Av. Cordoba 391 9B &ndash; CABA<br>
+      ventas@saguma.com.ar &nbsp;·&nbsp; +54 11 6112-5719
+    </td>
+  </tr>
+</table>
+
+<!-- SUB-HEADER -->
+<table style="width:100%;background:#e8eef7;border-bottom:3px solid #1a3a6b;margin-bottom:12px" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="padding:5px 16px;font-size:9px;font-weight:bold;color:#1a3a6b;text-transform:uppercase;letter-spacing:.5px">COTIZACION MAYORISTA — N&deg; '.$numero.'</td>
+    <td style="padding:5px 16px;font-size:9px;color:#1a3a6b;text-align:right">www.saguma.com.ar</td>
+  </tr>
+</table>
+
+<!-- DATOS CLIENTE / COTIZACION -->
+<table style="width:100%;margin-bottom:14px" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="width:50%;padding-right:8px;vertical-align:top">
+      <table style="width:100%;border-collapse:collapse;border:1px solid #d0d8e8">
+        <tr><td style="padding:4px 8px;background:#f7f9fc;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">Empresa / Cliente</span><br><strong style="font-size:11px">'.$cliente.'</strong></td></tr>
+        <tr><td style="padding:4px 8px;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">Contacto</span><br><span style="font-size:10px">'.($contacto ?: '—').'</span></td></tr>
+        <tr><td style="padding:4px 8px;background:#f7f9fc;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">Teléfono</span><br><span style="font-size:10px">'.($telefono ?: '—').'</span></td></tr>
+        <tr><td style="padding:4px 8px;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">Mail</span><br><span style="font-size:10px">'.$mail.'</span></td></tr>
+      </table>
+    </td>
+    <td style="width:50%;padding-left:8px;vertical-align:top">
+      <table style="width:100%;border-collapse:collapse;border:1px solid #d0d8e8">
+        <tr><td style="padding:4px 8px;background:#f7f9fc;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">N° Cotizacion</span><br><strong style="font-size:11px">'.$numero.'</strong></td></tr>
+        <tr><td style="padding:4px 8px;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">Fecha Envio</span><br><span style="font-size:10px">'.$fecha_envio.'</span></td></tr>
+        <tr><td style="padding:4px 8px;background:#f7f9fc;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">Valida Hasta</span><br><span style="font-size:10px">'.$fecha_valida.'</span></td></tr>
+        <tr><td style="padding:4px 8px;border:1px solid #d0d8e8"><span style="font-size:8px;font-weight:bold;color:#1a3a6b;text-transform:uppercase">Plazo de Entrega</span><br><span style="font-size:10px">'.$plazo.'</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- TABLA PRODUCTOS -->
+<table style="width:100%;border-collapse:collapse;margin-bottom:4px">
+  <thead>
+    <tr style="background:#1a3a6b">
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:center;text-transform:uppercase;width:24px">#</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:left;text-transform:uppercase">Descripcion</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:center;text-transform:uppercase;width:55px">Talle</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:center;text-transform:uppercase;width:55px">Color</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:center;text-transform:uppercase;width:40px">Cant.</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:right;text-transform:uppercase;width:80px">P.Unit s/IVA</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:right;text-transform:uppercase;width:80px">Subtotal</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:right;text-transform:uppercase;width:70px">IVA 21%</th>
+      <th style="padding:7px 4px;color:#fff;font-size:9px;text-align:right;text-transform:uppercase;width:80px">Total c/IVA</th>
+    </tr>
+  </thead>
+  <tbody>'.$filas_html.'</tbody>
+</table>
+
+'.$totales_html.'
+
+<!-- CONDICIONES -->
+'.$notas_html.'
+<table style="width:100%;border:1px solid #d0d8e8;border-left:3px solid #1a3a6b;margin-bottom:12px">
+  <tr><td style="padding:8px 12px">
+    <div style="font-size:9px;font-weight:bold;color:#1a3a6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">CONDICIONES COMERCIALES</div>
+    <div style="font-size:9px;line-height:1.8;color:#333">
+      &middot; Pedido minimo: 30 unidades<br>
+      &middot; Plazo de entrega: 30 dias habiles desde confirmacion<br>
+      &middot; Anticipo: 50% al confirmar &nbsp;|&nbsp; Saldo: 50% contra entrega<br>
+      &middot; Validez: 7 dias corridos desde fecha de envio<br>
+      &middot; Talles 3XL, 4XL y 5XL: +12% sobre precio unitario<br>
+      &middot; Los costos de prendas con bordado y estampado son orientativos. Disenos de gran tamano o complejidad podran requerir un ajuste en el precio, sujeto a evaluacion previa.
+    </div>
+  </td></tr>
+</table>
+
+<!-- PIE -->
+<div style="text-align:center;font-size:8px;color:#aaa;margin-top:10px;padding-top:8px;border-top:1px solid #eee">
+  Cotizacion sin valor fiscal. Precios validos por el periodo indicado.
+</div>';
 
     $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
     $pdf->SetCreator('SAGUMA CRM');
     $pdf->SetTitle('Cotizacion ' . $numero);
     $pdf->setPrintHeader(false);
     $pdf->setPrintFooter(false);
-    $pdf->SetMargins(12, 10, 12);
-    $pdf->SetAutoPageBreak(true, 20);
+    $pdf->SetMargins(12, 12, 12);
+    $pdf->SetAutoPageBreak(true, 15);
     $pdf->AddPage();
-    $w = 186; // ancho útil
-
-    // ── HEADER AZUL ─────────────────────────────────────────
-    $pdf->SetFillColor(55, 96, 146);
-    $pdf->Rect(0, 0, 210, 28, 'F');
-
-    $pdf->SetFont('helvetica', 'B', 22);
-    $pdf->SetTextColor(255, 255, 255);
-    $pdf->SetXY(14, 5);
-    $pdf->Cell(80, 9, 'SAGUMA', 0, 1, 'L');
-    $pdf->SetFont('helvetica', '', 7);
-    $pdf->SetXY(14, 14);
-    $pdf->Cell(80, 4, 'INDUMENTARIA LABORAL  ·  MAYORISTA', 0, 0, 'L');
-
-    $pdf->SetFont('helvetica', '', 7.5);
-    $pdf->SetXY(110, 5);
-    $pdf->Cell(88, 4, 'Organizacion Crima SA  ·  CUIT 30-70949492-5', 0, 1, 'R');
-    $pdf->SetX(110); $pdf->Cell(88, 4, 'Av. Cordoba 391 9°B – CABA', 0, 1, 'R');
-    $pdf->SetX(110); $pdf->Cell(88, 4, 'ventas@saguma.com.ar  ·  +54 11 6112-5719', 0, 1, 'R');
-
-    // Sub-header gris
-    $pdf->SetFillColor(238, 238, 238);
-    $pdf->Rect(0, 28, 210, 7, 'F');
-    $pdf->SetFont('helvetica', 'B', 7.5);
-    $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetXY(14, 29);
-    $pdf->Cell(100, 5, 'COTIZACION MAYORISTA — N° ' . $numero, 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 7.5);
-    $pdf->Cell(74, 5, 'www.saguma.com.ar', 0, 0, 'R');
-
-    // ── RECUADROS DATOS ─────────────────────────────────────
-    $y = 40;
-    $pdf->SetDrawColor(190, 190, 190);
-    $bw = 90; // ancho de cada recuadro
-    $bh = 38;
-
-    // Recuadro izquierdo
-    $pdf->Rect(12, $y, $bw, $bh, 'D');
-    $lx = 15; $ly = $y + 2;
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetXY($lx, $ly); $pdf->Cell(80, 3.5, 'EMPRESA / CLIENTE', 0, 1);
-    $pdf->SetFont('helvetica', 'B', 9); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($lx); $pdf->Cell(80, 5, $cliente, 0, 1);
-
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetX($lx); $pdf->Cell(80, 3.5, 'CONTACTO', 0, 1);
-    $pdf->SetFont('helvetica', '', 8.5); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($lx); $pdf->Cell(80, 4, $contacto ?: '—', 0, 1);
-
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetX($lx); $pdf->Cell(80, 3.5, 'TELEFONO', 0, 1);
-    $pdf->SetFont('helvetica', '', 8.5); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($lx); $pdf->Cell(80, 4, $telefono ?: '—', 0, 1);
-
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetX($lx); $pdf->Cell(80, 3.5, 'MAIL', 0, 1);
-    $pdf->SetFont('helvetica', '', 8.5); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($lx); $pdf->Cell(80, 4, $mail, 0, 1);
-
-    // Recuadro derecho
-    $rx = 108;
-    $pdf->Rect($rx, $y, $bw, $bh, 'D');
-    $rlx = $rx + 3; $rly = $y + 2;
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetXY($rlx, $rly); $pdf->Cell(80, 3.5, 'N° COTIZACION', 0, 1);
-    $pdf->SetFont('helvetica', 'B', 9); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($rlx); $pdf->Cell(80, 5, $numero, 0, 1);
-
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetX($rlx); $pdf->Cell(80, 3.5, 'FECHA ENVIO', 0, 1);
-    $pdf->SetFont('helvetica', '', 8.5); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($rlx); $pdf->Cell(80, 4, $fecha_envio, 0, 1);
-
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetX($rlx); $pdf->Cell(80, 3.5, 'VALIDA HASTA', 0, 1);
-    $pdf->SetFont('helvetica', '', 8.5); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($rlx); $pdf->Cell(80, 4, $fecha_valida, 0, 1);
-
-    $pdf->SetFont('helvetica', 'B', 6.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetX($rlx); $pdf->Cell(80, 3.5, 'PLAZO DE ENTREGA', 0, 1);
-    $pdf->SetFont('helvetica', '', 8.5); $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetX($rlx); $pdf->Cell(80, 4, $plazo, 0, 1);
-
-    // ── TABLA PRODUCTOS ─────────────────────────────────────
-    $ty = $y + $bh + 6;
-    $pdf->SetY($ty);
-
-    // Anchos columnas (como CRM): #, DESC, TALLE, COLOR, CANT, P.UNIT, SUBTOTAL, IVA, TOTAL
-    $c = [8, 56, 14, 14, 11, 22, 22, 17, 22];
-
-    $pdf->SetFillColor(55, 96, 146);
-    $pdf->SetTextColor(255, 255, 255);
-    $pdf->SetFont('helvetica', 'B', 6.5);
-    $h = ['#','DESCRIPCION','TALLE','COLOR','CANT.','P.UNIT S/IVA','SUBTOTAL','IVA 21%','TOTAL C/IVA'];
-    $al = ['C','L','C','C','C','R','R','R','R'];
-    for ($i=0; $i<9; $i++) $pdf->Cell($c[$i], 6, $h[$i], 0, 0, $al[$i], true);
-    $pdf->Ln();
-
-    // Filas
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFont('helvetica', '', 7.5);
-    $n = 1;
-    foreach ($items as $it) {
-        // Usar 'desc' si viene del nuevo formato, sino construir
-        if (!empty($it['desc'])) {
-            $desc = $it['desc'];
-        } else {
-            $cat  = $it['categoria'] ?? '';
-            $prod = $it['producto'] ?? '';
-            $custom = $it['personalizacion'] ?? 'Sin personalizar';
-            $desc = trim($cat . ' ' . strtolower($prod));
-            if ($custom === 'Bordado') $desc .= ' c/ bordado';
-            elseif ($custom === 'Estampado') $desc .= ' c/ estampado';
-            elseif ($custom === 'Ambos') $desc .= ' c/ bordado y estampado';
-        }
-
-        $cant = intval($it['cantidad'] ?? $it['cant'] ?? 0);
-        $talle = $it['talle'] ?? '';
-        $color = $it['color'] ?? '';
-
-        $pdf->SetDrawColor(220, 220, 220);
-        $pdf->Cell($c[0], 7, $n, 'B', 0, 'C');
-        $pdf->Cell($c[1], 7, ucfirst($desc), 'B', 0, 'L', false, '', 1);
-        $pdf->Cell($c[2], 7, $talle, 'B', 0, 'C');
-        $pdf->Cell($c[3], 7, $color, 'B', 0, 'C');
-        $pdf->Cell($c[4], 7, $cant, 'B', 0, 'C');
-        if ($hay_precios) {
-            $pdf->Cell($c[5], 7, '$'.number_format($it['_pu'],0,',','.'), 'B', 0, 'R');
-            $pdf->Cell($c[6], 7, '$'.number_format($it['_sub'],0,',','.'), 'B', 0, 'R');
-            $pdf->Cell($c[7], 7, '$'.number_format($it['_iva'],0,',','.'), 'B', 0, 'R');
-            $pdf->Cell($c[8], 7, '$'.number_format($it['_tot'],0,',','.'), 'B', 0, 'R');
-        } else {
-            $pdf->Cell($c[5], 7, '', 'B', 0, 'R');
-            $pdf->Cell($c[6], 7, '', 'B', 0, 'R');
-            $pdf->Cell($c[7], 7, '', 'B', 0, 'R');
-            $pdf->Cell($c[8], 7, '', 'B', 0, 'R');
-        }
-        $pdf->Ln();
-        $n++;
-    }
-
-    // Filas vacías (solo si hay menos de 8 items para completar la tabla)
-    $max_rows = max(count($items) + 2, 8);
-    for ($i = count($items); $i < $max_rows; $i++) {
-        for ($j=0; $j<9; $j++) $pdf->Cell($c[$j], 7, '', 'B', 0);
-        $pdf->Ln();
-    }
-
-    $pdf->Ln(4);
-
-    // ── TOTAL GENERAL ───────────────────────────────────────
-    if ($hay_precios) {
-        $pdf->SetFillColor(55, 96, 146);
-        $pdf->SetTextColor(255, 255, 255);
-        $pdf->SetFont('helvetica', 'B', 7.5);
-        $pre_w = $c[0]+$c[1]+$c[2]+$c[3]; // antes de CANT
-        $pdf->Cell($pre_w, 7, 'TOTAL GENERAL', 0, 0, 'R', true);
-        $pdf->Cell($c[4], 7, $total_prendas, 0, 0, 'C', true);
-        $pdf->Cell($c[5], 7, '', 0, 0, 'R', true);
-        $pdf->Cell($c[6], 7, '$'.number_format($subtotal_gen,0,',','.'), 0, 0, 'R', true);
-        $pdf->Cell($c[7], 7, '$'.number_format($iva_gen,0,',','.'), 0, 0, 'R', true);
-        $pdf->Cell($c[8], 7, '$'.number_format($total_gen,0,',','.'), 0, 0, 'R', true);
-        $pdf->Ln(10);
-
-        // Resumen
-        $pdf->SetTextColor(0,0,0);
-        $pdf->SetFont('helvetica', '', 8.5);
-        $xr = 128;
-        $pdf->SetX($xr); $pdf->Cell(35, 6, 'Subtotal s/IVA', 1, 0, 'L'); $pdf->Cell(30, 6, '$'.number_format($subtotal_gen,0,',','.'), 1, 1, 'R');
-        $pdf->SetX($xr); $pdf->Cell(35, 6, 'IVA 21%', 1, 0, 'L'); $pdf->Cell(30, 6, '$'.number_format($iva_gen,0,',','.'), 1, 1, 'R');
-        $pdf->SetFont('helvetica', 'B', 9);
-        $pdf->SetX($xr); $pdf->Cell(35, 7, 'TOTAL c/IVA', 1, 0, 'L'); $pdf->Cell(30, 7, '$'.number_format($total_gen,0,',','.'), 1, 1, 'R');
-    } else {
-        $pdf->SetFont('helvetica', 'B', 9);
-        $pdf->Cell($w, 7, 'TOTAL: ' . $total_prendas . ' prendas', 0, 1, 'L');
-        $pdf->Ln(1);
-        $pdf->SetFont('helvetica', 'I', 8);
-        $pdf->SetTextColor(100,100,100);
-        $pdf->Cell($w, 5, 'Los precios seran confirmados por nuestro equipo comercial a la brevedad.', 0, 1);
-    }
-
-    // ── CONDICIONES COMERCIALES ─────────────────────────────
-    $pdf->Ln(6);
-    $y = $pdf->GetY();
-    $pdf->SetDrawColor(190, 190, 190);
-    $pdf->Rect(12, $y, $w, 42, 'D');
-    $pdf->SetFont('helvetica', 'B', 7.5); $pdf->SetTextColor(55, 96, 146);
-    $pdf->SetXY(15, $y+2); $pdf->Cell(0, 4, 'CONDICIONES COMERCIALES', 0, 1);
-    $pdf->SetFont('helvetica', '', 7.5); $pdf->SetTextColor(0,0,0);
-    $pdf->SetX(17); $pdf->Cell(0, 4, '· Pedido minimo: 30 unidades', 0, 1);
-    $pdf->SetX(17); $pdf->Cell(0, 4, '· Plazo de entrega: 30 dias habiles desde confirmacion', 0, 1);
-    $pdf->SetX(17); $pdf->Cell(0, 4, '· Anticipo: 50% al confirmar | Saldo: 50% contra entrega', 0, 1);
-    $pdf->SetX(17); $pdf->Cell(0, 4, '· Validez: 7 dias corridos desde fecha de envio', 0, 1);
-    $pdf->SetX(17); $pdf->Cell(0, 4, '· Talles 3XL, 4XL y 5XL: +12% sobre precio unitario', 0, 1);
-    $pdf->SetX(17); $pdf->MultiCell(168, 4, '· Los costos de las prendas con bordado y estampado son orientativos. Disenos de gran tamano o complejidad podran requerir un ajuste en el precio, sujeto a evaluacion previa.', 0, 'L');
-
-    // ── FIRMAS ──────────────────────────────────────────────
-    $pdf->Ln(10);
-    $y = $pdf->GetY();
-    $pdf->SetDrawColor(0,0,0);
-    $pdf->Line(14, $y, 92, $y);
-    $pdf->Line(118, $y, 196, $y);
-    $pdf->SetFont('helvetica', '', 7.5); $pdf->SetTextColor(80,80,80);
-    $pdf->SetXY(14, $y+1); $pdf->Cell(78, 4, 'Aclaracion y Firma del Cliente', 0, 0, 'C');
-    $pdf->SetX(118); $pdf->Cell(78, 4, 'Firma y Sello · Organizacion Crima SA', 0, 1, 'C');
-
-    // ── PIE ─────────────────────────────────────────────────
-    $pdf->Ln(6);
-    $pdf->SetFont('helvetica', 'I', 7); $pdf->SetTextColor(150,150,150);
-    $pdf->Cell(0, 4, 'Cotizacion sin valor fiscal. Precios validos por el periodo indicado.', 0, 1, 'C');
+    $pdf->writeHTML($html, true, false, true, false, '');
 
     $tmp = sys_get_temp_dir() . '/cot_' . str_replace('-','', $numero) . '_' . time() . '.pdf';
     $pdf->Output($tmp, 'F');
