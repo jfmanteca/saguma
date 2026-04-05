@@ -3472,39 +3472,62 @@ function renderCuentas() {
       </div>`).join('') : '<div style="padding:40px;text-align:center;color:var(--muted)">Sin datos de clientes.</div>';
 
   } else {
-    // Proveedores: from pagos
+    // Proveedores: from compras (cargo = orden, pagos = anticipo + saldo)
     const provMap = {};
-    _data.pagos.forEach(p=>{
-      const nombre = p.proveedor || p.concepto || 'Sin proveedor';
-      if(!provMap[nombre]) provMap[nombre] = { movimientos:[] };
-      provMap[nombre].movimientos.push({ fecha:p.fecha, concepto:p.concepto||nombre, monto:parseFloat(p.monto)||0, categoria:p.categoria });
+
+    const agregarProv = (key, nombre) => {
+      if (!provMap[key]) provMap[key] = { nombre, movimientos:[] };
+    };
+
+    _data.compras.forEach(c => {
+      const key = c.proveedor_id ? 'id_'+c.proveedor_id : 'n_'+(c.proveedor_nombre||'Sin proveedor');
+      const nombre = c.prov_display || c.proveedor_nombre || 'Sin proveedor';
+      agregarProv(key, nombre);
+      const nroRef = c.tipo==='taller' ? (c.nro_orden||('OP-'+String(c.id).padStart(3,'0'))) : ('SRV-'+String(c.id).padStart(3,'0'));
+      // CARGO: total de la orden/servicio
+      provMap[key].movimientos.push({ fecha:c.fecha, tipo:'CARGO', concepto: c.tipo==='taller' ? `Orden ${nroRef}` : `Servicio — ${c.concepto||nroRef}`, monto:parseFloat(c.total||0), categoria: c.tipo==='taller'?'Producción / Taller':(c.categoria||'Servicios') });
+      // PAGO anticipo
+      if (parseFloat(c.anticipo_monto||0) > 0) {
+        provMap[key].movimientos.push({ fecha:c.anticipo_fecha||c.fecha, tipo:'PAGO', concepto:`Anticipo ${nroRef}`, monto:parseFloat(c.anticipo_monto), categoria:c.anticipo_forma_pago||'' });
+      }
+      // PAGO saldo
+      if (parseFloat(c.saldo_monto||0) > 0) {
+        provMap[key].movimientos.push({ fecha:c.saldo_fecha||c.fecha, tipo:'PAGO', concepto:`Saldo ${nroRef}`, monto:parseFloat(c.saldo_monto), categoria:c.saldo_forma_pago||'' });
+      }
     });
-    let entries = Object.entries(provMap)
-      .filter(([k])=>k.toLowerCase().includes(q))
-      .map(([nombre,{movimientos}])=>{
-        movimientos.sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
-        const total = movimientos.reduce((s,m)=>s+m.monto,0);
-        return { nombre, total, movimientos };
-      }).sort((a,b)=>b.total-a.total);
+
+    let entries = Object.values(provMap)
+      .filter(e=>e.nombre.toLowerCase().includes(q))
+      .map(e=>{
+        e.movimientos.sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+        let saldo = 0;
+        const rows = e.movimientos.map(m=>{
+          if (m.tipo==='CARGO') saldo += m.monto; else saldo -= m.monto;
+          return { ...m, saldo };
+        });
+        return { nombre:e.nombre, saldo, rows };
+      }).sort((a,b)=>b.saldo-a.saldo);
 
     el.innerHTML = entries.length ? entries.map((e,i)=>`
       <div class="table-wrap" style="cursor:pointer" onclick="toggleCuenta('cp-${i}')">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px">
           <div style="font-weight:600">${e.nombre}</div>
           <div style="display:flex;gap:20px;align-items:center">
-            <span style="font-size:12px;color:var(--muted)">${e.movimientos.length} pago(s)</span>
-            <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">Total pagado ${fmtARS(e.total)}</span>
+            <span style="font-size:12px;color:var(--muted)">${e.rows.length} movimiento(s)</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;color:${e.saldo>0.5?'var(--red)':e.saldo<-0.5?'var(--accent2)':'var(--muted)'}">${e.saldo>0.5?'Debemos':'Saldo a favor'} ${fmtARS(Math.abs(e.saldo))}</span>
             <span style="color:var(--muted)">▼</span>
           </div>
         </div>
         <div id="cp-${i}" style="display:none;border-top:1px solid var(--border)">
-          <table style="width:100%"><thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Monto</th></tr></thead>
-          <tbody>${e.movimientos.map(m=>`
+          <table style="width:100%"><thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría / Forma pago</th><th style="color:var(--red)">Cargo</th><th style="color:var(--green)">Pago</th><th>Saldo</th></tr></thead>
+          <tbody>${e.rows.map(r=>`
             <tr>
-              <td>${fmtDate(m.fecha)}</td>
-              <td style="font-size:12px">${m.concepto}</td>
-              <td style="font-size:11px;color:var(--muted)">${m.categoria||'—'}</td>
-              <td class="mono" style="color:var(--red)">${fmtARS(m.monto)}</td>
+              <td>${fmtDate(r.fecha)}</td>
+              <td style="font-size:12px">${r.concepto}</td>
+              <td style="font-size:11px;color:var(--muted)">${r.categoria||'—'}</td>
+              <td class="mono" style="color:var(--red)">${r.tipo==='CARGO'?fmtARS(r.monto):'—'}</td>
+              <td class="mono" style="color:var(--green)">${r.tipo==='PAGO'?fmtARS(r.monto):'—'}</td>
+              <td class="mono" style="font-weight:600;color:${r.saldo>0.5?'var(--red)':r.saldo<-0.5?'var(--accent2)':'var(--muted)'}">${fmtARS(Math.abs(r.saldo))}</td>
             </tr>`).join('')}
           </tbody></table>
         </div>
@@ -3597,6 +3620,7 @@ function renderCompras(data) {
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="verDetalleCompra(${c.id})" title="Ver detalle" style="font-size:11px">👁</button>
         <button class="btn btn-ghost btn-sm" onclick="editarCompra(${c.id})" title="Editar" style="font-size:11px;margin-left:2px">✏</button>
+        ${c.tipo==='taller' ? `<button class="btn btn-ghost btn-sm" onclick="imprimirOrdenCompra(${c.id})" title="Imprimir PDF" style="font-size:11px;margin-left:2px">📄</button>` : ''}
         ${c.tipo==='taller' && saldo_pend > 0.5 ? `<button class="btn btn-sm" style="background:#7c3aed;color:#fff;margin-left:2px;font-size:10px;padding:3px 6px" onclick="abrirSaldoCompra(${c.id})" title="Registrar saldo">$</button>` : ''}
         <button class="btn btn-danger btn-sm" onclick="eliminarCompra(${c.id})" style="margin-left:2px">✕</button>
       </td>
@@ -4037,6 +4061,129 @@ async function guardarSaldoCompra() {
     await loadAll();
     toast('✓ Saldo registrado · Cash Flow actualizado');
   } else toast('Error: ' + (res.error||'desconocido'), true);
+}
+
+// ── Imprimir PDF orden de compra (tipo taller) ──────────────
+function imprimirOrdenCompra(id) {
+  const c = _data.compras.find(x=>x.id==id);
+  if (!c) { toast('Compra no encontrada', true); return; }
+  const prov = c.prov_display || c.proveedor_nombre || '—';
+  let items = [];
+  try { items = c.items_json ? JSON.parse(c.items_json) : []; } catch(e){}
+  const fmtN = n => n ? '$'+parseFloat(n).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+  const fmtD = s => s ? s.toString().substring(0,10).split('-').reverse().join('/') : '—';
+  let totalCant=0, totalSub=0;
+  const itemRows = items.map((it,i)=>{
+    const cant=parseFloat(it.cant)||0, precio=parseFloat(it.precio)||0;
+    const sub=cant*precio;
+    totalCant+=cant; totalSub+=sub;
+    return `<tr><td style="text-align:center">${i+1}</td><td>${it.desc||''}</td><td>${it.talle||''}</td><td>${it.color||''}</td><td style="text-align:center">${cant||''}</td><td style="text-align:right">${precio?fmtN(precio):''}</td><td style="text-align:right">${sub?fmtN(sub):''}</td></tr>`;
+  }).join('');
+  const emptyRows = Array(Math.max(0,18-items.length)).fill(`<tr><td colspan="7" style="height:22px"></td></tr>`).join('');
+  const saldoPend = (parseFloat(c.total)||0) - (parseFloat(c.anticipo_monto)||0) - (parseFloat(c.saldo_monto)||0);
+  const ventaRef = c.venta_id ? `N°${String(c.venta_numero||c.venta_id).padStart(3,'0')}${c.venta_cliente?' — '+c.venta_cliente:''}` : '—';
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Orden ${c.nro_orden||''}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff;}
+  #pdf-content{width:210mm;margin:0 auto;background:#fff;}
+  .pdf-header{background:linear-gradient(135deg,#0f2447 0%,#1a3a6b 60%,#2563b0 100%)!important;color:#fff;padding:18px 28px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .brand{font-size:22px;font-weight:900;letter-spacing:3px;color:#fff;}
+  .tagline{font-size:9px;color:rgba(255,255,255,.65);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+  .contact{text-align:right;font-size:9.5px;color:rgba(255,255,255,.88);line-height:1.7;}
+  .pdf-sub{background:#e8eef7!important;border-bottom:3px solid #1a3a6b;padding:7px 28px;display:flex;justify-content:space-between;align-items:center;}
+  .pdf-sub-title{font-size:11px;font-weight:700;color:#1a3a6b;letter-spacing:.5px;text-transform:uppercase;}
+  .pdf-sub-num{font-family:monospace;font-size:12px;font-weight:700;color:#0f2447;}
+  .body{padding:16px 28px 20px;}
+  .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:14px;}
+  .hcell{padding:5px 8px;border:1px solid #d0d8e8;font-size:10.5px;background:#fff;}
+  .hcell:nth-child(odd){background:#f7f9fc!important;}
+  .hcell .lbl{color:#1a3a6b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px;}
+  table.items{width:100%;border-collapse:collapse;margin-bottom:12px;}
+  table.items thead th{background:#1a3a6b!important;color:#fff!important;padding:8px 6px;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;text-align:left;}
+  table.items tbody td{padding:5px 6px;border-bottom:1px solid #e8ecf0;font-size:10.5px;vertical-align:middle;}
+  table.items tbody tr:nth-child(even) td{background:#f4f7fb!important;}
+  .tfoot td{background:#0f2447!important;color:#fff!important;font-weight:700;padding:7px 6px;}
+  .totbox{display:flex;justify-content:flex-end;margin-bottom:14px;}
+  .tbox{border:1px solid #d0d8e8;border-radius:4px;overflow:hidden;min-width:280px;}
+  .trow{display:flex;justify-content:space-between;padding:6px 14px;font-size:11px;border-bottom:1px solid #eee;}
+  .trow.g{background:#1a3a6b!important;color:#fff!important;font-weight:700;font-size:13px;border:none;}
+  .trow.saldo{background:#f0f9ff!important;color:#0f2447;font-weight:700;}
+  .cond{padding:10px 14px;background:#f5f7fb!important;border:1px solid #d0d8e8;border-left:3px solid #1a3a6b;font-size:10px;line-height:1.75;margin-bottom:16px;}
+  .cond b{display:block;color:#1a3a6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+  .firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px;}
+  .fbox{border-top:2px solid #1a3a6b;padding-top:8px;font-size:10px;color:#555;}
+  .nota{text-align:center;font-size:9px;color:#aaa;margin-top:16px;padding-top:10px;border-top:1px solid #eee;}
+  .dl-bar{background:#f0f3f8;padding:10px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d0d8e8;}
+  .dl-btn{background:linear-gradient(135deg,#0f2447,#2563b0);color:#fff;border:none;padding:8px 20px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;}
+  .dl-btn:hover{filter:brightness(1.15);}
+  .dl-info{font-size:11px;color:#666;}
+  @media print{.dl-bar{display:none!important;}@page{size:A4;margin:0;}body{margin:0!important;}}
+</style></head><body>
+<div class="dl-bar">
+  <div class="dl-info">Orden de Pedido <strong>${c.nro_orden||'—'}</strong> — ${prov}</div>
+  <button class="dl-btn" onclick="descargarPDF()">⬇ Descargar PDF</button>
+</div>
+<div id="pdf-content">
+<div class="pdf-header">
+  <div><div class="brand">SAGUMA</div><div class="tagline">Indumentaria Laboral · Mayorista</div></div>
+  <div class="contact">Organización Crima SA &nbsp;·&nbsp; CUIT 30-70949492-5<br>Av. Córdoba 391 9°B – CABA<br>ventas@saguma.com.ar &nbsp;·&nbsp; +54 11 6112-5719</div>
+</div>
+<div class="pdf-sub">
+  <span class="pdf-sub-title">Orden de Pedido a Fabricante</span>
+  <span class="pdf-sub-num">${c.nro_orden||'—'}</span>
+</div>
+<div class="body">
+  <div class="hgrid">
+    <div class="hcell"><span class="lbl">Proveedor / Taller</span><strong>${prov}</strong></div>
+    <div class="hcell"><span class="lbl">N° Orden</span><strong>${c.nro_orden||'—'}</strong></div>
+    <div class="hcell"><span class="lbl">Fecha Orden</span>${fmtD(c.fecha)}</div>
+    <div class="hcell"><span class="lbl">Fecha Entrega Estimada</span>${fmtD(c.fecha_entrega_estimada)}</div>
+    <div class="hcell"><span class="lbl">Venta Relacionada</span>${ventaRef}</div>
+    <div class="hcell"><span class="lbl">Estado</span>${c.estado||''}</div>
+  </div>
+  <table class="items">
+    <thead><tr>
+      <th style="width:24px">#</th>
+      <th>Descripción / Prenda</th>
+      <th style="width:55px">Talle</th>
+      <th style="width:65px">Color</th>
+      <th style="width:50px;text-align:center">Cant.</th>
+      <th style="width:105px;text-align:right">P.Unit. s/IVA</th>
+      <th style="width:105px;text-align:right">Subtotal s/IVA</th>
+    </tr></thead>
+    <tbody>
+      ${itemRows}${emptyRows}
+      <tr class="tfoot"><td colspan="4" style="text-align:right">TOTALES</td><td style="text-align:center">${totalCant||''}</td><td></td><td style="text-align:right">${fmtN(totalSub)}</td></tr>
+    </tbody>
+  </table>
+  <div class="totbox"><div class="tbox">
+    <div class="trow"><span>Subtotal s/IVA</span><span>${fmtN(parseFloat(c.subtotal_sin_iva)||totalSub)}</span></div>
+    <div class="trow"><span>IVA 21%${!c.tiene_factura?' (no computable)':''}</span><span>${fmtN(parseFloat(c.iva)||0)}</span></div>
+    <div class="trow g"><span>TOTAL c/IVA</span><span>${fmtN(parseFloat(c.total)||0)}</span></div>
+    ${parseFloat(c.anticipo_monto||0)>0?`<div class="trow"><span>Anticipo pagado</span><span>- ${fmtN(parseFloat(c.anticipo_monto))}</span></div>`:''}
+    <div class="trow saldo"><span>Saldo a pagar</span><span>${fmtN(Math.max(0,saldoPend))}</span></div>
+  </div></div>
+  ${c.observaciones?`<div class="cond"><b>Observaciones</b>${c.observaciones}</div>`:''}
+  <div class="firmas">
+    <div class="fbox">Firma y aclaración — SAGUMA<br><br><br></div>
+    <div class="fbox">Firma y aclaración — ${prov}<br><br><br></div>
+  </div>
+  <div class="nota">Documento generado por SAGUMA CRM/ERP · Organización Crima SA · CUIT 30-70949492-5</div>
+</div></div>
+<script>
+function descargarPDF(){
+  const el=document.getElementById('pdf-content');
+  html2pdf().set({margin:0,filename:'${(c.nro_orden||'orden').replace(/[^a-zA-Z0-9-]/g,'_')}.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save();
+}
+<\/script>
+</body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
 }
 
 // ── Eliminar compra ──────────────────────────────────────────
