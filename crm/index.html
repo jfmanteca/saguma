@@ -1115,9 +1115,10 @@
     <div class="modal-head"><div class="modal-title" id="pago-modal-title">Nuevo Pago</div><button class="modal-close" onclick="closeModal('nuevo-pago')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="np2-edit-id">
+      <input type="hidden" id="np2-proveedor-id">
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" id="np2-fecha" type="date"></div>
-        <div class="form-group"><label class="form-label">Proveedor / Concepto *</label><input class="form-input" id="np2-concepto" type="text" placeholder="Nombre del proveedor o concepto" list="dl-proveedores"></div>
+        <div class="form-group"><label class="form-label">Proveedor / Concepto *</label><input class="form-input" id="np2-concepto" type="text" placeholder="Nombre del proveedor o concepto" list="dl-proveedores" oninput="resolverProveedorPago(this.value)"></div>
         <div class="form-group"><label class="form-label">Categoría</label>
           <select class="form-select" id="np2-categoria">
             <option>Producción / Taller</option><option>Telas y materias primas</option><option>Publicidad digital</option><option>Gestión publicidad</option><option>Hosting + Dominio</option><option>Avíos</option><option>Otros egresos</option>
@@ -3180,6 +3181,7 @@ async function guardarCobranza() {
 function initNuevoPago() {
   const hoy = new Date().toISOString().split('T')[0];
   document.getElementById('np2-edit-id').value = '';
+  document.getElementById('np2-proveedor-id').value = '';
   document.getElementById('np2-fecha').value = hoy;
   document.getElementById('np2-concepto').value = '';
   document.getElementById('np2-monto').value = '';
@@ -3194,6 +3196,7 @@ function editarPago(id) {
   const p = _data.pagos.find(x=>x.id==id);
   if(!p){ toast('Pago no encontrado', true); return; }
   document.getElementById('np2-edit-id').value = p.id;
+  document.getElementById('np2-proveedor-id').value = p.proveedor_id||'';
   document.getElementById('np2-fecha').value = p.fecha||'';
   document.getElementById('np2-concepto').value = p.concepto||'';
   document.getElementById('np2-categoria').value = p.categoria||'';
@@ -3238,6 +3241,16 @@ function filterPagos() {
   renderPagos(data);
 }
 
+// Resuelve si el texto ingresado coincide con un proveedor registrado y guarda su id
+function resolverProveedorPago(valor) {
+  const v = (valor||'').trim().toLowerCase();
+  const prov = _data.proveedores.find(x =>
+    (x.razon_social||'').toLowerCase() === v ||
+    (x.nombre_fantasia||'').toLowerCase() === v
+  );
+  document.getElementById('np2-proveedor-id').value = prov ? prov.id : '';
+}
+
 async function guardarPago() {
   const editId  = document.getElementById('np2-edit-id').value;
   const fecha   = document.getElementById('np2-fecha').value;
@@ -3245,12 +3258,16 @@ async function guardarPago() {
   const monto   = parseFloat(document.getElementById('np2-monto').value);
   if(!fecha || !concepto || !monto){ toast('Completá fecha, concepto y monto.', true); return; }
   setLoading('btn-guardar-pago', true);
+  // Resolver proveedor_id en caso de que el usuario lo haya escrito sin disparar oninput
+  resolverProveedorPago(concepto);
+  const proveedorId = document.getElementById('np2-proveedor-id').value;
   const body = {
     fecha, concepto, monto,
     categoria: document.getElementById('np2-categoria').value,
     forma_pago: document.getElementById('np2-forma-pago').value,
     orden_pedido_ref: document.getElementById('np2-op-ref').value,
     notas: document.getElementById('np2-notas').value,
+    ...(proveedorId ? { proveedor_id: proveedorId } : {}),
   };
   let res;
   if(editId) {
@@ -3493,17 +3510,36 @@ function renderCuentas() {
       }
     });
 
-    // PAGOS GENERALES (módulo Pagos) → aparecen como PAGO en la cuenta del proveedor/concepto
-    _data.pagos.forEach(p => {
+    // PAGOS GENERALES (módulo Pagos) → solo los que NO referencian una orden de compra.
+    // Los pagos con orden_pedido_ref ya están contabilizados como anticipo_monto/saldo_monto
+    // en _data.compras, por lo que incluirlos causaría duplicación en cuentas corrientes.
+    const pagosNoVinculados = _data.pagos.filter(p => !(p.orden_pedido_ref||'').trim());
+    pagosNoVinculados.forEach(p => {
       const conceptoNombre = (p.concepto||'Sin concepto').trim();
-      // Si el pago tiene proveedor_id vinculado, usar esa clave; si no, agrupar por concepto
-      const key = p.proveedor_id ? 'id_'+p.proveedor_id : 'pago_'+conceptoNombre.toLowerCase().replace(/\s+/g,'_');
-      // Intentar encontrar nombre real del proveedor si hay id
-      let nombre = conceptoNombre;
-      if (p.proveedor_id) {
-        const prov = _data.proveedores.find(x=>x.id==p.proveedor_id);
-        nombre = prov ? (prov.razon_social||prov.nombre_fantasia||conceptoNombre) : conceptoNombre;
+
+      let key, nombre;
+      // Intentar resolver proveedor: primero por proveedor_id (con == para tolerar string vs int)
+      const provPorId = p.proveedor_id ? _data.proveedores.find(x => x.id == p.proveedor_id) : null;
+      if (provPorId) {
+        key = 'id_'+provPorId.id;
+        nombre = provPorId.razon_social || provPorId.nombre_fantasia || conceptoNombre;
+      } else {
+        // Sin proveedor_id o no encontrado: buscar por nombre en el concepto (match exacto, case-insensitive)
+        const provPorNombre = _data.proveedores.find(x =>
+          (x.razon_social||'').toLowerCase() === conceptoNombre.toLowerCase() ||
+          (x.nombre_fantasia||'').toLowerCase() === conceptoNombre.toLowerCase()
+        );
+        if (provPorNombre) {
+          key = 'id_'+provPorNombre.id;
+          nombre = provPorNombre.razon_social || provPorNombre.nombre_fantasia || conceptoNombre;
+        } else {
+          // Pago genérico sin proveedor vinculado: agrupar por categoría + concepto
+          const cat = (p.categoria||'Sin categoría').trim();
+          key = 'pago_cat_'+cat.toLowerCase().replace(/\s+/g,'_');
+          nombre = cat + (cat !== conceptoNombre ? ' — '+conceptoNombre : '');
+        }
       }
+
       agregarProv(key, nombre);
       provMap[key].movimientos.push({
         fecha: p.fecha,
