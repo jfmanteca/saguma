@@ -3493,6 +3493,27 @@ function renderCuentas() {
       }
     });
 
+    // PAGOS GENERALES (módulo Pagos) → aparecen como PAGO en la cuenta del proveedor/concepto
+    _data.pagos.forEach(p => {
+      const conceptoNombre = (p.concepto||'Sin concepto').trim();
+      // Si el pago tiene proveedor_id vinculado, usar esa clave; si no, agrupar por concepto
+      const key = p.proveedor_id ? 'id_'+p.proveedor_id : 'pago_'+conceptoNombre.toLowerCase().replace(/\s+/g,'_');
+      // Intentar encontrar nombre real del proveedor si hay id
+      let nombre = conceptoNombre;
+      if (p.proveedor_id) {
+        const prov = _data.proveedores.find(x=>x.id==p.proveedor_id);
+        nombre = prov ? (prov.razon_social||prov.nombre_fantasia||conceptoNombre) : conceptoNombre;
+      }
+      agregarProv(key, nombre);
+      provMap[key].movimientos.push({
+        fecha: p.fecha,
+        tipo: 'PAGO',
+        concepto: p.concepto || 'Pago general',
+        monto: parseFloat(p.monto||0),
+        categoria: p.categoria || p.forma_pago || ''
+      });
+    });
+
     let entries = Object.values(provMap)
       .filter(e=>e.nombre.toLowerCase().includes(q))
       .map(e=>{
