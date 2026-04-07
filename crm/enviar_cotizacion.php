@@ -56,13 +56,17 @@ function enviarMailCotizacion($pdo, $data, $cotizacion_id, $numero) {
 }
 
 function _generarPDFCRM($data, $items, $numero, $fecha) {
+    // IMPORTANTE: No usar entidades HTML (&eacute; etc.) porque TCPDF aplica
+    // text-transform:uppercase ANTES de decodificarlas, generando texto literal "&EACUTE;".
+    // Usar siempre caracteres UTF-8 directos.
+
     $fecha_envio  = date('d/m/Y');
     $fecha_valida = date('d/m/Y', strtotime('+7 days'));
     $plazo        = $data['plazo'] ?? '30 días hábiles';
-    $cliente  = htmlspecialchars($data['cliente']  ?? '', ENT_QUOTES);
-    $contacto = htmlspecialchars($data['contacto'] ?? '', ENT_QUOTES);
-    $telefono = htmlspecialchars($data['telefono'] ?? '', ENT_QUOTES);
-    $mail     = htmlspecialchars($data['mail']     ?? '', ENT_QUOTES);
+    $cliente  = htmlspecialchars($data['cliente']  ?? '', ENT_QUOTES, 'UTF-8');
+    $contacto = htmlspecialchars($data['contacto'] ?? '', ENT_QUOTES, 'UTF-8');
+    $telefono = htmlspecialchars($data['telefono'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mail     = htmlspecialchars($data['mail']     ?? '', ENT_QUOTES, 'UTF-8');
     $notas    = $data['notas'] ?? '';
 
     // ── Calcular totales ─────────────────────────────────────
@@ -85,19 +89,23 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     $hay_precios = $subtotal_gen > 0;
     $fmt = fn($n) => '$' . number_format($n, 0, ',', '.');
 
-    // ── Colores base ──────────────────────────────────────────
-    $AZ  = '#1a3a6b';   // azul oscuro (header, th, totales)
-    $AZD = '#0f2447';   // azul muy oscuro (fila total general)
-    $AZL = '#e8eef7';   // azul claro (sub-header)
-    $GR1 = '#f7f9fc';   // gris alternado claro (rows impares, hcell)
-    $GR2 = '#f4f7fb';   // gris alternado tabla (rows pares)
-    $BRD = '#d0d8e8';   // color borde general
-    $ROW = '#e8ecf0';   // borde inferior filas tabla
+    // ── Colores ───────────────────────────────────────────────
+    $AZ  = '#1a3a6b';
+    $AZD = '#0f2447';
+    $AZL = '#e8eef7';
+    $GR1 = '#f7f9fc';
+    $GR2 = '#f4f7fb';
+    $BRD = '#d0d8e8';
+    $ROW = '#e8ecf0';
 
-    // ── Estilos base de celda (repetidos mucho) ───────────────
-    $th_base  = "background-color:$AZ;color:#fff;font-size:9px;font-weight:bold;text-transform:uppercase;padding:7px 5px;border-bottom:1px solid $AZD";
-    $td_base  = "font-size:10px;padding:5px 5px;border-bottom:1px solid $ROW";
-    $td_tot   = "background-color:$AZD;color:#fff;font-size:10px;font-weight:bold;padding:7px 5px";
+    // ── Estilos base ──────────────────────────────────────────
+    // SIN text-transform en th_base — texto ya escrito en mayúsculas en el HTML
+    $th  = "background-color:$AZ;color:#fff;font-size:9px;font-weight:bold;padding:7px 4px;border-bottom:2px solid $AZD";
+    $td  = "font-size:10px;padding:5px 4px;border-bottom:1px solid $ROW";
+    $tot = "background-color:$AZD;color:#fff;font-size:10px;font-weight:bold;padding:7px 4px";
+
+    // ── Estilos de labels (sin text-transform — texto ya en mayúsculas) ───
+    $lbl = "font-size:8px;font-weight:bold;color:$AZ";
 
     // ── Filas de productos ────────────────────────────────────
     $filas_html = '';
@@ -106,81 +114,78 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
         if (!empty($it['desc'])) {
             $desc = ucfirst($it['desc']);
         } else {
-            $cat    = $it['categoria']     ?? '';
-            $prod   = $it['producto']      ?? '';
+            $cat    = $it['categoria']       ?? '';
+            $prod   = $it['producto']        ?? '';
             $custom = $it['personalizacion'] ?? 'Sin personalizar';
             $desc   = trim($cat . ' ' . strtolower($prod));
-            if ($custom === 'Bordado')        $desc .= ' c/ bordado';
-            elseif ($custom === 'Estampado')  $desc .= ' c/ estampado';
-            elseif ($custom === 'Ambos')      $desc .= ' c/ bordado y estampado';
+            if ($custom === 'Bordado')       $desc .= ' c/ bordado';
+            elseif ($custom === 'Estampado') $desc .= ' c/ estampado';
+            elseif ($custom === 'Ambos')     $desc .= ' c/ bordado y estampado';
             $desc = ucfirst($desc);
         }
         $cant  = intval($it['cantidad'] ?? $it['cant'] ?? 0);
-        $talle = htmlspecialchars($it['talle'] ?? '', ENT_QUOTES);
-        $color = htmlspecialchars($it['color'] ?? '', ENT_QUOTES);
-        $bg    = ($n % 2 === 0) ? "background-color:$GR2;" : 'background-color:#fff;';
+        $talle = htmlspecialchars($it['talle'] ?? '', ENT_QUOTES, 'UTF-8');
+        $color = htmlspecialchars($it['color'] ?? '', ENT_QUOTES, 'UTF-8');
+        $bg    = ($n % 2 === 0) ? "background-color:$GR2;" : 'background-color:#ffffff;';
         $filas_html .= '<tr>
-          <td style="'.$bg.'text-align:center;'.$td_base.'">'.$n.'</td>
-          <td style="'.$bg.$td_base.'">'.htmlspecialchars($desc, ENT_QUOTES).'</td>
-          <td style="'.$bg.'text-align:center;'.$td_base.'">'.$talle.'</td>
-          <td style="'.$bg.'text-align:center;'.$td_base.'">'.$color.'</td>
-          <td style="'.$bg.'text-align:center;'.$td_base.'">'.$cant.'</td>';
+          <td style="'.$bg.'text-align:center;'.$td.'">'.$n.'</td>
+          <td style="'.$bg.$td.'">'.htmlspecialchars($desc, ENT_QUOTES, 'UTF-8').'</td>
+          <td style="'.$bg.'text-align:center;'.$td.'">'.$talle.'</td>
+          <td style="'.$bg.'text-align:center;'.$td.'">'.$color.'</td>
+          <td style="'.$bg.'text-align:center;'.$td.'">'.$cant.'</td>';
         if ($hay_precios) {
             $filas_html .=
-              '<td style="'.$bg.'text-align:right;'.$td_base.'">'.$fmt($it['_pu']).'</td>'.
-              '<td style="'.$bg.'text-align:right;'.$td_base.'">'.$fmt($it['_sub']).'</td>'.
-              '<td style="'.$bg.'text-align:right;'.$td_base.'">'.$fmt($it['_iva']).'</td>'.
-              '<td style="'.$bg.'text-align:right;'.$td_base.'">'.$fmt($it['_tot']).'</td>';
+              '<td style="'.$bg.'text-align:right;'.$td.'">'.$fmt($it['_pu']).'</td>'.
+              '<td style="'.$bg.'text-align:right;'.$td.'">'.$fmt($it['_sub']).'</td>'.
+              '<td style="'.$bg.'text-align:right;'.$td.'">'.$fmt($it['_iva']).'</td>'.
+              '<td style="'.$bg.'text-align:right;'.$td.'">'.$fmt($it['_tot']).'</td>';
         } else {
-            $filas_html .= '<td colspan="4" style="'.$bg.$td_base.'"></td>';
+            $filas_html .= '<td colspan="4" style="'.$bg.$td.'"></td>';
         }
         $filas_html .= '</tr>';
         $n++;
     }
-
-    // Filas vacías para rellenar (mínimo 14 filas como el CRM)
+    // Filas vacías (mínimo 14 igual que el CRM)
     $max_rows = max(count($items), 14);
     for ($i = count($items); $i < $max_rows; $i++) {
-        $bg = ($i % 2 === 0) ? "background-color:$GR2;" : 'background-color:#fff;';
+        $bg = ($i % 2 === 0) ? "background-color:$GR2;" : 'background-color:#ffffff;';
         $filas_html .= '<tr><td colspan="9" style="'.$bg.'height:20px;border-bottom:1px solid '.$ROW.'"></td></tr>';
     }
-
-    // Fila TOTAL GENERAL: background en cada TD individualmente
-    $filas_html .= '
-    <tr>
-      <td colspan="4" style="'.$td_tot.';text-align:right;padding-right:8px">TOTAL GENERAL</td>
-      <td style="'.$td_tot.';text-align:center">'.$total_prendas.'</td>
-      <td style="'.$td_tot.'"></td>';
+    // Fila TOTAL GENERAL
+    $filas_html .= '<tr>
+      <td colspan="4" style="'.$tot.';text-align:right;padding-right:8px">TOTAL GENERAL</td>
+      <td style="'.$tot.';text-align:center">'.$total_prendas.'</td>
+      <td style="'.$tot.'"></td>';
     if ($hay_precios) {
         $filas_html .=
-          '<td style="'.$td_tot.';text-align:right">'.$fmt($subtotal_gen).'</td>'.
-          '<td style="'.$td_tot.';text-align:right">'.$fmt($iva_gen).'</td>'.
-          '<td style="'.$td_tot.';text-align:right">'.$fmt($total_gen).'</td>';
+          '<td style="'.$tot.';text-align:right">'.$fmt($subtotal_gen).'</td>'.
+          '<td style="'.$tot.';text-align:right">'.$fmt($iva_gen).'</td>'.
+          '<td style="'.$tot.';text-align:right">'.$fmt($total_gen).'</td>';
     } else {
-        $filas_html .= '<td colspan="3" style="'.$td_tot.'"></td>';
+        $filas_html .= '<td colspan="3" style="'.$tot.'"></td>';
     }
     $filas_html .= '</tr>';
 
-    // ── Bloque de totales (tabla alineada a la derecha) ───────
+    // ── Bloque de totales ─────────────────────────────────────
     $totales_html = '';
     if ($hay_precios) {
         $totales_html = '
-<table style="width:100%;border-collapse:collapse;margin-top:6px;margin-bottom:12px" cellpadding="0" cellspacing="0">
+<table style="width:100%;border-collapse:collapse;margin-top:6px;margin-bottom:10px" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="width:58%"></td>
-    <td style="width:42%;vertical-align:top">
+    <td style="width:55%"></td>
+    <td style="width:45%;vertical-align:top">
       <table style="width:100%;border-collapse:collapse;border:1px solid '.$BRD.'" cellpadding="0" cellspacing="0">
         <tr>
-          <td style="padding:5px 12px;font-size:11px;border-bottom:1px solid #eee;background-color:#fff">Subtotal s/IVA</td>
-          <td style="padding:5px 12px;font-size:11px;text-align:right;border-bottom:1px solid #eee;background-color:#fff">'.$fmt($subtotal_gen).'</td>
+          <td style="background-color:#fff;padding:5px 12px;font-size:11px;border-bottom:1px solid #eee">Subtotal s/IVA</td>
+          <td style="background-color:#fff;padding:5px 12px;font-size:11px;text-align:right;border-bottom:1px solid #eee">'.$fmt($subtotal_gen).'</td>
         </tr>
         <tr>
-          <td style="padding:5px 12px;font-size:11px;border-bottom:1px solid #eee;background-color:#fff">IVA 21%</td>
-          <td style="padding:5px 12px;font-size:11px;text-align:right;border-bottom:1px solid #eee;background-color:#fff">'.$fmt($iva_gen).'</td>
+          <td style="background-color:#fff;padding:5px 12px;font-size:11px;border-bottom:1px solid #eee">IVA 21%</td>
+          <td style="background-color:#fff;padding:5px 12px;font-size:11px;text-align:right;border-bottom:1px solid #eee">'.$fmt($iva_gen).'</td>
         </tr>
         <tr>
-          <td style="padding:7px 12px;font-size:13px;font-weight:bold;color:#fff;background-color:'.$AZ.'">TOTAL c/IVA</td>
-          <td style="padding:7px 12px;font-size:13px;font-weight:bold;color:#fff;text-align:right;background-color:'.$AZ.'">'.$fmt($total_gen).'</td>
+          <td style="background-color:'.$AZ.';padding:7px 12px;font-size:13px;font-weight:bold;color:#fff">TOTAL c/IVA</td>
+          <td style="background-color:'.$AZ.';padding:7px 12px;font-size:13px;font-weight:bold;color:#fff;text-align:right">'.$fmt($total_gen).'</td>
         </tr>
       </table>
     </td>
@@ -196,83 +201,85 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
         $notas_html = '
 <table style="width:100%;border-collapse:collapse;margin-bottom:8px" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="padding:7px 12px;background-color:#fffbeb;border:1px solid #fcd34d;font-size:10px">
-      <strong>Observaciones:</strong> '.htmlspecialchars($notas, ENT_QUOTES).'
+    <td style="background-color:#fffbeb;padding:7px 12px;border:1px solid #fcd34d;font-size:10px">
+      <strong>Observaciones:</strong> '.htmlspecialchars($notas, ENT_QUOTES, 'UTF-8').'
     </td>
   </tr>
 </table>';
     }
 
-    // ── HTML completo (todo en tablas, sin flex/grid) ─────────
+    // ── HTML completo ─────────────────────────────────────────
+    // REGLA: sin entidades HTML, sin text-transform en CSS, solo UTF-8 directo.
+    // Los labels de la grilla ya están escritos en MAYÚSCULAS en el HTML.
     $html = '
 <style>
-  * { box-sizing: border-box; }
   body { font-family: helvetica, Arial, sans-serif; font-size: 11px; color: #111; margin: 0; padding: 0; }
   table { border-collapse: collapse; }
 </style>
 
-<!-- ═══ HEADER ═══ -->
+<!-- HEADER: fondo azul oscuro, cada TD con background-color propio -->
 <table style="width:100%;border-collapse:collapse" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="background-color:'.$AZ.';padding:14px 18px 12px;color:#fff;width:55%;vertical-align:middle">
+    <td style="background-color:'.$AZ.';color:#fff;padding:14px 18px 12px;width:55%;vertical-align:middle">
       <div style="font-size:24px;font-weight:bold;color:#fff">SAGUMA</div>
-      <div style="font-size:8px;color:#aac4e8;margin-top:3px">INDUMENTARIA LABORAL &middot; MAYORISTA</div>
+      <div style="font-size:8px;color:#aac4e8;margin-top:2px">INDUMENTARIA LABORAL · MAYORISTA</div>
     </td>
-    <td style="background-color:'.$AZ.';padding:14px 18px 12px;color:#fff;text-align:right;font-size:9px;line-height:1.85;vertical-align:middle">
-      Organizaci&oacute;n Crima SA &nbsp;&middot;&nbsp; CUIT 30-70949492-5<br>
-      Av. C&oacute;rdoba 391 9&deg;B &ndash; CABA<br>
-      ventas@saguma.com.ar &nbsp;&middot;&nbsp; +54 11 6112-5719
+    <td style="background-color:'.$AZ.';color:#fff;padding:14px 18px 12px;text-align:right;vertical-align:middle;font-size:9px">
+      Organización Crima SA · CUIT 30-70949492-5<br>
+      Av. Córdoba 391 9°B – CABA<br>
+      ventas@saguma.com.ar · +54 11 6112-5719
     </td>
   </tr>
 </table>
 
-<!-- ═══ SUB-HEADER ═══ -->
+<!-- SUB-HEADER -->
 <table style="width:100%;border-collapse:collapse;border-bottom:3px solid '.$AZ.';margin-bottom:12px" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="background-color:'.$AZL.';padding:5px 18px;font-size:9px;font-weight:bold;color:'.$AZ.'">COTIZACI&Oacute;N MAYORISTA &mdash; N&deg; '.$numero.'</td>
-    <td style="background-color:'.$AZL.';padding:5px 18px;font-size:9px;color:'.$AZ.';text-align:right">www.saguma.com.ar</td>
+    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:5px 18px;font-size:9px;font-weight:bold">COTIZACIÓN MAYORISTA — N° '.$numero.'</td>
+    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:5px 18px;font-size:9px;text-align:right">www.saguma.com.ar</td>
   </tr>
 </table>
 
-<!-- ═══ DATOS CLIENTE / COTIZACION (4 filas x 2 columnas) ═══ -->
-<table style="width:100%;border-collapse:collapse;margin-bottom:14px" cellpadding="0" cellspacing="0">
+<!-- GRILLA DATOS CLIENTE / COTIZACIÓN -->
+<!-- Labels ya en MAYÚSCULAS como UTF-8, sin text-transform para evitar bug de TCPDF -->
+<table style="width:100%;border-collapse:collapse;margin-bottom:12px" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="width:50%;padding-right:6px;vertical-align:top">
+    <td style="width:50%;padding-right:5px;vertical-align:top">
       <table style="width:100%;border-collapse:collapse;border:1px solid '.$BRD.'" cellpadding="0" cellspacing="0">
         <tr><td style="background-color:'.$GR1.';padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">Empresa / Cliente</span><br>
+          <span style="'.$lbl.'">EMPRESA / CLIENTE</span><br>
           <strong style="font-size:11px">'.$cliente.'</strong>
         </td></tr>
         <tr><td style="background-color:#fff;padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">Contacto</span><br>
-          <span style="font-size:10px">'.($contacto ?: '&mdash;').'</span>
+          <span style="'.$lbl.'">CONTACTO</span><br>
+          <span style="font-size:10px">'.($contacto ?: '—').'</span>
         </td></tr>
         <tr><td style="background-color:'.$GR1.';padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">Tel&eacute;fono</span><br>
-          <span style="font-size:10px">'.($telefono ?: '&mdash;').'</span>
+          <span style="'.$lbl.'">TELÉFONO</span><br>
+          <span style="font-size:10px">'.($telefono ?: '—').'</span>
         </td></tr>
         <tr><td style="background-color:#fff;padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">Mail</span><br>
+          <span style="'.$lbl.'">MAIL</span><br>
           <span style="font-size:10px">'.$mail.'</span>
         </td></tr>
       </table>
     </td>
-    <td style="width:50%;padding-left:6px;vertical-align:top">
+    <td style="width:50%;padding-left:5px;vertical-align:top">
       <table style="width:100%;border-collapse:collapse;border:1px solid '.$BRD.'" cellpadding="0" cellspacing="0">
         <tr><td style="background-color:'.$GR1.';padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">N&deg; Cotizaci&oacute;n</span><br>
+          <span style="'.$lbl.'">N° COTIZACIÓN</span><br>
           <strong style="font-size:11px">'.$numero.'</strong>
         </td></tr>
         <tr><td style="background-color:#fff;padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">Fecha Env&iacute;o</span><br>
+          <span style="'.$lbl.'">FECHA ENVÍO</span><br>
           <span style="font-size:10px">'.$fecha_envio.'</span>
         </td></tr>
         <tr><td style="background-color:'.$GR1.';padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">V&aacute;lida Hasta</span><br>
+          <span style="'.$lbl.'">VÁLIDA HASTA</span><br>
           <span style="font-size:10px">'.$fecha_valida.'</span>
         </td></tr>
         <tr><td style="background-color:#fff;padding:5px 9px;border:1px solid '.$BRD.'">
-          <span style="font-size:8px;font-weight:bold;color:'.$AZ.';text-transform:uppercase">Plazo de Entrega</span><br>
+          <span style="'.$lbl.'">PLAZO DE ENTREGA</span><br>
           <span style="font-size:10px">'.$plazo.'</span>
         </td></tr>
       </table>
@@ -280,19 +287,22 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
   </tr>
 </table>
 
-<!-- ═══ TABLA DE PRODUCTOS ═══ -->
-<table style="width:100%;border-collapse:collapse;margin-bottom:2px" cellpadding="0" cellspacing="0">
+<!-- TABLA DE PRODUCTOS -->
+<!-- Anchos en mm para que TCPDF distribuya correctamente el espacio -->
+<!-- Total contenido con márgenes 10mm: ~190mm -->
+<!-- #=6mm Desc=70mm Talle=16mm Color=14mm Cant=11mm PU=21mm Sub=21mm IVA=17mm Tot=14mm => 190mm -->
+<table style="width:190mm;border-collapse:collapse;margin-bottom:2px" cellpadding="0" cellspacing="0">
   <thead>
     <tr>
-      <th style="'.$th_base.';text-align:center;width:22px">#</th>
-      <th style="'.$th_base.';text-align:left">Descripci&oacute;n</th>
-      <th style="'.$th_base.';text-align:center;width:52px">Talle</th>
-      <th style="'.$th_base.';text-align:center;width:50px">Color</th>
-      <th style="'.$th_base.';text-align:center;width:38px">Cant.</th>
-      <th style="'.$th_base.';text-align:right;width:75px">P.Unit s/IVA</th>
-      <th style="'.$th_base.';text-align:right;width:75px">Subtotal</th>
-      <th style="'.$th_base.';text-align:right;width:65px">IVA 21%</th>
-      <th style="'.$th_base.';text-align:right;width:75px">Total c/IVA</th>
+      <th style="'.$th.';text-align:center;width:6mm">#</th>
+      <th style="'.$th.';text-align:left;width:70mm">DESCRIPCIÓN</th>
+      <th style="'.$th.';text-align:center;width:16mm">TALLE</th>
+      <th style="'.$th.';text-align:center;width:14mm">COLOR</th>
+      <th style="'.$th.';text-align:center;width:11mm">CANT.</th>
+      <th style="'.$th.';text-align:right;width:21mm">P.UNIT S/IVA</th>
+      <th style="'.$th.';text-align:right;width:21mm">SUBTOTAL</th>
+      <th style="'.$th.';text-align:right;width:17mm">IVA 21%</th>
+      <th style="'.$th.';text-align:right;width:14mm">TOTAL C/IVA</th>
     </tr>
   </thead>
   <tbody>
@@ -302,29 +312,29 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 
 '.$totales_html.'
 
-<!-- ═══ CONDICIONES COMERCIALES ═══ -->
+<!-- CONDICIONES COMERCIALES -->
 '.$notas_html.'
-<table style="width:100%;border-collapse:collapse;border:1px solid '.$BRD.';border-left:3px solid '.$AZ.';margin-bottom:14px" cellpadding="0" cellspacing="0">
+<table style="width:100%;border-collapse:collapse;border:1px solid '.$BRD.';border-left:3px solid '.$AZ.';margin-bottom:12px" cellpadding="0" cellspacing="0">
   <tr>
     <td style="background-color:#f5f7fb;padding:9px 13px">
-      <div style="font-size:9px;font-weight:bold;color:'.$AZ.';text-transform:uppercase;margin-bottom:5px">Condiciones Comerciales</div>
-      <div style="font-size:9px;line-height:1.85;color:#333">
-        &bull; Pedido m&iacute;nimo: 30 unidades<br>
-        &bull; Plazo de entrega: 30 d&iacute;as h&aacute;biles desde confirmaci&oacute;n<br>
-        &bull; Anticipo: 50% al confirmar &nbsp;|&nbsp; Saldo: 50% contra entrega<br>
-        &bull; Validez: 7 d&iacute;as corridos desde fecha de env&iacute;o<br>
-        &bull; Talle XXXL: +12% sobre precio unitario<br>
-        &bull; Los costos de prendas con bordado y estampado son orientativos. Dise&ntilde;os de gran tama&ntilde;o o complejidad podr&aacute;n requerir un ajuste en el precio, sujeto a evaluaci&oacute;n previa.
+      <div style="font-size:9px;font-weight:bold;color:'.$AZ.';margin-bottom:5px">CONDICIONES COMERCIALES</div>
+      <div style="font-size:9px;color:#333">
+        • Pedido mínimo: 30 unidades<br>
+        • Plazo de entrega: 30 días hábiles desde confirmación<br>
+        • Anticipo: 50% al confirmar | Saldo: 50% contra entrega<br>
+        • Validez: 7 días corridos desde fecha de envío<br>
+        • Talle XXXL: +12% sobre precio unitario<br>
+        • Los costos de prendas con bordado y estampado son orientativos. Diseños de gran tamaño o complejidad podrán requerir un ajuste en el precio, sujeto a evaluación previa.
       </div>
     </td>
   </tr>
 </table>
 
-<!-- ═══ PIE ═══ -->
+<!-- PIE -->
 <table style="width:100%;border-collapse:collapse;border-top:1px solid #eee" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="padding:8px;text-align:center;font-size:8px;color:#aaa">
-      Cotizaci&oacute;n sin valor fiscal. Precios v&aacute;lidos por el per&iacute;odo indicado.
+    <td style="background-color:#fff;padding:8px;text-align:center;font-size:8px;color:#aaa">
+      Cotización sin valor fiscal. Precios válidos por el período indicado.
     </td>
   </tr>
 </table>';
