@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l /Users/Mante/Desktop/saguma/crm/enviar_cotizacion.php)"
+    ]
+  }
+}
