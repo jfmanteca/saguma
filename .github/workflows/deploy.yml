@@ -31,26 +31,52 @@ jobs:
           base     = '/home/u868157557/domains/saguma.com.ar/public_html'
 
           files = [
-            ('crm/api.php',              f'{base}/crm/api.php'),
-            ('crm/enviar_cotizacion.php', f'{base}/crm/enviar_cotizacion.php'),
-            ('crm/index.html',           f'{base}/crm/index.html'),
-            ('test/index.html',          f'{base}/test/index.html'),
+            ('crm/api.php',               f'{base}/crm/api.php'),
+            ('crm/enviar_cotizacion.php',  f'{base}/crm/enviar_cotizacion.php'),
+            ('crm/index.html',            f'{base}/crm/index.html'),
+            ('test/index.html',           f'{base}/test/index.html'),
           ]
+
+          # Validar que los secrets no están vacíos
+          if not host or not user or not password:
+              print('ERROR: Uno o más secrets de SFTP están vacíos.')
+              print(f'  FTP_SERVER: {"OK" if host else "VACÍO"}')
+              print(f'  FTP_USERNAME: {"OK" if user else "VACÍO"}')
+              print(f'  SFTP_PASSWORD: {"OK" if password else "VACÍO"}')
+              sys.exit(1)
+
+          print(f'Conectando a {host}:{port} como {user}...')
 
           transport = paramiko.Transport((host, port))
           transport.connect()
 
+          # Intentar autenticación — primero password, luego interactive
+          autenticado = False
           try:
-            transport.auth_interactive(user, lambda t, i, f: [password]*len(f))
-          except Exception:
-            transport.auth_password(user, password)
+              transport.auth_password(user, password)
+              autenticado = True
+              print('Autenticado via password.')
+          except Exception as e1:
+              print(f'auth_password falló: {e1}')
+              try:
+                  transport.auth_interactive(user, lambda t, i, f: [password]*len(f))
+                  autenticado = True
+                  print('Autenticado via keyboard-interactive.')
+              except Exception as e2:
+                  print(f'auth_interactive falló: {e2}')
+
+          if not autenticado:
+              print('ERROR: No se pudo autenticar con el servidor SFTP.')
+              print('Verificá los secrets FTP_SERVER, FTP_USERNAME y SFTP_PASSWORD en GitHub.')
+              transport.close()
+              sys.exit(1)
 
           sftp = paramiko.SFTPClient.from_transport(transport)
 
           for local, remote in files:
-            print(f'Subiendo {local}...')
-            sftp.put(local, remote)
-            print(f'  OK')
+              print(f'Subiendo {local} → {remote}')
+              sftp.put(local, remote)
+              print(f'  ✓ OK')
 
           sftp.close()
           transport.close()
