@@ -46,7 +46,7 @@ jobs:
 
           # Cargar clave privada (RSA, Ed25519 o ECDSA)
           pkey = None
-          for cls in [paramiko.RSAKey, paramiko.Ed25519Key, paramiko.ECDSAKey, paramiko.DSSKey]:
+          for cls in [paramiko.RSAKey, paramiko.Ed25519Key, paramiko.ECDSAKey]:
               try:
                   pkey = cls.from_private_key(io.StringIO(key_str))
                   print(f'Clave cargada: {cls.__name__}')
