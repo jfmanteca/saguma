@@ -179,10 +179,10 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     // CRM: .hcell .lbl { font-size:9px; font-weight:700; color:#1a3a6b }
     // CRM: thead th { padding:8px 6px; font-size:9.5px }
     // CRM: tbody td { padding:5px 6px; font-size:10.5px }
-    $cel_o = "background-color:$GR1;padding:3px 7px;border:1px solid $BRD;vertical-align:top"; // odd
-    $cel_e = "background-color:#ffffff;padding:3px 7px;border:1px solid $BRD;vertical-align:top"; // even
-    $lbl_s = "font-size:8px;font-weight:bold;color:$AZ";
-    $val_s = "font-size:9px;color:#111111";
+    $cel_o = "background-color:$GR1;padding:2px 7px 3px;border:1px solid $BRD;vertical-align:top"; // odd
+    $cel_e = "background-color:#ffffff;padding:2px 7px 3px;border:1px solid $BRD;vertical-align:top"; // even
+    $lbl_s = "font-size:7.5px;font-weight:bold;color:$AZ;margin:0;padding:0;line-height:1.2";
+    $val_s = "font-size:9px;color:#111111;margin:0;padding:0;line-height:1.3";
     $th    = "background-color:$AZ;color:#ffffff;padding:6px 5px;font-size:8.5px;font-weight:bold";
     $td    = "padding:4px 5px;border-bottom:1px solid $ROW;font-size:9px;color:#111111";
     $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:5px 5px;font-size:8.5px";
