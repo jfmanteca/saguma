@@ -2658,8 +2658,8 @@ function agregarItemCotiz(){
     <td><input type="text" placeholder="Ej: Campera Trucker" oninput="_cotizItems[${idx}].desc=this.value"></td>
     <td><input type="text" placeholder="XL" oninput="_cotizItems[${idx}].talle=this.value"></td>
     <td><input type="text" placeholder="Negro" oninput="_cotizItems[${idx}].color=this.value"></td>
-    <td><input type="number" placeholder="0" oninput="_cotizItems[${idx}].cant=this.value;recalcCotiz()"></td>
-    <td><input type="number" placeholder="0.00" oninput="_cotizItems[${idx}].precio=this.value;recalcCotiz()"></td>
+    <td><input type="number" placeholder="0" oninput="_cotizItems[${idx}].cant=this.value;recalcCotiz()" onwheel="this.blur()"></td>
+    <td><input type="number" placeholder="0.00" oninput="_cotizItems[${idx}].precio=this.value;recalcCotiz()" onwheel="this.blur()"></td>
     <td class="td-calc" id="cotiz-sub-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
     <td class="td-calc" id="cotiz-iva-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
     <td class="td-calc" id="cotiz-tot-${idx}"><span style="color:var(--muted);font-size:10px">—</span></td>
@@ -2798,8 +2798,8 @@ function renderItemCotizRow(idx, it) {
     <td><input class="form-input" style="font-size:12px;padding:4px 8px" value="${it.desc||''}" onchange="_cotizItems[${idx}].desc=this.value"></td>
     <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:50px" value="${it.talle||''}" onchange="_cotizItems[${idx}].talle=this.value"></td>
     <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:60px" value="${it.color||''}" onchange="_cotizItems[${idx}].color=this.value"></td>
-    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:45px;text-align:center" type="number" value="${it.cant||0}" onchange="_cotizItems[${idx}].cant=parseFloat(this.value)||0;recalcCotiz()"></td>
-    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:85px;text-align:right" type="number" value="${it.precio||0}" onchange="_cotizItems[${idx}].precio=parseFloat(this.value)||0;recalcCotiz()"></td>
+    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:45px;text-align:center" type="number" value="${it.cant||0}" onchange="_cotizItems[${idx}].cant=parseFloat(this.value)||0;recalcCotiz()" onwheel="this.blur()"></td>
+    <td><input class="form-input" style="font-size:12px;padding:4px 8px;width:85px;text-align:right" type="number" value="${it.precio||0}" onchange="_cotizItems[${idx}].precio=parseFloat(this.value)||0;recalcCotiz()" onwheel="this.blur()"></td>
     <td class="mono" style="font-size:12px;text-align:right" id="cotiz-sub-${idx}">$0</td>
     <td class="mono" style="font-size:12px;text-align:right" id="cotiz-iva-${idx}">$0</td>
     <td class="mono" style="font-size:12px;text-align:right" id="cotiz-tot-${idx}">$0</td>

@@ -117,7 +117,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     $TH_DESC      = 'DESCRIPCI&#211;N';
     $TXT_COND_HDR = 'CONDICIONES COMERCIALES';
     $TXT_COND     =
-        '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'.
+        '<table cellpadding="0" cellspacing="0" style="width:168mm;border-collapse:collapse">'.
         '<tr><td style="width:5mm;vertical-align:top;font-size:8px;color:#333333;line-height:1.6">&#183;</td><td style="font-size:8px;color:#333333;line-height:1.6">Pedido m&#237;nimo: 30 unidades</td></tr>'.
         '<tr><td style="width:5mm;vertical-align:top;font-size:8px;color:#333333;line-height:1.6">&#183;</td><td style="font-size:8px;color:#333333;line-height:1.6">Plazo de entrega: 30 d&#237;as h&#225;biles desde confirmaci&#243;n</td></tr>'.
         '<tr><td style="width:5mm;vertical-align:top;font-size:8px;color:#333333;line-height:1.6">&#183;</td><td style="font-size:8px;color:#333333;line-height:1.6">Anticipo: 50% al confirmar | Saldo: 50% contra entrega</td></tr>'.
@@ -251,24 +251,28 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
   table { border-collapse: collapse; }
 </style>
 
-<!-- ═══ HEADER (edge-to-edge, width=100% con margins=0) ═══ -->
+<!-- ═══ HEADER: 4 columnas (10mm spacer | 90mm izq | 100mm der | 10mm spacer = 210mm) ═══ -->
 <table style="width:100%;border-collapse:collapse" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="background-color:'.$AZ.';color:#ffffff;padding:10px 8px 10px 28px;width:50%;vertical-align:middle">
+    <td style="background-color:'.$AZ.';width:10mm"> </td>
+    <td style="background-color:'.$AZ.';color:#ffffff;width:90mm;vertical-align:middle">
       <div style="font-size:22px;font-weight:bold;color:#ffffff;margin:0;padding:0;line-height:1.1">SAGUMA</div>
       <div style="font-size:7px;color:#aac4e8;margin:1px 0 0 0;padding:0">'.$TXT_TAGLINE.'</div>
     </td>
-    <td style="background-color:'.$AZ.';color:#ffffff;padding:10px 28px 10px 8px;width:50%;text-align:right;vertical-align:middle;font-size:8px">
+    <td style="background-color:'.$AZ.';color:#ffffff;width:100mm;text-align:right;vertical-align:middle;font-size:8px">
       '.$TXT_ORG.'<br>'.$TXT_ADDR.'<br>'.$TXT_CONTACT.'
     </td>
+    <td style="background-color:'.$AZ.';width:10mm"> </td>
   </tr>
 </table>
 
-<!-- ═══ SUB-HEADER (edge-to-edge) ═══ -->
+<!-- ═══ SUB-HEADER: misma estructura 4 columnas ═══ -->
 <table style="width:100%;border-collapse:collapse;border-bottom:3px solid '.$AZ.';margin-bottom:0" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:3px 8px 3px 28px;font-size:8px;font-weight:bold">'.$TXT_SUBHDR.$numero.'</td>
-    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:3px 28px 3px 8px;font-size:8px;text-align:right">www.saguma.com.ar</td>
+    <td style="background-color:'.$AZL.';width:10mm"> </td>
+    <td style="background-color:'.$AZL.';color:'.$AZ.';width:90mm;font-size:8px;font-weight:bold">'.$TXT_SUBHDR.$numero.'</td>
+    <td style="background-color:'.$AZL.';color:'.$AZ.';width:100mm;font-size:8px;text-align:right">www.saguma.com.ar</td>
+    <td style="background-color:'.$AZL.';width:10mm"> </td>
   </tr>
 </table>
 
