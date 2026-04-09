@@ -179,10 +179,10 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     // CRM: .hcell .lbl { font-size:9px; font-weight:700; color:#1a3a6b }
     // CRM: thead th { padding:8px 6px; font-size:9.5px }
     // CRM: tbody td { padding:5px 6px; font-size:10.5px }
-    $cel_o = "background-color:$GR1;padding:2px 7px 3px;border:1px solid $BRD;vertical-align:top"; // odd
-    $cel_e = "background-color:#ffffff;padding:2px 7px 3px;border:1px solid $BRD;vertical-align:top"; // even
-    $lbl_s = "font-size:7.5px;font-weight:bold;color:$AZ;margin:0;padding:0;line-height:1.2";
-    $val_s = "font-size:9px;color:#111111;margin:0;padding:0;line-height:1.3";
+    $cel_o = "background-color:$GR1;padding:3px 7px;border:1px solid $BRD;vertical-align:top"; // odd
+    $cel_e = "background-color:#ffffff;padding:3px 7px;border:1px solid $BRD;vertical-align:top"; // even
+    $lbl_s = "font-size:7.5px;font-weight:bold;color:$AZ";
+    $val_s = "font-size:9px;color:#111111";
     $th    = "background-color:$AZ;color:#ffffff;padding:6px 5px;font-size:8.5px;font-weight:bold";
     $td    = "padding:4px 5px;border-bottom:1px solid $ROW;font-size:9px;color:#111111";
     $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:5px 5px;font-size:8.5px";
@@ -192,47 +192,26 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     // Odd cells (1,3,5,7) = left column = bg #f7f9fc
     // Even cells (2,4,6,8) = right column = bg #ffffff
     $d = '&#8212;';
+    // TCPDF agrega espacio entre <div> bloques. Usar <span>+<br> en un solo flujo elimina ese espacio.
+    $lbl = fn($t) => "<span style=\"{$lbl_s}\">{$t}</span>";
+    $val = fn($t) => "<span style=\"{$val_s}\">{$t}</span>";
     $grid = "
 <table style=\"width:190mm;border-collapse:collapse;margin-top:10px;margin-bottom:10px\" cellpadding=\"0\" cellspacing=\"0\">
   <tr>
-    <td style=\"{$cel_o};width:95mm\">
-      <div style=\"{$lbl_s}\">EMPRESA / CLIENTE</div>
-      <div style=\"{$val_s}\"><strong>" . ($esc($cliente) ?: $d) . "</strong></div>
-    </td>
-    <td style=\"{$cel_e};width:95mm\">
-      <div style=\"{$lbl_s}\">N&#176; COTIZACI&#211;N</div>
-      <div style=\"{$val_s}\"><strong>" . $esc($numero) . "</strong></div>
-    </td>
+    <td style=\"{$cel_o};width:95mm\">" . $lbl('EMPRESA / CLIENTE') . "<br><strong>" . ($esc($cliente) ?: $d) . "</strong></td>
+    <td style=\"{$cel_e};width:95mm\">" . $lbl('N&#176; COTIZACI&#211;N') . "<br><strong>" . $esc($numero) . "</strong></td>
   </tr>
   <tr>
-    <td style=\"{$cel_o}\">
-      <div style=\"{$lbl_s}\">CONTACTO</div>
-      <div style=\"{$val_s}\">" . ($esc($contacto) ?: $d) . "</div>
-    </td>
-    <td style=\"{$cel_e}\">
-      <div style=\"{$lbl_s}\">FECHA ENV&#205;O</div>
-      <div style=\"{$val_s}\">{$fecha_envio}</div>
-    </td>
+    <td style=\"{$cel_o}\">" . $lbl('CONTACTO') . "<br>" . ($esc($contacto) ?: $d) . "</td>
+    <td style=\"{$cel_e}\">" . $lbl('FECHA ENV&#205;O') . "<br>{$fecha_envio}</td>
   </tr>
   <tr>
-    <td style=\"{$cel_o}\">
-      <div style=\"{$lbl_s}\">TEL&#201;FONO</div>
-      <div style=\"{$val_s}\">" . ($esc($telefono) ?: $d) . "</div>
-    </td>
-    <td style=\"{$cel_e}\">
-      <div style=\"{$lbl_s}\">V&#193;LIDA HASTA</div>
-      <div style=\"{$val_s}\">{$fecha_valida}</div>
-    </td>
+    <td style=\"{$cel_o}\">" . $lbl('TEL&#201;FONO') . "<br>" . ($esc($telefono) ?: $d) . "</td>
+    <td style=\"{$cel_e}\">" . $lbl('V&#193;LIDA HASTA') . "<br>{$fecha_valida}</td>
   </tr>
   <tr>
-    <td style=\"{$cel_o}\">
-      <div style=\"{$lbl_s}\">MAIL</div>
-      <div style=\"{$val_s}\">" . ($esc($mail) ?: $d) . "</div>
-    </td>
-    <td style=\"{$cel_e}\">
-      <div style=\"{$lbl_s}\">PLAZO DE ENTREGA</div>
-      <div style=\"{$val_s}\">" . $esc($plazo) . "</div>
-    </td>
+    <td style=\"{$cel_o}\">" . $lbl('MAIL') . "<br>" . ($esc($mail) ?: $d) . "</td>
+    <td style=\"{$cel_e}\">" . $lbl('PLAZO DE ENTREGA') . "<br>" . $esc($plazo) . "</td>
   </tr>
 </table>";
 
