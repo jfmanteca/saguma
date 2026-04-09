@@ -134,7 +134,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     $td  = "font-size:9px;padding:6px 3px;border-bottom:1px solid $ROW";
     $tot = "background-color:$AZD;color:#ffffff;font-size:9px;font-weight:bold;padding:5px 3px";
     $lbl = "font-size:7px;font-weight:bold;color:$AZ";
-    $val = "font-size:9px;margin-top:1px";
+    $val = "font-size:9px;margin-top:0";
 
     // Anchos de columna en mm (total = 190mm = ancho de contenido con margenes 10mm)
     // #=5 Desc=55 Talle=14 Color=13 Cant=11 PU=21 Sub=22 IVA=20 Tot=29 => 190mm
@@ -254,11 +254,11 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 <!-- ═══ HEADER (edge-to-edge, width=100% con margins=0) ═══ -->
 <table style="width:100%;border-collapse:collapse" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="background-color:'.$AZ.';color:#ffffff;padding:4mm 5mm 4mm 10mm;width:55%;vertical-align:middle">
+    <td style="background-color:'.$AZ.';color:#ffffff;padding:10px 8px 10px 28px;width:50%;vertical-align:middle">
       <div style="font-size:22px;font-weight:bold;color:#ffffff;margin:0;padding:0;line-height:1.1">SAGUMA</div>
       <div style="font-size:7px;color:#aac4e8;margin:1px 0 0 0;padding:0">'.$TXT_TAGLINE.'</div>
     </td>
-    <td style="background-color:'.$AZ.';color:#ffffff;padding:4mm 10mm 4mm 5mm;text-align:right;vertical-align:middle;font-size:8px">
+    <td style="background-color:'.$AZ.';color:#ffffff;padding:10px 28px 10px 8px;width:50%;text-align:right;vertical-align:middle;font-size:8px">
       '.$TXT_ORG.'<br>'.$TXT_ADDR.'<br>'.$TXT_CONTACT.'
     </td>
   </tr>
@@ -267,8 +267,8 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 <!-- ═══ SUB-HEADER (edge-to-edge) ═══ -->
 <table style="width:100%;border-collapse:collapse;border-bottom:3px solid '.$AZ.';margin-bottom:0" cellpadding="0" cellspacing="0">
   <tr>
-    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:2mm 5mm 2mm 10mm;font-size:8px;font-weight:bold">'.$TXT_SUBHDR.$numero.'</td>
-    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:2mm 10mm 2mm 5mm;font-size:8px;text-align:right">www.saguma.com.ar</td>
+    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:3px 8px 3px 28px;font-size:8px;font-weight:bold">'.$TXT_SUBHDR.$numero.'</td>
+    <td style="background-color:'.$AZL.';color:'.$AZ.';padding:3px 28px 3px 8px;font-size:8px;text-align:right">www.saguma.com.ar</td>
   </tr>
 </table>
 
@@ -276,26 +276,26 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 <table style="width:100%;border-collapse:collapse" cellpadding="0" cellspacing="0">
   <tr>
     <td style="width:10mm"></td>
-    <td style="width:190mm;vertical-align:top;padding-top:10px">
+    <td style="width:190mm;vertical-align:top;padding-top:16px">
 
 <!-- GRILLA DATOS CLIENTE / COTIZACION -->
-<table style="width:190mm;border-collapse:collapse;margin-top:6px;margin-bottom:6px" cellpadding="0" cellspacing="0">
+<table style="width:190mm;border-collapse:collapse;margin-top:12px;margin-bottom:12px" cellpadding="0" cellspacing="0">
   <tr>
     <td style="width:95mm;padding-right:4px;vertical-align:top">
       <table style="width:100%;border-collapse:collapse;border:1px solid '.$BRD.'" cellpadding="0" cellspacing="0">
-        <tr><td style="background-color:'.$GR1.';padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:'.$GR1.';padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_EMPRESA.'</div>
           <div style="'.$val.'"><strong>'.$cliente.'</strong></div>
         </td></tr>
-        <tr><td style="background-color:#ffffff;padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:#ffffff;padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_CONTACTO.'</div>
           <div style="'.$val.'">'.($contacto ?: '&#8212;').'</div>
         </td></tr>
-        <tr><td style="background-color:'.$GR1.';padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:'.$GR1.';padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_TEL.'</div>
           <div style="'.$val.'">'.($telefono ?: '&#8212;').'</div>
         </td></tr>
-        <tr><td style="background-color:#ffffff;padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:#ffffff;padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_MAIL.'</div>
           <div style="'.$val.'">'.$mail.'</div>
         </td></tr>
@@ -303,19 +303,19 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     </td>
     <td style="width:95mm;padding-left:4px;vertical-align:top">
       <table style="width:100%;border-collapse:collapse;border:1px solid '.$BRD.'" cellpadding="0" cellspacing="0">
-        <tr><td style="background-color:'.$GR1.';padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:'.$GR1.';padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_COT.'</div>
           <div style="'.$val.'"><strong>'.$numero.'</strong></div>
         </td></tr>
-        <tr><td style="background-color:#ffffff;padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:#ffffff;padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_FENVIO.'</div>
           <div style="'.$val.'">'.$fecha_envio.'</div>
         </td></tr>
-        <tr><td style="background-color:'.$GR1.';padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:'.$GR1.';padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_VALIDA.'</div>
           <div style="'.$val.'">'.$fecha_valida.'</div>
         </td></tr>
-        <tr><td style="background-color:#ffffff;padding:2px 7px;border:1px solid '.$BRD.'">
+        <tr><td style="background-color:#ffffff;padding:1px 6px;border:1px solid '.$BRD.'">
           <div style="'.$lbl.'">'.$LBL_PLAZO.'</div>
           <div style="'.$val.'">'.$plazo.'</div>
         </td></tr>
