@@ -179,13 +179,13 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     // CRM: .hcell .lbl { font-size:9px; font-weight:700; color:#1a3a6b }
     // CRM: thead th { padding:8px 6px; font-size:9.5px }
     // CRM: tbody td { padding:5px 6px; font-size:10.5px }
-    $cel_o = "background-color:$GR1;padding:5px 8px;border:1px solid $BRD;vertical-align:top"; // odd
-    $cel_e = "background-color:#ffffff;padding:5px 8px;border:1px solid $BRD;vertical-align:top"; // even
-    $lbl_s = "font-size:9px;font-weight:bold;color:$AZ";
-    $val_s = "font-size:10px";
-    $th    = "background-color:$AZ;color:#ffffff;padding:8px 6px;font-size:9px;font-weight:bold";
-    $td    = "padding:5px 6px;border-bottom:1px solid $ROW;font-size:10px";
-    $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:7px 6px;font-size:9px";
+    $cel_o = "background-color:$GR1;padding:3px 7px;border:1px solid $BRD;vertical-align:top"; // odd
+    $cel_e = "background-color:#ffffff;padding:3px 7px;border:1px solid $BRD;vertical-align:top"; // even
+    $lbl_s = "font-size:8px;font-weight:bold;color:$AZ";
+    $val_s = "font-size:9px;color:#111111";
+    $th    = "background-color:$AZ;color:#ffffff;padding:6px 5px;font-size:8.5px;font-weight:bold";
+    $td    = "padding:4px 5px;border-bottom:1px solid $ROW;font-size:9px;color:#111111";
+    $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:5px 5px;font-size:8.5px";
 
     // ── Grid datos cliente (idéntico a hgrid del CRM) ────────
     // CRM: grid-template-columns:1fr 1fr; gap:0; margin-bottom:14px
@@ -193,7 +193,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     // Even cells (2,4,6,8) = right column = bg #ffffff
     $d = '&#8212;';
     $grid = "
-<table style=\"width:190mm;border-collapse:collapse;margin-bottom:14px\" cellpadding=\"0\" cellspacing=\"0\">
+<table style=\"width:190mm;border-collapse:collapse;margin-top:10px;margin-bottom:10px\" cellpadding=\"0\" cellspacing=\"0\">
   <tr>
     <td style=\"{$cel_o};width:95mm\">
       <div style=\"{$lbl_s}\">EMPRESA / CLIENTE</div>
@@ -237,8 +237,8 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 </table>";
 
     // ── Tabla de productos ────────────────────────────────────
-    // Anchos: 8+52+18+15+12+24+24+20+17 = 190mm
-    $W = ['8mm','52mm','18mm','15mm','12mm','24mm','24mm','20mm','17mm'];
+    // Anchos: 7+50+16+13+11+23+23+19+28 = 190mm
+    $W = ['7mm','50mm','16mm','13mm','11mm','23mm','23mm','19mm','28mm'];
 
     $rows = '';
     $n = 1;
@@ -329,16 +329,16 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     <td style=\"width:45%\">
       <table style=\"width:100%;border-collapse:collapse;border:1px solid $BRD\" cellpadding=\"0\" cellspacing=\"0\">
         <tr>
-          <td style=\"background-color:#ffffff;padding:6px 14px;font-size:11px;border-bottom:1px solid #eeeeee\">Subtotal s/IVA</td>
-          <td style=\"background-color:#ffffff;padding:6px 14px;font-size:11px;text-align:right;border-bottom:1px solid #eeeeee\">" . $fmt($subtotal_gen) . "</td>
+          <td style=\"background-color:#ffffff;padding:4px 12px;font-size:9px;border-bottom:1px solid #eeeeee\">Subtotal s/IVA</td>
+          <td style=\"background-color:#ffffff;padding:4px 12px;font-size:9px;text-align:right;border-bottom:1px solid #eeeeee\">" . $fmt($subtotal_gen) . "</td>
         </tr>
         <tr>
-          <td style=\"background-color:#ffffff;padding:6px 14px;font-size:11px;border-bottom:1px solid #eeeeee\">IVA 21%</td>
-          <td style=\"background-color:#ffffff;padding:6px 14px;font-size:11px;text-align:right;border-bottom:1px solid #eeeeee\">" . $fmt($iva_gen) . "</td>
+          <td style=\"background-color:#ffffff;padding:4px 12px;font-size:9px;border-bottom:1px solid #eeeeee\">IVA 21%</td>
+          <td style=\"background-color:#ffffff;padding:4px 12px;font-size:9px;text-align:right;border-bottom:1px solid #eeeeee\">" . $fmt($iva_gen) . "</td>
         </tr>
         <tr>
-          <td style=\"background-color:$AZ;color:#ffffff;padding:6px 14px;font-size:13px;font-weight:bold\">TOTAL c/IVA</td>
-          <td style=\"background-color:$AZ;color:#ffffff;padding:6px 14px;font-size:13px;font-weight:bold;text-align:right\">" . $fmt($total_gen) . "</td>
+          <td style=\"background-color:$AZ;color:#ffffff;padding:5px 12px;font-size:10px;font-weight:bold\">TOTAL c/IVA</td>
+          <td style=\"background-color:$AZ;color:#ffffff;padding:5px 12px;font-size:10px;font-weight:bold;text-align:right\">" . $fmt($total_gen) . "</td>
         </tr>
       </table>
     </td>
@@ -363,19 +363,18 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 
     // ── Condiciones comerciales (idéntico al CRM: .cond ul li) ──
     // CRM: padding:10px 14px; font-size:10px; line-height:1.75; ul padding-left:16px
+    $li = "font-size:8.5px;color:#333333;line-height:1.6";
     $cond = "
 <table style=\"width:190mm;border-collapse:collapse;border:1px solid $BRD;border-left:3px solid $AZ;margin-bottom:10px\" cellpadding=\"0\" cellspacing=\"0\">
   <tr>
-    <td style=\"background-color:#f5f7fb;padding:10px 14px\">
-      <div style=\"font-size:9px;font-weight:bold;color:$AZ;margin-bottom:5px\">CONDICIONES COMERCIALES</div>
-      <table cellpadding=\"0\" cellspacing=\"0\" style=\"width:170mm;border-collapse:collapse\">
-        <tr><td style=\"width:5mm;vertical-align:top;font-size:10px;color:#333333;line-height:1.75\">&#8226;</td><td style=\"font-size:10px;color:#333333;line-height:1.75\">Pedido m&#237;nimo: 30 unidades</td></tr>
-        <tr><td style=\"vertical-align:top;font-size:10px;color:#333333;line-height:1.75\">&#8226;</td><td style=\"font-size:10px;color:#333333;line-height:1.75\">Plazo de entrega: 30 d&#237;as h&#225;biles desde confirmaci&#243;n</td></tr>
-        <tr><td style=\"vertical-align:top;font-size:10px;color:#333333;line-height:1.75\">&#8226;</td><td style=\"font-size:10px;color:#333333;line-height:1.75\">Anticipo: 50% al confirmar | Saldo: 50% contra entrega</td></tr>
-        <tr><td style=\"vertical-align:top;font-size:10px;color:#333333;line-height:1.75\">&#8226;</td><td style=\"font-size:10px;color:#333333;line-height:1.75\">Validez: 7 d&#237;as corridos desde fecha de env&#237;o</td></tr>
-        <tr><td style=\"vertical-align:top;font-size:10px;color:#333333;line-height:1.75\">&#8226;</td><td style=\"font-size:10px;color:#333333;line-height:1.75\">Talle XXXL: +12% sobre precio unitario</td></tr>
-        <tr><td style=\"vertical-align:top;font-size:10px;color:#333333;line-height:1.75\">&#8226;</td><td style=\"font-size:10px;color:#333333;line-height:1.75\">Los costos de prendas con bordado y estampado son orientativos. Dise&#241;os de gran tama&#241;o o complejidad podr&#225;n requerir un ajuste en el precio, sujeto a evaluaci&#243;n previa.</td></tr>
-      </table>
+    <td style=\"background-color:#f5f7fb;padding:8px 12px\">
+      <div style=\"font-size:8.5px;font-weight:bold;color:$AZ;margin-bottom:4px\">CONDICIONES COMERCIALES</div>
+      <div style=\"$li\">&#8226; Pedido m&#237;nimo: 30 unidades</div>
+      <div style=\"$li\">&#8226; Plazo de entrega: 30 d&#237;as h&#225;biles desde confirmaci&#243;n</div>
+      <div style=\"$li\">&#8226; Anticipo: 50% al confirmar | Saldo: 50% contra entrega</div>
+      <div style=\"$li\">&#8226; Validez: 7 d&#237;as corridos desde fecha de env&#237;o</div>
+      <div style=\"$li\">&#8226; Talle XXXL: +12% sobre precio unitario</div>
+      <div style=\"$li\">&#8226; Los costos de prendas con bordado y estampado son orientativos. Dise&#241;os de gran tama&#241;o o complejidad podr&#225;n requerir un ajuste en el precio, sujeto a evaluaci&#243;n previa.</div>
     </td>
   </tr>
 </table>";
