@@ -19,55 +19,54 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.FTP_SERVER }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
-          SFTP_PASS: ${{ secrets.SFTP_PASSWORD }}
+          SSH_KEY:   ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           python3 << 'EOF'
-          import paramiko, os, sys
+          import paramiko, os, sys, io
 
-          host     = os.environ['SFTP_HOST']
-          user     = os.environ['SFTP_USER']
-          password = os.environ['SFTP_PASS']
-          port     = 65002
-          base     = '/home/u868157557/domains/saguma.com.ar/public_html'
+          host    = os.environ['SFTP_HOST']
+          user    = os.environ['SFTP_USER']
+          key_str = os.environ['SSH_KEY']
+          port    = 65002
+          base    = '/home/u868157557/domains/saguma.com.ar/public_html'
 
           files = [
-            ('crm/api.php',               f'{base}/crm/api.php'),
-            ('crm/enviar_cotizacion.php',  f'{base}/crm/enviar_cotizacion.php'),
-            ('crm/index.html',            f'{base}/crm/index.html'),
-            ('test/index.html',           f'{base}/test/index.html'),
+            ('crm/api.php',              f'{base}/crm/api.php'),
+            ('crm/enviar_cotizacion.php', f'{base}/crm/enviar_cotizacion.php'),
+            ('crm/index.html',           f'{base}/crm/index.html'),
+            ('test/index.html',          f'{base}/test/index.html'),
           ]
 
-          # Validar que los secrets no están vacíos
-          if not host or not user or not password:
-              print('ERROR: Uno o más secrets de SFTP están vacíos.')
-              print(f'  FTP_SERVER: {"OK" if host else "VACÍO"}')
-              print(f'  FTP_USERNAME: {"OK" if user else "VACÍO"}')
-              print(f'  SFTP_PASSWORD: {"OK" if password else "VACÍO"}')
+          if not host or not user or not key_str:
+              print('ERROR: Uno o más secrets están vacíos.')
+              print(f'  FTP_SERVER:      {"OK" if host else "VACÍO"}')
+              print(f'  FTP_USERNAME:    {"OK" if user else "VACÍO"}')
+              print(f'  SSH_PRIVATE_KEY: {"OK" if key_str else "VACÍO"}')
+              sys.exit(1)
+
+          # Cargar clave privada (RSA, Ed25519 o ECDSA)
+          pkey = None
+          for cls in [paramiko.RSAKey, paramiko.Ed25519Key, paramiko.ECDSAKey, paramiko.DSSKey]:
+              try:
+                  pkey = cls.from_private_key(io.StringIO(key_str))
+                  print(f'Clave cargada: {cls.__name__}')
+                  break
+              except Exception:
+                  continue
+
+          if pkey is None:
+              print('ERROR: No se pudo cargar la clave SSH_PRIVATE_KEY.')
               sys.exit(1)
 
           print(f'Conectando a {host}:{port} como {user}...')
-
           transport = paramiko.Transport((host, port))
           transport.connect()
 
-          # Intentar autenticación — primero password, luego interactive
-          autenticado = False
           try:
-              transport.auth_password(user, password)
-              autenticado = True
-              print('Autenticado via password.')
-          except Exception as e1:
-              print(f'auth_password falló: {e1}')
-              try:
-                  transport.auth_interactive(user, lambda t, i, f: [password]*len(f))
-                  autenticado = True
-                  print('Autenticado via keyboard-interactive.')
-              except Exception as e2:
-                  print(f'auth_interactive falló: {e2}')
-
-          if not autenticado:
-              print('ERROR: No se pudo autenticar con el servidor SFTP.')
-              print('Verificá los secrets FTP_SERVER, FTP_USERNAME y SFTP_PASSWORD en GitHub.')
+              transport.auth_publickey(user, pkey)
+              print('Autenticado via clave SSH.')
+          except Exception as e:
+              print(f'ERROR: Autenticación con clave SSH falló: {e}')
               transport.close()
               sys.exit(1)
 
