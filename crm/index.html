@@ -508,13 +508,15 @@
           </select>
         </div>
         <div class="table-wrap">
-          <div class="table-header">
+          <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
             <div class="table-title">Productos y Precios</div>
-            <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Todos los valores son <strong>sin IVA</strong>. Editá margen o costo directamente en la tabla.</div>
+            <button class="btn btn-ghost btn-sm" onclick="exportarProductosExcel()" title="Exportar a Excel" style="font-size:12px;display:flex;align-items:center;gap:5px;border:1px solid var(--border);padding:5px 10px;">
+              <span>📊</span> Exportar Excel
+            </button>
           </div>
           <table>
             <thead><tr>
-              <th>Categoría</th>
+              <th id="th-categoria" onclick="sortProductosPorCategoria()" style="cursor:pointer;user-select:none;">Categoría <span id="prod-sort-icon" style="font-size:10px;">↑</span></th>
               <th>Producto / Tela</th>
               <th>Marca</th>
               <th style="width:100px">Costo s/IVA</th>
@@ -1885,10 +1887,72 @@ function calcPrecioProducto(costo, margenPct) {
   return c * (1 + m / 100);
 }
 
+// Estado de ordenamiento de productos
+let _prodSortDir = 'asc'; // 'asc' | 'desc'
+
+function sortProductosPorCategoria() {
+  _prodSortDir = _prodSortDir === 'asc' ? 'desc' : 'asc';
+  const icon = document.getElementById('prod-sort-icon');
+  if(icon) icon.textContent = _prodSortDir === 'asc' ? '↑' : '↓';
+  // Re-renderizar con el filtro activo
+  const q = (document.getElementById('prod-search')?.value||'').toLowerCase();
+  const cat = document.getElementById('prod-cat')?.value||'';
+  const filtered = _data.productos.filter(p=>
+    [p.categoria,p.tela,p.marca].join(' ').toLowerCase().includes(q) && (!cat||p.categoria===cat)
+  );
+  renderProductos(filtered);
+}
+
+function exportarProductosExcel() {
+  const rows = _data.productos;
+  if(!rows.length){ toast('No hay productos para exportar'); return; }
+  // Armar CSV con separador de coma, UTF-8 BOM para Excel
+  const BOM = '\uFEFF';
+  const headers = ['Categoría','Producto / Tela','Marca','Costo s/IVA','Margen %','Precio s/IVA','Precio c/IVA','Web'];
+  const lines = rows
+    .slice()
+    .sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'','es'))
+    .map(p=>{
+      const costo     = parseFloat(p.costo)||0;
+      const margenRaw = parseFloat(p.margen)||0;
+      const margenPct = margenRaw > 1 ? parseFloat(margenRaw.toFixed(1)) : parseFloat((margenRaw*100).toFixed(1));
+      const precio    = costo * (1 + margenPct/100);
+      const precioIVA = precio * 1.21;
+      const web       = parseInt(p.visible_web)===1 ? 'Sí' : 'No';
+      const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+      return [
+        esc(p.categoria||''),
+        esc(p.tela||''),
+        esc(p.marca||''),
+        costo.toFixed(2),
+        margenPct.toFixed(1),
+        precio.toFixed(2),
+        precioIVA.toFixed(2),
+        web
+      ].join(',');
+    });
+  const csv = BOM + headers.join(',') + '\n' + lines.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'productos_precios.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Exportación descargada ✓');
+}
+
 function renderProductos(data) {
   const tbody = document.getElementById('productos-tbody');
   if(!tbody) return;
   if(!data.length){ tbody.innerHTML='<tr><td colspan="9" class="empty">No hay productos.</td></tr>'; return; }
+  // Ordenar por categoría según estado actual
+  data = data.slice().sort((a,b)=>{
+    const cmp = (a.categoria||'').localeCompare(b.categoria||'','es');
+    return _prodSortDir === 'asc' ? cmp : -cmp;
+  });
   // Poblar filtro de categorías (siempre desde la lista completa para no perder opciones)
   const cats = [...new Set(_data.productos.map(p=>p.categoria).filter(Boolean))].sort();
   const catSelect = document.getElementById('prod-cat');
@@ -2058,6 +2122,9 @@ function filterProductos() {
   renderProductos(_data.productos.filter(p=>{
     return [p.categoria,p.tela,p.marca].join(' ').toLowerCase().includes(q) && (!cat||p.categoria===cat);
   }));
+  // Actualizar ícono de sort
+  const icon = document.getElementById('prod-sort-icon');
+  if(icon) icon.textContent = _prodSortDir === 'asc' ? '↑' : '↓';
 }
 
 async function toggleVisibleWeb(id, checked) {
