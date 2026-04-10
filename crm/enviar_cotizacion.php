@@ -367,6 +367,9 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
   </tr>
 </table>";
 
+    // Espaciador: celda con height explicito — lo unico que TCPDF respeta para agregar espacio vertical
+    $esp = '<table style="width:190mm;border-collapse:collapse" cellpadding="0" cellspacing="0"><tr><td style="height:10px;font-size:1px;line-height:1px"> </td></tr></table>';
+
     // ── HTML body completo (spacer 10mm | 190mm contenido | 10mm) ──
     $html = '
 <style>
@@ -376,8 +379,8 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 <table style="width:100%;border-collapse:collapse" cellpadding="0" cellspacing="0">
   <tr>
     <td style="width:10mm"></td>
-    <td style="width:190mm;vertical-align:top;padding-top:14px">
-      ' . $grid . $tabla . $totales . $obs_html . $cond . $pie . '
+    <td style="width:190mm;vertical-align:top">
+      ' . $esp . $grid . $esp . $tabla . $totales . $obs_html . $cond . $pie . '
     </td>
     <td style="width:10mm"></td>
   </tr>
