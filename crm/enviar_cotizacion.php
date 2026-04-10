@@ -184,8 +184,8 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     $lbl_s = "font-size:7.5px;font-weight:bold;color:$AZ";
     $val_s = "font-size:9px;color:#111111";
     $th    = "background-color:$AZ;color:#ffffff;padding:6px 5px;font-size:8.5px;font-weight:bold";
-    $td    = "padding:4px 5px;border-bottom:1px solid $ROW;font-size:9px;color:#111111";
-    $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:5px 5px;font-size:8.5px";
+    $td    = "padding:6px 5px;border-bottom:1px solid $ROW;font-size:9px;color:#111111;vertical-align:middle";
+    $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:6px 5px;font-size:8.5px;vertical-align:middle";
 
     // ── Grid datos cliente (idéntico a hgrid del CRM) ────────
     // CRM: grid-template-columns:1fr 1fr; gap:0; margin-bottom:14px
@@ -262,7 +262,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     $max_rows = max(count($items), 14);
     for ($i = count($items); $i < $max_rows; $i++) {
         $bg = (($i + 1) % 2 === 0) ? "background-color:$GR2;" : '';
-        $rows .= "<tr><td colspan=\"9\" style=\"{$bg}height:22px;border-bottom:1px solid $ROW\"></td></tr>";
+        $rows .= "<tr><td colspan=\"9\" style=\"{$bg}height:21px;border-bottom:1px solid $ROW\"></td></tr>";
     }
 
     // Fila TOTAL GENERAL
@@ -380,7 +380,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
   <tr>
     <td style="width:10mm"></td>
     <td style="width:190mm;vertical-align:top">
-      ' . $esp . $grid . $esp . $tabla . $totales . $obs_html . $cond . $pie . '
+      ' . $esp . $grid . $esp . $tabla . $totales . $obs_html . $esp . $cond . $pie . '
     </td>
     <td style="width:10mm"></td>
   </tr>
