@@ -192,26 +192,26 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     // Odd cells (1,3,5,7) = left column = bg #f7f9fc
     // Even cells (2,4,6,8) = right column = bg #ffffff
     $d = '&#8212;';
-    // TCPDF agrega espacio entre <div> bloques. Usar <span>+<br> en un solo flujo elimina ese espacio.
+    // <span> label azul + <br> + <span> valor negro en un solo flujo (sin espacio entre div bloques)
     $lbl = fn($t) => "<span style=\"{$lbl_s}\">{$t}</span>";
-    $val = fn($t) => "<span style=\"{$val_s}\">{$t}</span>";
+    $blk = fn($t) => "<span style=\"{$val_s}\">{$t}</span>";
     $grid = "
-<table style=\"width:190mm;border-collapse:collapse;margin-top:10px;margin-bottom:10px\" cellpadding=\"0\" cellspacing=\"0\">
+<table style=\"width:190mm;border-collapse:collapse;margin-top:12px;margin-bottom:12px\" cellpadding=\"0\" cellspacing=\"0\">
   <tr>
-    <td style=\"{$cel_o};width:95mm\">" . $lbl('EMPRESA / CLIENTE') . "<br><strong>" . ($esc($cliente) ?: $d) . "</strong></td>
-    <td style=\"{$cel_e};width:95mm\">" . $lbl('N&#176; COTIZACI&#211;N') . "<br><strong>" . $esc($numero) . "</strong></td>
+    <td style=\"{$cel_o};width:95mm\">" . $lbl('EMPRESA / CLIENTE') . "<br><span style=\"{$val_s};font-weight:bold\">" . ($esc($cliente) ?: $d) . "</span></td>
+    <td style=\"{$cel_e};width:95mm\">" . $lbl('N&#176; COTIZACI&#211;N') . "<br><span style=\"{$val_s};font-weight:bold\">" . $esc($numero) . "</span></td>
   </tr>
   <tr>
-    <td style=\"{$cel_o}\">" . $lbl('CONTACTO') . "<br>" . ($esc($contacto) ?: $d) . "</td>
-    <td style=\"{$cel_e}\">" . $lbl('FECHA ENV&#205;O') . "<br>{$fecha_envio}</td>
+    <td style=\"{$cel_o}\">" . $lbl('CONTACTO') . "<br>" . $blk($esc($contacto) ?: $d) . "</td>
+    <td style=\"{$cel_e}\">" . $lbl('FECHA ENV&#205;O') . "<br>" . $blk($fecha_envio) . "</td>
   </tr>
   <tr>
-    <td style=\"{$cel_o}\">" . $lbl('TEL&#201;FONO') . "<br>" . ($esc($telefono) ?: $d) . "</td>
-    <td style=\"{$cel_e}\">" . $lbl('V&#193;LIDA HASTA') . "<br>{$fecha_valida}</td>
+    <td style=\"{$cel_o}\">" . $lbl('TEL&#201;FONO') . "<br>" . $blk($esc($telefono) ?: $d) . "</td>
+    <td style=\"{$cel_e}\">" . $lbl('V&#193;LIDA HASTA') . "<br>" . $blk($fecha_valida) . "</td>
   </tr>
   <tr>
-    <td style=\"{$cel_o}\">" . $lbl('MAIL') . "<br>" . ($esc($mail) ?: $d) . "</td>
-    <td style=\"{$cel_e}\">" . $lbl('PLAZO DE ENTREGA') . "<br>" . $esc($plazo) . "</td>
+    <td style=\"{$cel_o}\">" . $lbl('MAIL') . "<br>" . $blk($esc($mail) ?: $d) . "</td>
+    <td style=\"{$cel_e}\">" . $lbl('PLAZO DE ENTREGA') . "<br>" . $blk($esc($plazo)) . "</td>
   </tr>
 </table>";
 
@@ -342,18 +342,18 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 
     // ── Condiciones comerciales (idéntico al CRM: .cond ul li) ──
     // CRM: padding:10px 14px; font-size:10px; line-height:1.75; ul padding-left:16px
-    $li = "font-size:8.5px;color:#333333;line-height:1.6";
+    $li = "font-size:8.5px;color:#333333;line-height:1.4";
     $cond = "
 <table style=\"width:190mm;border-collapse:collapse;border:1px solid $BRD;border-left:3px solid $AZ;margin-bottom:10px\" cellpadding=\"0\" cellspacing=\"0\">
   <tr>
     <td style=\"background-color:#f5f7fb;padding:8px 12px\">
-      <div style=\"font-size:8.5px;font-weight:bold;color:$AZ;margin-bottom:4px\">CONDICIONES COMERCIALES</div>
-      <div style=\"$li\">&#8226; Pedido m&#237;nimo: 30 unidades</div>
-      <div style=\"$li\">&#8226; Plazo de entrega: 30 d&#237;as h&#225;biles desde confirmaci&#243;n</div>
-      <div style=\"$li\">&#8226; Anticipo: 50% al confirmar | Saldo: 50% contra entrega</div>
-      <div style=\"$li\">&#8226; Validez: 7 d&#237;as corridos desde fecha de env&#237;o</div>
-      <div style=\"$li\">&#8226; Talle XXXL: +12% sobre precio unitario</div>
-      <div style=\"$li\">&#8226; Los costos de prendas con bordado y estampado son orientativos. Dise&#241;os de gran tama&#241;o o complejidad podr&#225;n requerir un ajuste en el precio, sujeto a evaluaci&#243;n previa.</div>
+      <span style=\"font-size:8.5px;font-weight:bold;color:$AZ\">CONDICIONES COMERCIALES</span><br>
+      <span style=\"$li\">&#8226; Pedido m&#237;nimo: 30 unidades</span><br>
+      <span style=\"$li\">&#8226; Plazo de entrega: 30 d&#237;as h&#225;biles desde confirmaci&#243;n</span><br>
+      <span style=\"$li\">&#8226; Anticipo: 50% al confirmar | Saldo: 50% contra entrega</span><br>
+      <span style=\"$li\">&#8226; Validez: 7 d&#237;as corridos desde fecha de env&#237;o</span><br>
+      <span style=\"$li\">&#8226; Talle XXXL: +12% sobre precio unitario</span><br>
+      <span style=\"$li\">&#8226; Los costos de prendas con bordado y estampado son orientativos. Dise&#241;os de gran tama&#241;o o complejidad podr&#225;n requerir un ajuste en el precio, sujeto a evaluaci&#243;n previa.</span>
     </td>
   </tr>
 </table>";
