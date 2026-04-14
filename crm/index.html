@@ -1906,37 +1906,51 @@ function sortProductosPorCategoria() {
 function exportarProductosExcel() {
   const rows = _data.productos;
   if(!rows.length){ toast('No hay productos para exportar'); return; }
-  // Armar CSV con separador de coma, UTF-8 BOM para Excel
-  const BOM = '\uFEFF';
-  const headers = ['Categoría','Producto / Tela','Marca','Costo s/IVA','Margen %','Precio s/IVA','Precio c/IVA','Web'];
-  const lines = rows
-    .slice()
-    .sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'','es'))
-    .map(p=>{
-      const costo     = parseFloat(p.costo)||0;
-      const margenRaw = parseFloat(p.margen)||0;
-      const margenPct = margenRaw > 1 ? parseFloat(margenRaw.toFixed(1)) : parseFloat((margenRaw*100).toFixed(1));
-      const precio    = costo * (1 + margenPct/100);
-      const precioIVA = precio * 1.21;
-      const web       = parseInt(p.visible_web)===1 ? 'Sí' : 'No';
-      const esc = v => `"${String(v).replace(/"/g,'""')}"`;
-      return [
-        esc(p.categoria||''),
-        esc(p.tela||''),
-        esc(p.marca||''),
-        costo.toFixed(2),
-        margenPct.toFixed(1),
-        precio.toFixed(2),
-        precioIVA.toFixed(2),
-        web
-      ].join(',');
-    });
-  const csv = BOM + headers.join(',') + '\n' + lines.join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+
+  const sorted = rows.slice().sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'','es'));
+
+  const thStyle = 'background-color:#2d3748;color:#ffffff;font-weight:bold;font-size:12px;padding:8px 10px;border:1px solid #1a202c;text-align:left;white-space:nowrap;';
+  const tdStyle = 'padding:6px 10px;border:1px solid #d1d5db;font-size:12px;vertical-align:middle;';
+  const tdNum   = tdStyle + 'text-align:right;';
+  const tdCen   = tdStyle + 'text-align:center;';
+  const trEven  = 'background-color:#f7f8fa;';
+
+  const headers = ['Categoría','Producto / Tela','Marca','Costo s/IVA','Margen %','Precio s/IVA','Precio c/IVA','Visible Web'];
+  const headerRow = headers.map(h => `<th style="${thStyle}">${h}</th>`).join('');
+
+  const dataRows = sorted.map((p, i) => {
+    const costo     = parseFloat(p.costo)||0;
+    const margenRaw = parseFloat(p.margen)||0;
+    const margenPct = margenRaw > 1 ? parseFloat(margenRaw.toFixed(1)) : parseFloat((margenRaw*100).toFixed(1));
+    const precio    = costo * (1 + margenPct/100);
+    const precioIVA = precio * 1.21;
+    const web       = parseInt(p.visible_web)===1 ? 'Sí' : 'No';
+    const fmt = n => n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const rowStyle = i % 2 === 1 ? ` style="${trEven}"` : '';
+    return `<tr${rowStyle}>
+      <td style="${tdStyle}">${(p.categoria||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</td>
+      <td style="${tdStyle}">${(p.tela||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</td>
+      <td style="${tdStyle}">${(p.marca||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</td>
+      <td style="${tdNum}">$${fmt(costo)}</td>
+      <td style="${tdCen}">${margenPct.toFixed(1)}%</td>
+      <td style="${tdNum}">$${fmt(precio)}</td>
+      <td style="${tdNum}">$${fmt(precioIVA)}</td>
+      <td style="${tdCen}">${web}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Productos</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+<body><table border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-family:Arial,sans-serif;">
+  <thead><tr>${headerRow}</tr></thead>
+  <tbody>${dataRows}</tbody>
+</table></body></html>`;
+
+  const blob = new Blob([html], {type:'application/vnd.ms-excel;charset=utf-8;'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
-  a.download = 'productos_precios.csv';
+  a.download = 'productos_precios.xls';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
