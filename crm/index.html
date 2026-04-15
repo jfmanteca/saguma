@@ -1322,7 +1322,7 @@ function openModal(id){
   if(id==='nueva-cobranza'){ if(window._skipCobranzaInit){window._skipCobranzaInit=false;}else{initNuevaCobranza();} }
   if(id==='nuevo-pago'){ if(window._skipPagoInit){window._skipPagoInit=false;}else{initNuevoPago();} }
   if(id==='nuevo-cliente'){ if(window._skipClienteInit){window._skipClienteInit=false;}else{ document.getElementById('cli-modal-title').textContent='Nuevo Cliente'; document.getElementById('ncli-edit-id').value=''; ['ncli-razon-social','ncli-referente','ncli-fantasia','ncli-tel','ncli-mail','ncli-cuit','ncli-dir','ncli-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('btn-guardar-cliente').textContent='Guardar Cliente'; } }
-  if(id==='nuevo-proveedor'){ if(window._skipProveedorInit){window._skipProveedorInit=false;}else{ document.getElementById('prov-modal-title').textContent='Nuevo Proveedor'; document.getElementById('nprov-edit-id').value=''; ['nprov-razon-social','nprov-referente','nprov-fantasia','nprov-tel','nprov-mail','nprov-cuit','nprov-dir','nprov-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('nprov-categoria').value=''; document.getElementById('btn-guardar-proveedor').textContent='Guardar Proveedor'; } }
+  if(id==='nuevo-proveedor'){ const bprov=document.getElementById('btn-guardar-proveedor'); bprov.disabled=false; if(window._skipProveedorInit){window._skipProveedorInit=false;}else{ document.getElementById('prov-modal-title').textContent='Nuevo Proveedor'; document.getElementById('nprov-edit-id').value=''; ['nprov-razon-social','nprov-referente','nprov-fantasia','nprov-tel','nprov-mail','nprov-cuit','nprov-dir','nprov-notas'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''}); document.getElementById('nprov-categoria').value=''; bprov.textContent='Guardar Proveedor'; bprov.dataset.label='Guardar Proveedor'; } }
 }
 function closeModal(id){
   document.getElementById('modal-'+id).classList.remove('open');
@@ -3479,6 +3479,8 @@ async function guardarProveedor() {
   const cuit         = document.getElementById('nprov-cuit').value.trim();
   if(!razon_social || !referente || !cuit){ toast('Razón Social, Referente y CUIT son obligatorios.', true); return; }
   const editId = document.getElementById('nprov-edit-id').value;
+  const btn = document.getElementById('btn-guardar-proveedor');
+  btn.dataset.label = editId ? 'Actualizar Proveedor' : 'Guardar Proveedor';
   setLoading('btn-guardar-proveedor', true);
   const body = {
     razon_social, referente, cuit,
@@ -3489,15 +3491,21 @@ async function guardarProveedor() {
     direccion:       document.getElementById('nprov-dir').value,
     notas:           document.getElementById('nprov-notas').value,
   };
-  let res;
-  if(editId) {
-    res = await fetch(`${API}?tabla=proveedores&id=${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({multi:true, fields:body}) }).then(r=>r.json());
-  } else {
-    res = await apiPost('proveedores', body);
+  try {
+    let res;
+    if(editId) {
+      const r = await fetch(`${API}?tabla=proveedores&id=${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({multi:true, fields:body}) });
+      res = await r.json();
+    } else {
+      res = await apiPost('proveedores', body);
+    }
+    if(res.ok){ closeModal('nuevo-proveedor'); await loadAll(); toast(editId ? '✓ Proveedor actualizado' : '✓ Proveedor agregado'); }
+    else toast('Error: '+(res.error||'desconocido'), true);
+  } catch(e) {
+    toast('Error de conexión al guardar proveedor.', true);
+  } finally {
+    setLoading('btn-guardar-proveedor', false);
   }
-  setLoading('btn-guardar-proveedor', false);
-  if(res.ok){ closeModal('nuevo-proveedor'); await loadAll(); toast(editId ? '✓ Proveedor actualizado' : '✓ Proveedor agregado'); }
-  else toast('Error: '+(res.error||'desconocido'), true);
 }
 
 // ── DATALISTS AUTOCOMPLETADO ─────────────────────────────────
