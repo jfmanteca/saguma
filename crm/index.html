@@ -246,11 +246,14 @@
   .prenda-hint { font-size:10px; color:var(--muted); margin-top:3px; font-family:'DM Mono',monospace; }
 
   /* ── DASHBOARD ─────────────────────────────────────── */
-  .lc-nav-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .lc-range-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;}
-  .lc-nav-btn{min-width:32px;justify-content:center;font-size:14px;padding:3px 10px;}
-  .lc-nav-btn:disabled{opacity:.35;cursor:not-allowed;}
-  .lc-wrap{min-height:100px;}
+  .lc-stack{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;}
+  .lc-full-card{width:100%;}
+  .lc-chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .lc-chart-controls{display:flex;align-items:center;gap:6px;}
+  .lc-range-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-right:4px;}
+  .lc-nav-btn{min-width:28px;justify-content:center;font-size:13px;padding:2px 8px;}
+  .lc-nav-btn:disabled{opacity:.3;cursor:not-allowed;}
+  .lc-wrap{min-height:120px;}
   .dash-filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
   .dash-filter-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);white-space:nowrap;}
   .dash-filter-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);}
@@ -336,25 +339,39 @@
 
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
-        <!-- Gráficos de línea: tendencias por mes -->
-        <div class="lc-nav-bar">
-          <span class="lc-range-label" id="lc-range"></span>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost btn-sm lc-nav-btn" id="btn-lc-prev" onclick="dashChartNav(1)" title="Meses anteriores">←</button>
-            <button class="btn btn-ghost btn-sm lc-nav-btn" id="btn-lc-next" onclick="dashChartNav(-1)" title="Meses siguientes" disabled>→</button>
-          </div>
-        </div>
-        <div class="grid3" style="margin-bottom:20px">
-          <div class="chart-card">
-            <div class="chart-title">Consultas por Mes</div>
+        <!-- Gráficos de línea: tendencias por mes (apilados, full-width) -->
+        <div class="lc-stack">
+          <div class="chart-card lc-full-card">
+            <div class="lc-chart-header">
+              <div class="chart-title">Consultas por Mes</div>
+              <div class="lc-chart-controls">
+                <span class="lc-range-label" id="lc-range-consultas"></span>
+                <button class="btn btn-ghost btn-sm lc-nav-btn" onclick="dashChartNav('consultas',1)">←</button>
+                <button class="btn btn-ghost btn-sm lc-nav-btn" id="btn-lc-next-consultas" onclick="dashChartNav('consultas',-1)" disabled>→</button>
+              </div>
+            </div>
             <div id="lc-consultas" class="lc-wrap"></div>
           </div>
-          <div class="chart-card">
-            <div class="chart-title">Cotizaciones por Mes</div>
+          <div class="chart-card lc-full-card">
+            <div class="lc-chart-header">
+              <div class="chart-title">Cotizaciones por Mes</div>
+              <div class="lc-chart-controls">
+                <span class="lc-range-label" id="lc-range-cotizaciones"></span>
+                <button class="btn btn-ghost btn-sm lc-nav-btn" onclick="dashChartNav('cotizaciones',1)">←</button>
+                <button class="btn btn-ghost btn-sm lc-nav-btn" id="btn-lc-next-cotizaciones" onclick="dashChartNav('cotizaciones',-1)" disabled>→</button>
+              </div>
+            </div>
             <div id="lc-cotizaciones" class="lc-wrap"></div>
           </div>
-          <div class="chart-card">
-            <div class="chart-title">Ventas por Mes</div>
+          <div class="chart-card lc-full-card">
+            <div class="lc-chart-header">
+              <div class="chart-title">Ventas por Mes</div>
+              <div class="lc-chart-controls">
+                <span class="lc-range-label" id="lc-range-ventas"></span>
+                <button class="btn btn-ghost btn-sm lc-nav-btn" onclick="dashChartNav('ventas',1)">←</button>
+                <button class="btn btn-ghost btn-sm lc-nav-btn" id="btn-lc-next-ventas" onclick="dashChartNav('ventas',-1)" disabled>→</button>
+              </div>
+            </div>
             <div id="lc-ventas" class="lc-wrap"></div>
           </div>
         </div>
@@ -2460,26 +2477,41 @@ function renderAlertas() {
 }
 
 // ── DASHBOARD LINE CHARTS ────────────────────────────────────
-let _dashChartOffset = 0;
+// ── DASHBOARD LINE CHARTS ────────────────────────────────────
+const _lcOffsets = { consultas: 0, cotizaciones: 0, ventas: 0 };
 
-function dashChartNav(dir) {
-  _dashChartOffset = Math.max(0, _dashChartOffset + dir);
-  const nextBtn = document.getElementById('btn-lc-next');
-  if (nextBtn) nextBtn.disabled = _dashChartOffset === 0;
-  renderDashLineCharts();
+// Convierte cualquier campo de fecha válido a clave 'YYYY-MM'
+// Soporta item.fecha (ventas/cotiz/cashflow) y item.created_at (consultas)
+function _itemDateKey(item) {
+  const raw = item.fecha || item.created_at;
+  if (!raw || typeof raw !== 'string') return '';
+  // Detectar formato YYYY-MM-DD o timestamp; normalizar a fecha
+  const str = raw.includes('T') ? raw : raw.substring(0,10) + 'T12:00:00';
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return ''; // descarta fechas inválidas ("Indefinido", etc.)
+  const y = d.getFullYear();
+  if (y < 2000 || y > 2100) return ''; // descarta años absurdos
+  return `${y}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
-function getDashMonthsWindow() {
+function _monthsForOffset(offset) {
   const now = new Date();
   const months = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i - (_dashChartOffset * 6), 1);
+    const d = new Date(now.getFullYear(), now.getMonth() - i - offset * 6, 1);
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const yy = String(d.getFullYear()).slice(2);
-    const mes = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];
-    months.push({ key: `${d.getFullYear()}-${mm}`, label: `${mes} ${yy}` });
+    const label = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()] + ' ' + yy;
+    months.push({ key: `${d.getFullYear()}-${mm}`, label });
   }
   return months;
+}
+
+function dashChartNav(chartId, dir) {
+  _lcOffsets[chartId] = Math.max(0, _lcOffsets[chartId] + dir);
+  const nextBtn = document.getElementById(`btn-lc-next-${chartId}`);
+  if (nextBtn) nextBtn.disabled = _lcOffsets[chartId] === 0;
+  _renderOneLineChart(chartId);
 }
 
 function drawSVGLineChart(containerId, months, grouped, color, fmtShort) {
@@ -2488,53 +2520,58 @@ function drawSVGLineChart(containerId, months, grouped, color, fmtShort) {
   const data = months.map(m => ({ label: m.label, value: grouped[m.key] || 0 }));
   const vals = data.map(d => d.value);
   const maxVal = Math.max(...vals, 1);
-  const VW = 460, VH = 118;
-  const pL = 6, pR = 6, pT = 20, pB = 28;
+  const VW = 700, VH = 150;
+  const pL = 8, pR = 8, pT = 24, pB = 32;
   const cW = VW - pL - pR, cH = VH - pT - pB;
   const n = data.length;
   const xs = i => pL + (i / (n - 1)) * cW;
   const ys = v => pT + (1 - v / maxVal) * cH;
-  const gridLines = [0.33, 0.67, 1].map(f => {
+  const gridLines = [0.25, 0.5, 0.75, 1].map(f => {
     const y = ys(f * maxVal).toFixed(1);
-    return `<line x1="${pL}" y1="${y}" x2="${VW - pR}" y2="${y}" stroke="#edf0f5" stroke-width="1" stroke-dasharray="3,2"/>`;
+    const lbl = fmtShort(f * maxVal);
+    return `<line x1="${pL}" y1="${y}" x2="${VW-pR}" y2="${y}" stroke="#edf0f5" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="${pL-2}" y="${(parseFloat(y)+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#c0c8d8" font-family="monospace">${lbl}</text>`;
   }).join('');
   const pts = data.map((d, i) => `${xs(i).toFixed(1)},${ys(d.value).toFixed(1)}`);
-  const area = `M${xs(0).toFixed(1)},${(VH - pB).toFixed(1)} ${pts.map(p => `L${p}`).join(' ')} L${xs(n-1).toFixed(1)},${(VH-pB).toFixed(1)} Z`;
+  const area = `M${xs(0).toFixed(1)},${(VH-pB).toFixed(1)} ${pts.map(p=>`L${p}`).join(' ')} L${xs(n-1).toFixed(1)},${(VH-pB).toFixed(1)} Z`;
   const gid = `lcg_${containerId}`;
   const dots = data.map((d, i) => {
     const cx = xs(i).toFixed(1), cy = ys(d.value).toFixed(1);
-    const lbl = fmtShort(d.value);
-    return `<circle cx="${cx}" cy="${cy}" r="3.5" fill="${color}" stroke="#fff" stroke-width="1.5"/>
-      <text x="${cx}" y="${(VH - pB + 14).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="#9aa3b5" font-family="monospace">${d.label}</text>
-      ${d.value > 0 ? `<text x="${cx}" y="${(parseFloat(cy) - 6).toFixed(1)}" text-anchor="middle" font-size="8" fill="${color}" font-family="monospace" font-weight="600">${lbl}</text>` : ''}`;
+    return `<circle cx="${cx}" cy="${cy}" r="4" fill="${color}" stroke="#fff" stroke-width="2"/>
+      <text x="${cx}" y="${(VH-pB+18).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9aa3b5" font-family="monospace">${d.label}</text>
+      ${d.value>0?`<text x="${cx}" y="${(parseFloat(cy)-8).toFixed(1)}" text-anchor="middle" font-size="9" fill="${color}" font-family="monospace" font-weight="700">${fmtShort(d.value)}</text>`:''}`;
   }).join('');
   el.innerHTML = `<svg viewBox="0 0 ${VW} ${VH}" width="100%" style="display:block;overflow:visible">
     <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${color}" stop-opacity="0.16"/>
-      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0.01"/>
     </linearGradient></defs>
     ${gridLines}
     <path d="${area}" fill="url(#${gid})"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     ${dots}
   </svg>`;
 }
 
-function renderDashLineCharts() {
-  const months = getDashMonthsWindow();
-  const rangeEl = document.getElementById('lc-range');
+function _renderOneLineChart(chartId) {
+  const months = _monthsForOffset(_lcOffsets[chartId]);
+  const rangeEl = document.getElementById(`lc-range-${chartId}`);
   if (rangeEl) rangeEl.textContent = `${months[0].label.toUpperCase()} — ${months[5].label.toUpperCase()}`;
-  const toKey = fecha => { if (!fecha) return ''; const d = new Date(fecha + 'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
-  // Consultas
-  const byCons = {}; _data.consultas.forEach(x => { const k=toKey(x.fecha); if(k) byCons[k]=(byCons[k]||0)+1; });
-  drawSVGLineChart('lc-consultas', months, byCons, '#2563b0', v => v);
-  // Cotizaciones
-  const byCotiz = {}; _data.cotizaciones.forEach(x => { const k=toKey(x.fecha); if(k) byCotiz[k]=(byCotiz[k]||0)+1; });
-  drawSVGLineChart('lc-cotizaciones', months, byCotiz, '#16a34a', v => v);
-  // Ventas (monto)
-  const byVenta = {}; _data.ventas.forEach(x => { const k=toKey(x.fecha); if(k) byVenta[k]=(byVenta[k]||0)+(parseFloat(x.ingreso_neto)||0); });
-  const fmtV = v => v>=1000000?'$'+(v/1000000).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+Math.round(v);
-  drawSVGLineChart('lc-ventas', months, byVenta, '#1a3a6b', fmtV);
+  if (chartId === 'consultas') {
+    const g = {}; _data.consultas.forEach(x=>{ const k=_itemDateKey(x); if(k) g[k]=(g[k]||0)+1; });
+    drawSVGLineChart('lc-consultas', months, g, '#2563b0', v=>v);
+  } else if (chartId === 'cotizaciones') {
+    const g = {}; _data.cotizaciones.forEach(x=>{ const k=_itemDateKey(x); if(k) g[k]=(g[k]||0)+1; });
+    drawSVGLineChart('lc-cotizaciones', months, g, '#16a34a', v=>v);
+  } else if (chartId === 'ventas') {
+    const g = {}; _data.ventas.forEach(x=>{ const k=_itemDateKey(x); if(k) g[k]=(g[k]||0)+(parseFloat(x.ingreso_neto)||0); });
+    const fmtV = v=>v>=1000000?'$'+(v/1000000).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+Math.round(v);
+    drawSVGLineChart('lc-ventas', months, g, '#1a3a6b', fmtV);
+  }
+}
+
+function renderDashLineCharts() {
+  ['consultas','cotizaciones','ventas'].forEach(id => _renderOneLineChart(id));
 }
 
 // ── DASHBOARD KPIs ───────────────────────────────────────────
@@ -2542,8 +2579,17 @@ function populateDashFilter() {
   const select = document.getElementById('dash-mes-filter');
   if (!select) return;
   const monthSet = new Set();
-  const addKey = fecha => { if (!fecha) return; const d = new Date(fecha+'T12:00:00'); monthSet.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); };
-  [..._data.consultas,..._data.cotizaciones,..._data.ventas,..._data.cashflow,..._data.cobranzas,..._data.pagos,...(_data.compras||[])].forEach(x=>addKey(x.fecha));
+  // Agregar solo fechas válidas; consultas usan created_at, el resto usa fecha
+  const all = [
+    ..._data.consultas,
+    ..._data.cotizaciones,
+    ..._data.ventas,
+    ..._data.cashflow,
+    ..._data.cobranzas,
+    ..._data.pagos,
+    ...(_data.compras||[])
+  ];
+  all.forEach(x => { const k = _itemDateKey(x); if (k) monthSet.add(k); });
   const mesNombres = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const sorted = Array.from(monthSet).sort().reverse();
   const cur = select.value;
@@ -2556,8 +2602,7 @@ function populateDashFilter() {
 
 function renderDashKPIs() {
   const mes = document.getElementById('dash-mes-filter')?.value||'';
-  const toKey = fecha => { if(!fecha) return ''; const d=new Date(fecha+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
-  const filt = item => !mes || toKey(item.fecha)===mes;
+  const filt = item => !mes || _itemDateKey(item)===mes;
   const v=_data.ventas.filter(filt), c=_data.consultas.filter(filt), co=_data.cotizaciones.filter(filt);
   const cf=_data.cashflow.filter(filt), cobr=_data.cobranzas.filter(filt), pags=_data.pagos.filter(filt);
   const compras=(_data.compras||[]).filter(filt);
