@@ -246,10 +246,14 @@
   .prenda-hint { font-size:10px; color:var(--muted); margin-top:3px; font-family:'DM Mono',monospace; }
 
   /* ── DASHBOARD ─────────────────────────────────────── */
-  .dash-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border);}
-  .dash-greeting{font-family:'DM Serif Display',serif;font-size:21px;color:var(--text);letter-spacing:.3px;}
-  .dash-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.3px;}
-  .dash-pill{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);background:rgba(37,99,176,.08);border:1px solid rgba(37,99,176,.18);padding:5px 14px;border-radius:20px;letter-spacing:.6px;text-transform:uppercase;}
+  .lc-nav-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .lc-range-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;}
+  .lc-nav-btn{min-width:32px;justify-content:center;font-size:14px;padding:3px 10px;}
+  .lc-nav-btn:disabled{opacity:.35;cursor:not-allowed;}
+  .lc-wrap{min-height:100px;}
+  .dash-filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
+  .dash-filter-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);white-space:nowrap;}
+  .dash-filter-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);}
 
 </style>
 </head>
@@ -315,7 +319,7 @@
         </button>
         <div>
           <div class="page-title" id="page-title">Dashboard General</div>
-          <div class="page-subtitle" id="page-subtitle">Resumen ejecutivo · Marzo 2026</div>
+          <div class="page-subtitle" id="page-subtitle">Resumen ejecutivo</div>
         </div>
       </div>
       <div class="topbar-actions">
@@ -332,13 +336,35 @@
 
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
-        <!-- Header contextual -->
-        <div class="dash-header">
-          <div>
-            <div class="dash-greeting">Panel de Control</div>
-            <div class="dash-date" id="dash-today"></div>
+        <!-- Gráficos de línea: tendencias por mes -->
+        <div class="lc-nav-bar">
+          <span class="lc-range-label" id="lc-range"></span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm lc-nav-btn" id="btn-lc-prev" onclick="dashChartNav(1)" title="Meses anteriores">←</button>
+            <button class="btn btn-ghost btn-sm lc-nav-btn" id="btn-lc-next" onclick="dashChartNav(-1)" title="Meses siguientes" disabled>→</button>
           </div>
-          <div class="dash-pill" id="dash-month-label"></div>
+        </div>
+        <div class="grid3" style="margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">Consultas por Mes</div>
+            <div id="lc-consultas" class="lc-wrap"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Cotizaciones por Mes</div>
+            <div id="lc-cotizaciones" class="lc-wrap"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Ventas por Mes</div>
+            <div id="lc-ventas" class="lc-wrap"></div>
+          </div>
+        </div>
+        <!-- Filtro por mes -->
+        <div class="dash-filter-bar">
+          <span class="dash-filter-label">Período</span>
+          <select class="form-select" id="dash-mes-filter" style="width:190px;font-size:12px" onchange="renderDashKPIs()">
+            <option value="">Todos los períodos</option>
+          </select>
+          <span class="dash-filter-hint" id="dash-filter-hint"></span>
         </div>
         <!-- KPIs principales -->
         <div class="kpi-grid-primary">
@@ -1296,7 +1322,7 @@ async function apiDelete(tabla, id) {
 
 // ── Navigation ───────────────────────────────────────────────
 const pageInfo = {
-  dashboard:   ['Dashboard General','Resumen ejecutivo · Marzo 2026'],
+  dashboard:   ['Dashboard General','Resumen ejecutivo'],
   consultas:   ['Consultas & Seguimiento','CRM · Gestión de contactos entrantes'],
   pipeline:    ['Pipeline Comercial','CRM · Estado del proceso de ventas'],
   cotizaciones:['Cotizaciones','CRM · Cotizaciones emitidas'],
@@ -2433,47 +2459,141 @@ function renderAlertas() {
     : `<tr><td colspan="7" class="alert-empty">✅ Sin cotizaciones sin respuesta hace más de ${diasCo} días</td></tr>`;
 }
 
+// ── DASHBOARD LINE CHARTS ────────────────────────────────────
+let _dashChartOffset = 0;
+
+function dashChartNav(dir) {
+  _dashChartOffset = Math.max(0, _dashChartOffset + dir);
+  const nextBtn = document.getElementById('btn-lc-next');
+  if (nextBtn) nextBtn.disabled = _dashChartOffset === 0;
+  renderDashLineCharts();
+}
+
+function getDashMonthsWindow() {
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i - (_dashChartOffset * 6), 1);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yy = String(d.getFullYear()).slice(2);
+    const mes = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];
+    months.push({ key: `${d.getFullYear()}-${mm}`, label: `${mes} ${yy}` });
+  }
+  return months;
+}
+
+function drawSVGLineChart(containerId, months, grouped, color, fmtShort) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const data = months.map(m => ({ label: m.label, value: grouped[m.key] || 0 }));
+  const vals = data.map(d => d.value);
+  const maxVal = Math.max(...vals, 1);
+  const VW = 460, VH = 118;
+  const pL = 6, pR = 6, pT = 20, pB = 28;
+  const cW = VW - pL - pR, cH = VH - pT - pB;
+  const n = data.length;
+  const xs = i => pL + (i / (n - 1)) * cW;
+  const ys = v => pT + (1 - v / maxVal) * cH;
+  const gridLines = [0.33, 0.67, 1].map(f => {
+    const y = ys(f * maxVal).toFixed(1);
+    return `<line x1="${pL}" y1="${y}" x2="${VW - pR}" y2="${y}" stroke="#edf0f5" stroke-width="1" stroke-dasharray="3,2"/>`;
+  }).join('');
+  const pts = data.map((d, i) => `${xs(i).toFixed(1)},${ys(d.value).toFixed(1)}`);
+  const area = `M${xs(0).toFixed(1)},${(VH - pB).toFixed(1)} ${pts.map(p => `L${p}`).join(' ')} L${xs(n-1).toFixed(1)},${(VH-pB).toFixed(1)} Z`;
+  const gid = `lcg_${containerId}`;
+  const dots = data.map((d, i) => {
+    const cx = xs(i).toFixed(1), cy = ys(d.value).toFixed(1);
+    const lbl = fmtShort(d.value);
+    return `<circle cx="${cx}" cy="${cy}" r="3.5" fill="${color}" stroke="#fff" stroke-width="1.5"/>
+      <text x="${cx}" y="${(VH - pB + 14).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="#9aa3b5" font-family="monospace">${d.label}</text>
+      ${d.value > 0 ? `<text x="${cx}" y="${(parseFloat(cy) - 6).toFixed(1)}" text-anchor="middle" font-size="8" fill="${color}" font-family="monospace" font-weight="600">${lbl}</text>` : ''}`;
+  }).join('');
+  el.innerHTML = `<svg viewBox="0 0 ${VW} ${VH}" width="100%" style="display:block;overflow:visible">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${gridLines}
+    <path d="${area}" fill="url(#${gid})"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+  </svg>`;
+}
+
+function renderDashLineCharts() {
+  const months = getDashMonthsWindow();
+  const rangeEl = document.getElementById('lc-range');
+  if (rangeEl) rangeEl.textContent = `${months[0].label.toUpperCase()} — ${months[5].label.toUpperCase()}`;
+  const toKey = fecha => { if (!fecha) return ''; const d = new Date(fecha + 'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+  // Consultas
+  const byCons = {}; _data.consultas.forEach(x => { const k=toKey(x.fecha); if(k) byCons[k]=(byCons[k]||0)+1; });
+  drawSVGLineChart('lc-consultas', months, byCons, '#2563b0', v => v);
+  // Cotizaciones
+  const byCotiz = {}; _data.cotizaciones.forEach(x => { const k=toKey(x.fecha); if(k) byCotiz[k]=(byCotiz[k]||0)+1; });
+  drawSVGLineChart('lc-cotizaciones', months, byCotiz, '#16a34a', v => v);
+  // Ventas (monto)
+  const byVenta = {}; _data.ventas.forEach(x => { const k=toKey(x.fecha); if(k) byVenta[k]=(byVenta[k]||0)+(parseFloat(x.ingreso_neto)||0); });
+  const fmtV = v => v>=1000000?'$'+(v/1000000).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+Math.round(v);
+  drawSVGLineChart('lc-ventas', months, byVenta, '#1a3a6b', fmtV);
+}
+
+// ── DASHBOARD KPIs ───────────────────────────────────────────
+function populateDashFilter() {
+  const select = document.getElementById('dash-mes-filter');
+  if (!select) return;
+  const monthSet = new Set();
+  const addKey = fecha => { if (!fecha) return; const d = new Date(fecha+'T12:00:00'); monthSet.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); };
+  [..._data.consultas,..._data.cotizaciones,..._data.ventas,..._data.cashflow,..._data.cobranzas,..._data.pagos,...(_data.compras||[])].forEach(x=>addKey(x.fecha));
+  const mesNombres = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const sorted = Array.from(monthSet).sort().reverse();
+  const cur = select.value;
+  select.innerHTML = '<option value="">Todos los períodos</option>' + sorted.map(k => {
+    const [y,m] = k.split('-');
+    const lbl = mesNombres[parseInt(m)-1]+' '+y;
+    return `<option value="${k}"${k===cur?' selected':''}>${lbl.charAt(0).toUpperCase()+lbl.slice(1)}</option>`;
+  }).join('');
+}
+
+function renderDashKPIs() {
+  const mes = document.getElementById('dash-mes-filter')?.value||'';
+  const toKey = fecha => { if(!fecha) return ''; const d=new Date(fecha+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+  const filt = item => !mes || toKey(item.fecha)===mes;
+  const v=_data.ventas.filter(filt), c=_data.consultas.filter(filt), co=_data.cotizaciones.filter(filt);
+  const cf=_data.cashflow.filter(filt), cobr=_data.cobranzas.filter(filt), pags=_data.pagos.filter(filt);
+  const compras=(_data.compras||[]).filter(filt);
+  const mesNombres=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const periodo = mes ? (()=>{const[y,m]=mes.split('-');const n=mesNombres[parseInt(m)-1];return n.charAt(0).toUpperCase()+n.slice(1)+' '+y;})() : 'acumulado';
+  const hint=document.getElementById('dash-filter-hint'); if(hint) hint.textContent=mes?`Mostrando ${periodo}`:'';
+  const netoTotal=v.reduce((s,x)=>s+(parseFloat(x.ingreso_neto)||0),0);
+  document.getElementById('kpi-ventas').textContent=fmtARS(netoTotal);
+  document.getElementById('kpi-ventas-sub').textContent=`${v.length} venta${v.length!==1?'s':''} · ${periodo}`;
+  document.getElementById('kpi-consultas').textContent=c.length;
+  document.getElementById('kpi-consultas-sub').textContent=`${c.filter(x=>x.calificada==='SI').length} calificadas · ${periodo}`;
+  document.getElementById('kpi-cotiz').textContent=co.length;
+  document.getElementById('kpi-cotiz-sub').textContent=`${co.filter(x=>x.estado==='Aceptada').length} aceptadas · ${periodo}`;
+  const ing=cf.filter(t=>t.tipo==='INGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
+  const eg=cf.filter(t=>t.tipo==='EGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
+  const bal=ing-eg;
+  document.getElementById('kpi-cf').textContent=fmtARS(Math.abs(bal));
+  document.getElementById('kpi-cf-sub').textContent=(bal>=0?'↑ Positivo':'↓ Negativo')+` · ${periodo}`;
+  const cobrT=cobr.reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
+  document.getElementById('kpi-cobros').textContent=fmtARS(cobrT);
+  document.getElementById('kpi-cobros-sub').textContent=`${cobr.length} cobro${cobr.length!==1?'s':''} · ${periodo}`;
+  const pagsT=pags.reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
+  document.getElementById('kpi-pagos').textContent=fmtARS(pagsT);
+  document.getElementById('kpi-pagos-sub').textContent=`${pags.length} pago${pags.length!==1?'s':''} · ${periodo}`;
+  const compT=compras.reduce((s,x)=>s+(parseFloat(x.total)||0),0);
+  const kpiComp=document.getElementById('kpi-compras');
+  if(kpiComp){kpiComp.textContent=fmtARS(compT);document.getElementById('kpi-compras-sub').textContent=`${compras.length} compra${compras.length!==1?'s':''} · ${periodo}`;}
+}
+
 function renderDashboard() {
   renderAlertas();
-  // Header contextual
-  const _hoy = new Date();
-  const _dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const _meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const _elToday = document.getElementById('dash-today');
-  const _elPill  = document.getElementById('dash-month-label');
-  if(_elToday) _elToday.textContent = `${_dias[_hoy.getDay()]}, ${_hoy.getDate()} de ${_meses[_hoy.getMonth()]} ${_hoy.getFullYear()}`;
-  if(_elPill)  _elPill.textContent  = `${_meses[_hoy.getMonth()]} ${_hoy.getFullYear()}`;
+  populateDashFilter();
+  renderDashKPIs();
+  renderDashLineCharts();
   const v = _data.ventas;
   const c = _data.consultas;
-  const co= _data.cotizaciones;
-  const cf= _data.cashflow;
-  const cobr = _data.cobranzas;
-  const pags = _data.pagos;
-  const netoTotal = v.reduce((s,x)=>s+(parseFloat(x.ingreso_neto)||0),0);
-  document.getElementById('kpi-ventas').textContent = fmtARS(netoTotal);
-  document.getElementById('kpi-ventas-sub').textContent = `${v.length} operación${v.length!==1?'es':''} registrada${v.length!==1?'s':''}`;
-  document.getElementById('kpi-consultas').textContent = c.length;
-  const calificadas = c.filter(x=>x.calificada==='SI').length;
-  document.getElementById('kpi-consultas-sub').textContent = `${calificadas} calificadas`;
-  document.getElementById('kpi-cotiz').textContent = co.length;
-  const acept = co.filter(x=>x.estado==='Aceptada').length;
-  document.getElementById('kpi-cotiz-sub').textContent = `${acept} aceptadas`;
-  const ing = cf.filter(t=>t.tipo==='INGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
-  const eg  = cf.filter(t=>t.tipo==='EGRESO').reduce((s,t)=>s+(parseFloat(t.monto)||0),0);
-  const bal = ing - eg;
-  document.getElementById('kpi-cf').textContent = fmtARS(Math.abs(bal));
-  document.getElementById('kpi-cf-sub').textContent = bal >= 0 ? '↑ Saldo positivo' : '↓ Saldo negativo';
-  const mesActual = new Date().getMonth();
-  const cobrMes = cobr.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
-  document.getElementById('kpi-cobros').textContent = fmtARS(cobrMes);
-  document.getElementById('kpi-cobros-sub').textContent = cobr.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).length + ' cobro(s) este mes';
-  const pagsMes = pags.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.monto)||0),0);
-  document.getElementById('kpi-pagos').textContent = fmtARS(pagsMes);
-  document.getElementById('kpi-pagos-sub').textContent = pags.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).length + ' pago(s) este mes';
-  const compras = _data.compras || [];
-  const comprasMes = compras.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).reduce((s,x)=>s+(parseFloat(x.total)||0),0);
-  const kpiComp = document.getElementById('kpi-compras');
-  if(kpiComp) { kpiComp.textContent = fmtARS(comprasMes); document.getElementById('kpi-compras-sub').textContent = compras.filter(x=>x.fecha && new Date(x.fecha+'T12:00:00').getMonth()===mesActual).length + ' compra(s) este mes'; }
 
   // Canales chart
   const canales = {};
