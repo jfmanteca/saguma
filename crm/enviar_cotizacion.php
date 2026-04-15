@@ -184,8 +184,8 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
     $lbl_s = "font-size:7.5px;font-weight:bold;color:$AZ";
     $val_s = "font-size:9px;color:#111111";
     $th    = "background-color:$AZ;color:#ffffff;padding:6px 5px;font-size:8.5px;font-weight:bold";
-    $td    = "padding:6px 5px;border-bottom:1px solid $ROW;font-size:9px;color:#111111;vertical-align:middle";
-    $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:6px 5px;font-size:8.5px;vertical-align:middle";
+    $td    = "padding:9px 5px;border-bottom:1px solid $ROW;font-size:9px;color:#111111;vertical-align:middle";
+    $tfoot = "background-color:$AZD;color:#ffffff;font-weight:bold;padding:9px 5px;font-size:8.5px;vertical-align:middle";
 
     // ── Grid datos cliente (idéntico a hgrid del CRM) ────────
     // CRM: grid-template-columns:1fr 1fr; gap:0; margin-bottom:14px
@@ -342,7 +342,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
 
     // ── Condiciones comerciales (idéntico al CRM: .cond ul li) ──
     // CRM: padding:10px 14px; font-size:10px; line-height:1.75; ul padding-left:16px
-    $li = "font-size:8.5px;color:#333333;line-height:1.4";
+    $li = "font-size:8.5px;color:#111111;line-height:1.4";
     $cond = "
 <table style=\"width:190mm;border-collapse:collapse;border:1px solid $BRD;border-left:3px solid $AZ;margin-bottom:10px\" cellpadding=\"0\" cellspacing=\"0\">
   <tr>
@@ -352,7 +352,7 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
       <span style=\"$li\">&#8226; Plazo de entrega: 30 d&#237;as h&#225;biles desde confirmaci&#243;n</span><br>
       <span style=\"$li\">&#8226; Anticipo: 50% al confirmar | Saldo: 50% contra entrega</span><br>
       <span style=\"$li\">&#8226; Validez: 7 d&#237;as corridos desde fecha de env&#237;o</span><br>
-      <span style=\"$li\">&#8226; Talle XXXL: +12% sobre precio unitario</span><br>
+      <span style=\"$li\">&#8226; Talles del 3XL al 5XL: +12% sobre precio unitario</span><br>
       <span style=\"$li\">&#8226; Los costos de prendas con bordado y estampado son orientativos. Dise&#241;os de gran tama&#241;o o complejidad podr&#225;n requerir un ajuste en el precio, sujeto a evaluaci&#243;n previa.</span>
     </td>
   </tr>
