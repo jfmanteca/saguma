@@ -35,13 +35,19 @@
   .content{flex:1;overflow-y:auto;padding:24px 28px;}
   .page{display:none;} .page.active{display:block;}
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
-  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px;position:relative;overflow:hidden;}
-  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-  .kpi-card.yellow::before{background:var(--accent);} .kpi-card.green::before{background:#16a34a;}
-  .kpi-card.orange::before{background:var(--accent3);} .kpi-card.red::before{background:var(--red);}
-  .kpi-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
-  .kpi-value{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);line-height:1;}
-  .kpi-sub{font-size:11px;color:var(--muted);margin-top:6px;}
+  .kpi-grid-primary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;}
+  .kpi-grid-secondary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-left-width:4px;border-left-color:rgba(26,58,107,.15);border-radius:10px;padding:20px 22px 18px;position:relative;overflow:hidden;transition:box-shadow .2s,transform .15s;}
+  .kpi-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.09);transform:translateY(-2px);}
+  .kpi-card::before{display:none;}
+  .kpi-card::after{content:attr(data-icon);position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:50px;opacity:.05;font-family:'DM Serif Display',serif;pointer-events:none;color:var(--text);}
+  .kpi-card.yellow{border-left-color:var(--accent);background:linear-gradient(150deg,rgba(26,58,107,.035) 0%,var(--surface) 55%);}
+  .kpi-card.green{border-left-color:#16a34a;background:linear-gradient(150deg,rgba(22,163,74,.04) 0%,var(--surface) 55%);}
+  .kpi-card.orange{border-left-color:var(--accent3);background:linear-gradient(150deg,rgba(74,144,217,.04) 0%,var(--surface) 55%);}
+  .kpi-card.red{border-left-color:var(--red);background:linear-gradient(150deg,rgba(217,48,37,.035) 0%,var(--surface) 55%);}
+  .kpi-label{font-family:'DM Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;}
+  .kpi-value{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);line-height:1.05;}
+  .kpi-sub{font-size:11px;color:var(--muted);margin-top:8px;font-family:'DM Mono',monospace;letter-spacing:.2px;}
   .kpi-change{font-size:11px;margin-top:4px;} .kpi-change.up{color:#16a34a;} .kpi-change.down{color:var(--red);}
   .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;}
   .table-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
@@ -86,14 +92,21 @@
   .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:2px 6px;}
   .modal-close:hover{color:var(--text);}
   .modal-body{padding:24px;} .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
-  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;}
-  .chart-title{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--text);}
-  .bar-chart{display:flex;flex-direction:column;gap:10px;}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;}
+  .chart-title{font-size:10px;font-weight:600;margin-bottom:18px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;font-family:'DM Mono',monospace;display:flex;align-items:center;gap:8px;}
+  .chart-title::before{content:'';width:3px;height:13px;background:var(--accent2);border-radius:2px;flex-shrink:0;display:inline-block;}
+  .bar-chart{display:flex;flex-direction:column;gap:12px;}
   .bar-row{display:flex;align-items:center;gap:12px;}
-  .bar-label{width:140px;font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .bar-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
-  .bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
-  .bar-val{width:80px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+  .bar-label{width:130px;font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bar-track{flex:1;height:10px;background:var(--surface2);border-radius:5px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:5px;transform-origin:left;animation:barIn .65s ease both;}
+  .bar-val{width:76px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+  @keyframes barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .bar-row:nth-child(1) .bar-fill{animation-delay:.04s}
+  .bar-row:nth-child(2) .bar-fill{animation-delay:.11s}
+  .bar-row:nth-child(3) .bar-fill{animation-delay:.18s}
+  .bar-row:nth-child(4) .bar-fill{animation-delay:.25s}
+  .bar-row:nth-child(5) .bar-fill{animation-delay:.32s}
   .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
   .pipeline-col{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
   .pipeline-head{padding:10px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
@@ -232,6 +245,12 @@
   }
   .prenda-hint { font-size:10px; color:var(--muted); margin-top:3px; font-family:'DM Mono',monospace; }
 
+  /* ── DASHBOARD ─────────────────────────────────────── */
+  .dash-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+  .dash-greeting{font-family:'DM Serif Display',serif;font-size:21px;color:var(--text);letter-spacing:.3px;}
+  .dash-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.3px;}
+  .dash-pill{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);background:rgba(37,99,176,.08);border:1px solid rgba(37,99,176,.18);padding:5px 14px;border-radius:20px;letter-spacing:.6px;text-transform:uppercase;}
+
 </style>
 </head>
 <body>
@@ -313,43 +332,56 @@
 
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
-        <div class="kpi-grid">
-          <div class="kpi-card yellow">
+        <!-- Header contextual -->
+        <div class="dash-header">
+          <div>
+            <div class="dash-greeting">Panel de Control</div>
+            <div class="dash-date" id="dash-today"></div>
+          </div>
+          <div class="dash-pill" id="dash-month-label"></div>
+        </div>
+        <!-- KPIs principales -->
+        <div class="kpi-grid-primary">
+          <div class="kpi-card yellow" data-icon="$">
             <div class="kpi-label">Ventas Netas</div>
             <div class="kpi-value" id="kpi-ventas">—</div>
             <div class="kpi-sub" id="kpi-ventas-sub">cargando...</div>
           </div>
-          <div class="kpi-card green">
+          <div class="kpi-card green" data-icon="◎">
             <div class="kpi-label">Consultas Totales</div>
             <div class="kpi-value" id="kpi-consultas">—</div>
             <div class="kpi-sub" id="kpi-consultas-sub">cargando...</div>
           </div>
-          <div class="kpi-card orange">
+          <div class="kpi-card orange" data-icon="◈">
             <div class="kpi-label">Cotizaciones</div>
             <div class="kpi-value" id="kpi-cotiz">—</div>
             <div class="kpi-sub" id="kpi-cotiz-sub">cargando...</div>
           </div>
-          <div class="kpi-card red">
+          <div class="kpi-card red" data-icon="⇅">
             <div class="kpi-label">Balance Cashflow</div>
             <div class="kpi-value" id="kpi-cf">—</div>
             <div class="kpi-sub" id="kpi-cf-sub">cargando...</div>
           </div>
-          <div class="kpi-card green">
+        </div>
+        <!-- KPIs secundarios del mes -->
+        <div class="kpi-grid-secondary">
+          <div class="kpi-card green" data-icon="▲">
             <div class="kpi-label">Cobros del mes</div>
             <div class="kpi-value" id="kpi-cobros">—</div>
             <div class="kpi-sub" id="kpi-cobros-sub">cargando...</div>
           </div>
-          <div class="kpi-card red">
+          <div class="kpi-card red" data-icon="▼">
             <div class="kpi-label">Pagos del mes</div>
             <div class="kpi-value" id="kpi-pagos">—</div>
             <div class="kpi-sub" id="kpi-pagos-sub">cargando...</div>
           </div>
-          <div class="kpi-card orange">
+          <div class="kpi-card orange" data-icon="◇">
             <div class="kpi-label">Compras del mes</div>
             <div class="kpi-value" id="kpi-compras">—</div>
             <div class="kpi-sub" id="kpi-compras-sub">cargando...</div>
           </div>
         </div>
+        <!-- Gráficos de consultas -->
         <div class="grid2">
           <div class="chart-card">
             <div class="chart-title">Consultas por Canal</div>
@@ -360,6 +392,7 @@
             <div id="chart-estados" class="bar-chart"><div class="loading">Cargando...</div></div>
           </div>
         </div>
+        <!-- Últimas ventas -->
         <div class="table-wrap">
           <div class="table-header">
             <div class="table-title">Últimas Ventas</div>
@@ -368,6 +401,7 @@
           <table><thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Ingreso Neto</th><th>Estado</th></tr></thead>
           <tbody id="dash-ventas-tbody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
         </div>
+        <!-- Gráficos de productos -->
         <div class="grid3">
           <div class="chart-card">
             <div class="chart-title">Productos más vendidos</div>
@@ -2401,6 +2435,14 @@ function renderAlertas() {
 
 function renderDashboard() {
   renderAlertas();
+  // Header contextual
+  const _hoy = new Date();
+  const _dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const _meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const _elToday = document.getElementById('dash-today');
+  const _elPill  = document.getElementById('dash-month-label');
+  if(_elToday) _elToday.textContent = `${_dias[_hoy.getDay()]}, ${_hoy.getDate()} de ${_meses[_hoy.getMonth()]} ${_hoy.getFullYear()}`;
+  if(_elPill)  _elPill.textContent  = `${_meses[_hoy.getMonth()]} ${_hoy.getFullYear()}`;
   const v = _data.ventas;
   const c = _data.consultas;
   const co= _data.cotizaciones;
