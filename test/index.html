@@ -11,6 +11,7 @@
 :root {
   --navy:#0a1e3d;--navy-mid:#0f2a52;--navy-light:#163a6b;
   --blue:#2563b0;--blue-light:#4a90d9;--sky:#7ab8f5;
+  --orange:#e8631a;--orange-light:#f07835;--orange-dark:#c2410c;
   --cream:#f4f1ec;--warm:#e8e3da;--white:#ffffff;
   --gray-100:#f1f3f5;--gray-200:#e9ecef;--gray-300:#dee2e6;--gray-400:#ced4da;
   --text:#1a2333;--muted:#6b7a99;--border:#d4d8e0;
@@ -34,8 +35,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .nav-links a{color:rgba(255,255,255,.9);text-decoration:none;font-size:13px;font-weight:500;padding:8px 16px;border-radius:6px;transition:all .2s;letter-spacing:.3px;}
 .nav-links a:hover{color:#fff;background:rgba(255,255,255,.08);}
 .nav-links a.active{color:#fff;background:rgba(74,144,217,.2);}
-.nav-cta{background:var(--blue)!important;color:#fff!important;font-weight:600!important;padding:9px 20px!important;}
-.nav-cta:hover{background:var(--blue-light)!important;}
+.nav-cta{background:var(--orange)!important;color:#fff!important;font-weight:600!important;padding:9px 20px!important;box-shadow:0 2px 12px rgba(232,99,26,.25);}
+.nav-cta:hover{background:var(--orange-light)!important;box-shadow:0 4px 18px rgba(232,99,26,.4)!important;}
 .nav-toggle{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:8px;}
 @media(max-width:768px){
   .nav-toggle{display:block;}
@@ -61,8 +62,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .hero-sub{font-size:17px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:32px;max-width:480px;}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .25s;text-decoration:none;font-family:'DM Sans',sans-serif;letter-spacing:.3px;}
-.btn-primary{background:var(--blue);color:#fff;}
-.btn-primary:hover{background:var(--blue-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(37,99,176,.3);}
+.btn-primary{background:var(--orange);color:#fff;}
+.btn-primary:hover{background:var(--orange-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,99,26,.35);}
 .btn-outline{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.2);}
 .btn-outline:hover{color:#fff;border-color:rgba(255,255,255,.4);}
 .btn-wa{background:#25d366;color:#fff;}
@@ -150,8 +151,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .talle-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.3px;margin-bottom:4px;font-weight:500;}
 .talle-input{width:100%;padding:10px 2px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;text-align:center;font-weight:600;color:var(--text);transition:all .2s;background:var(--white);-moz-appearance:textfield;}
 .talle-input::-webkit-outer-spin-button,.talle-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-.talle-input:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(37,99,176,.1);}
-.talle-input.has-value{border-color:var(--blue);background:rgba(37,99,176,.03);}
+.talle-input:focus{border-color:var(--orange);outline:none;box-shadow:0 0 0 3px rgba(232,99,26,.1);}
+.talle-input.has-value{border-color:var(--orange);background:rgba(232,99,26,.03);}
 .talle-summary{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:10px;font-size:12px;font-family:'DM Mono',monospace;}
 .talle-summary.ok{color:var(--success);}
 .talle-summary.warn{color:var(--danger);}
@@ -163,26 +164,31 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 @media(max-width:380px){.talle-grid{grid-template-columns:repeat(3,1fr);}}.summary-talles{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;margin-bottom:6px;}
 
 /* COTIZADOR */
-.cot-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 50%,var(--navy-light) 100%);border-radius:16px;padding:48px;margin-bottom:40px;position:relative;overflow:hidden;}
-.cot-hero::after{content:'';position:absolute;top:0;right:0;width:40%;height:100%;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 0v60M0 30h60' stroke='rgba(255,255,255,.03)' stroke-width='.5'/%3E%3C/svg%3E");opacity:.5;}
-.cot-hero-content{position:relative;z-index:1;max-width:600px;}
+.cot-hero{background:linear-gradient(135deg,#7c2d12 0%,var(--orange-dark) 40%,var(--orange) 100%);border-radius:16px;padding:48px;margin-bottom:40px;position:relative;overflow:hidden;}
+.cot-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none;}
+.cot-hero::after{content:'';position:absolute;top:0;right:0;width:40%;height:100%;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 0v60M0 30h60' stroke='rgba(255,255,255,.05)' stroke-width='.5'/%3E%3C/svg%3E");opacity:.6;}
+.cot-hero-content{position:relative;z-index:1;max-width:660px;}
 .cot-hero-title{font-family:'DM Serif Display',serif;font-size:clamp(32px,5vw,48px);color:#fff;line-height:1.15;margin-bottom:16px;}
-.cot-hero-sub{font-size:16px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:28px;}
-.cot-hero-features{display:flex;gap:24px;flex-wrap:wrap;}
-.cot-hero-feat{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.7);font-weight:500;}
+.cot-hero-sub{font-size:16px;color:rgba(255,255,255,.8);line-height:1.7;margin-bottom:28px;}
+.cot-hero-features{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:28px;}
+.cot-hero-feat{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.85);font-weight:500;}
 .cot-hero-feat-icon{font-size:16px;}
+.cot-hero-promise{display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:18px 22px;backdrop-filter:blur(4px);}
+.cot-hero-promise-icon{font-size:26px;flex-shrink:0;line-height:1;margin-top:2px;}
+.cot-hero-promise-text strong{display:block;color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;}
+.cot-hero-promise-text span{font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;}
 @media(max-width:768px){.cot-hero{padding:32px 24px;}.cot-hero-features{flex-direction:column;gap:12px;}}
 
-.cotizador-wrap{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
-.cotizador-header{background:var(--navy);padding:32px 40px;color:#fff;}
+.cotizador-wrap{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border-top:3px solid var(--orange);}
+.cotizador-header{background:linear-gradient(135deg,var(--orange-dark) 0%,var(--orange) 100%);padding:32px 40px;color:#fff;}
 .cotizador-header h3{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:4px;}
-.cotizador-header p{font-size:13px;color:rgba(255,255,255,.5);}
+.cotizador-header p{font-size:13px;color:rgba(255,255,255,.65);}
 .cotizador-body{padding:40px;}
 .cotizador-steps{display:flex;gap:0;margin-bottom:40px;border-bottom:2px solid var(--gray-300);}
 .cot-step{flex:1;padding:12px 16px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;color:var(--muted);text-align:center;position:relative;cursor:pointer;transition:color .2s;}
-.cot-step.active{color:var(--navy);font-weight:500;}
-.cot-step.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--blue);}
-.cot-step.done{color:var(--success);}
+.cot-step.active{color:var(--orange-dark);font-weight:600;}
+.cot-step.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--orange);}
+.cot-step.done{color:var(--orange);}
 .cot-panel{display:none;}.cot-panel.active{display:block;}
 .cat-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
 .cat-select-card{padding:0;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:all .2s;overflow:hidden;}
@@ -207,7 +213,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .items-table th{text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--gray-300);}
 .items-table td{padding:12px;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px;vertical-align:middle;}
 .items-table tr:hover{background:rgba(37,99,176,.02);}
-.item-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;}
+.item-check{width:18px;height:18px;accent-color:var(--orange);cursor:pointer;}
 .item-qty{width:70px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;text-align:center;}
 .item-qty:focus{border-color:var(--blue);outline:none;}
 .item-custom{padding:5px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);}
@@ -395,13 +401,20 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
     <!-- Banner llamativo -->
     <div class="cot-hero fade-up">
       <div class="cot-hero-content">
-        <div class="section-label" style="color:var(--sky);font-size:12px;letter-spacing:3px;">Cotizador online</div>
+        <div class="section-label" style="color:rgba(255,255,255,.65);font-size:12px;letter-spacing:3px;">Cotizador online</div>
         <h2 class="cot-hero-title">Cotiza tu pedido en minutos</h2>
-        <p class="cot-hero-sub">Selecciona las prendas, indica cantidades y personalización. Recibís la cotización por mail con el presupuesto detallado.</p>
+        <p class="cot-hero-sub">Seleccioná las prendas, indicá cantidades y personalización. Completá el formulario y recibís tu presupuesto por mail.</p>
         <div class="cot-hero-features">
-          <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#9889;</span><span>Respuesta al instante</span></div>
-          <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#128196;</span><span>Presupuesto detallado por mail</span></div>
+          <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#9889;</span><span>Rápido y fácil</span></div>
+          <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#128196;</span><span>Presupuesto por mail</span></div>
           <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#128274;</span><span>Sin compromiso de compra</span></div>
+        </div>
+        <div class="cot-hero-promise">
+          <span class="cot-hero-promise-icon">&#128231;</span>
+          <div class="cot-hero-promise-text">
+            <strong>Recibís el presupuesto completo en tu mail</strong>
+            <span>Con el precio de cada prenda, cantidades, talles y personalización — listo para presentar a tu empresa.</span>
+          </div>
         </div>
       </div>
     </div>
