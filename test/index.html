@@ -11,7 +11,7 @@
 :root {
   --navy:#0a1e3d;--navy-mid:#0f2a52;--navy-light:#163a6b;
   --blue:#2563b0;--blue-light:#4a90d9;--sky:#7ab8f5;
-  --orange:#e8631a;--orange-light:#f07835;--orange-dark:#c2410c;
+  --orange:#b85c24;--orange-light:#c96a30;--orange-dark:#8b3d18;
   --cream:#f4f1ec;--warm:#e8e3da;--white:#ffffff;
   --gray-100:#f1f3f5;--gray-200:#e9ecef;--gray-300:#dee2e6;--gray-400:#ced4da;
   --text:#1a2333;--muted:#6b7a99;--border:#d4d8e0;
@@ -35,8 +35,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .nav-links a{color:rgba(255,255,255,.9);text-decoration:none;font-size:13px;font-weight:500;padding:8px 16px;border-radius:6px;transition:all .2s;letter-spacing:.3px;}
 .nav-links a:hover{color:#fff;background:rgba(255,255,255,.08);}
 .nav-links a.active{color:#fff;background:rgba(74,144,217,.2);}
-.nav-cta{background:var(--orange)!important;color:#fff!important;font-weight:600!important;padding:9px 20px!important;box-shadow:0 2px 12px rgba(232,99,26,.25);}
-.nav-cta:hover{background:var(--orange-light)!important;box-shadow:0 4px 18px rgba(232,99,26,.4)!important;}
+.nav-cta{background:linear-gradient(160deg,#c56830 0%,#a84d1e 100%)!important;color:#fff!important;font-weight:600!important;padding:9px 20px!important;box-shadow:0 1px 6px rgba(140,60,20,.2),inset 0 1px 0 rgba(255,255,255,.08);}
+.nav-cta:hover{background:linear-gradient(160deg,#d4733a 0%,#b85525 100%)!important;box-shadow:0 3px 12px rgba(140,60,20,.28),inset 0 1px 0 rgba(255,255,255,.1)!important;}
 .nav-toggle{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:8px;}
 @media(max-width:768px){
   .nav-toggle{display:block;}
@@ -62,8 +62,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .hero-sub{font-size:17px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:32px;max-width:480px;}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .25s;text-decoration:none;font-family:'DM Sans',sans-serif;letter-spacing:.3px;}
-.btn-primary{background:var(--orange);color:#fff;}
-.btn-primary:hover{background:var(--orange-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,99,26,.35);}
+.btn-primary{background:linear-gradient(160deg,#c56830 0%,#a84d1e 100%);color:#fff;box-shadow:0 2px 8px rgba(140,60,20,.22),inset 0 1px 0 rgba(255,255,255,.1);}
+.btn-primary:hover{background:linear-gradient(160deg,#d4733a 0%,#b85525 100%);transform:translateY(-1px);box-shadow:0 6px 20px rgba(140,60,20,.28),inset 0 1px 0 rgba(255,255,255,.12);}
 .btn-outline{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.2);}
 .btn-outline:hover{color:#fff;border-color:rgba(255,255,255,.4);}
 .btn-wa{background:#25d366;color:#fff;}
@@ -412,8 +412,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
         <div class="cot-hero-promise">
           <span class="cot-hero-promise-icon">&#128231;</span>
           <div class="cot-hero-promise-text">
-            <strong>Recibís el presupuesto completo en tu mail</strong>
-            <span>Con el precio de cada prenda, cantidades, talles y personalización — listo para presentar a tu empresa.</span>
+            <strong>Recibís al instante el presupuesto completo en tu mail</strong>
+            <span>Con el precio de cada prenda, cantidades, talles y personalización.</span>
           </div>
         </div>
       </div>
