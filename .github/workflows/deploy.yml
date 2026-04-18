@@ -35,7 +35,7 @@ jobs:
             ('crm/enviar_cotizacion.php', f'{base}/crm/enviar_cotizacion.php'),
             ('crm/index.html',           f'{base}/crm/index.html'),
             ('index.html',               f'{base}/index.html'),
-            ('inverno/index.html',       f'{base}/inverno/index.html'),
+            ('invierno/index.html',       f'{base}/invierno/index.html'),
           ]
 
           if not host or not user or not key_str:
