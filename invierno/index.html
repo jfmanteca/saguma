@@ -358,7 +358,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="section-title">Temporada de invierno</div>
       <p class="section-desc">Camperas, buzos, chalecos y camperones para equipar a tu equipo esta temporada.</p>
     </div>
-    <div class="products-grid fade-up">
+    <div class="products-grid fade-up" style="grid-template-columns:repeat(2,1fr);">
       <div class="product-card" onclick="scrollToCotizador('Camperas')">
         <div class="product-img" style="background-image:url('/images/campera_de_trabajo-1.png')"></div>
         <div class="product-body"><div class="product-cat">Campaña invierno</div><div class="product-name">Camperas de trabajo</div><span class="product-action">Solicitar cotización &#8594;</span></div>
@@ -592,11 +592,11 @@ async function loadProductos() {
     const res = await fetch(`${API_URL}?tabla=productos`);
     _productos = await res.json();
     // Categorías: solo las que tienen al menos 1 producto visible en web y no son Adicionales
-    const INVIERNO = ['Camperas','Buzos','Chalecos','Chaleco','Camperón','CAMPERÓN'];
+    const INVIERNO = ['camperas','buzos','chalecos','chaleco','camperón'];
     _categorias = [...new Set(_productos.filter(p => {
       return (p.categoria||'').toLowerCase() !== 'adicionales' && parseInt(p.visible_web) === 1;
     }).map(p => p.categoria).filter(Boolean))].sort((a,b) => {
-      const ai = INVIERNO.indexOf(a), bi = INVIERNO.indexOf(b);
+      const ai = INVIERNO.indexOf(a.toLowerCase()), bi = INVIERNO.indexOf(b.toLowerCase());
       if (ai !== -1 && bi !== -1) return ai - bi;
       if (ai !== -1) return -1;
       if (bi !== -1) return 1;
