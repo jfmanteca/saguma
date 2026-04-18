@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KPHKLNCQ');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAGUMA — Indumentaria Laboral</title>
+<meta name="description" content="Indumentaria de trabajo al por mayor. Soluciones en indumentaria laboral a medida para empresas de todos los rubros.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0a1e3d;--navy-mid:#0f2a52;--navy-light:#163a6b;
+  --blue:#2563b0;--blue-light:#4a90d9;--sky:#7ab8f5;
+  --orange:#b85c24;--orange-light:#c96a30;--orange-dark:#8b3d18;
+  --cream:#f4f1ec;--warm:#e8e3da;--white:#ffffff;
+  --gray-100:#f1f3f5;--gray-200:#e9ecef;--gray-300:#dee2e6;--gray-400:#ced4da;
+  --text:#1a2333;--muted:#6b7a99;--border:#d4d8e0;
+  --success:#16a34a;--danger:#d93025;
+  --shadow:0 4px 24px rgba(10,30,61,.08);
+  --shadow-lg:0 12px 48px rgba(10,30,61,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+.container{max-width:1200px;margin:0 auto;padding:0 24px;}
+
+/* NAV */
+.nav-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,30,61,.97);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.06);transition:all .3s;}
+.nav-bar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.25);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:68px;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-text{font-family:'DM Serif Display',serif;font-size:24px;color:#fff;letter-spacing:3px;}
+.nav-logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-links a{color:rgba(255,255,255,.9);text-decoration:none;font-size:13px;font-weight:500;padding:8px 16px;border-radius:6px;transition:all .2s;letter-spacing:.3px;}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.08);}
+.nav-links a.active{color:#fff;background:rgba(74,144,217,.2);}
+.nav-cta{background:linear-gradient(160deg,#c56830 0%,#a84d1e 100%)!important;color:#fff!important;font-weight:600!important;padding:9px 20px!important;box-shadow:0 1px 6px rgba(140,60,20,.2),inset 0 1px 0 rgba(255,255,255,.08);}
+.nav-cta:hover{background:linear-gradient(160deg,#d4733a 0%,#b85525 100%)!important;box-shadow:0 3px 12px rgba(140,60,20,.28),inset 0 1px 0 rgba(255,255,255,.1)!important;}
+.nav-toggle{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:8px;}
+@media(max-width:768px){
+  .nav-toggle{display:block;}
+  .nav-links{display:none;position:absolute;top:68px;left:0;right:0;background:var(--navy);flex-direction:column;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.08);}
+  .nav-links.open{display:flex;}
+  .nav-links a{padding:12px 16px;width:100%;}
+}
+
+/* HERO with slideshow */
+.hero{position:relative;min-height:100vh;background:var(--navy);display:flex;align-items:center;overflow:hidden;padding-top:68px;}
+.hero-slideshow{position:absolute;inset:0;}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center 20%;opacity:0;transition:opacity 1.5s ease;}
+.hero-slide.active{opacity:1;}
+.hero-slide:nth-child(1){background-image:url('/images/indumentaria_laboral3.png');}
+.hero-slide:nth-child(2){background-image:url('/images/ropa_de_trabajo_3-scaled.jpg');}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(165deg,rgba(10,30,61,.7) 0%,rgba(15,42,82,.6) 40%,rgba(22,58,107,.5) 100%);z-index:1;}
+.hero-grid-pattern{position:absolute;inset:0;z-index:1;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 0v60M0 30h60' stroke='rgba(255,255,255,.02)' stroke-width='.5'/%3E%3C/svg%3E");opacity:.6;}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.25);padding:6px 14px;border-radius:30px;font-family:'DM Mono',monospace;font-size:11px;color:var(--sky);letter-spacing:.8px;text-transform:uppercase;margin-bottom:20px;}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--sky);border-radius:50%;}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(36px,5vw,56px);color:#fff;line-height:1.1;margin-bottom:20px;}
+.hero h1 em{font-style:italic;background:linear-gradient(135deg,var(--sky),var(--blue-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:17px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:32px;max-width:480px;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .25s;text-decoration:none;font-family:'DM Sans',sans-serif;letter-spacing:.3px;}
+.btn-primary{background:linear-gradient(160deg,#c56830 0%,#a84d1e 100%);color:#fff;box-shadow:0 2px 8px rgba(140,60,20,.22),inset 0 1px 0 rgba(255,255,255,.1);}
+.btn-primary:hover{background:linear-gradient(160deg,#d4733a 0%,#b85525 100%);transform:translateY(-1px);box-shadow:0 6px 20px rgba(140,60,20,.28),inset 0 1px 0 rgba(255,255,255,.12);}
+.btn-outline{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.2);}
+.btn-outline:hover{color:#fff;border-color:rgba(255,255,255,.4);}
+.btn-wa{background:#25d366;color:#fff;}
+.btn-wa:hover{background:#20bd5a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(37,211,102,.3);}
+.hero-visual{display:flex;justify-content:center;align-items:center;}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:480px;}
+.stat-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:24px 20px;text-align:center;transition:all .3s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.stat-card:hover{background:rgba(255,255,255,.2);transform:translateY(-2px);}
+.stat-number{font-family:'DM Serif Display',serif;font-size:36px;color:#fff;line-height:1;}
+.stat-label{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.7);letter-spacing:1px;text-transform:uppercase;margin-top:8px;}
+@media(max-width:768px){
+  .hero-content{grid-template-columns:1fr;gap:40px;text-align:center;}
+  .hero-sub{margin-left:auto;margin-right:auto;}
+  .hero-actions{justify-content:center;}
+  .hero-stats{max-width:320px;margin:0 auto;}
+}
+
+/* SECTIONS */
+.section{padding:100px 0;}
+.section-dark{background:var(--navy);color:#fff;}
+.section-white{background:var(--white);}
+.section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px;}
+.section-dark .section-label{color:var(--sky);}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(28px,3.5vw,40px);line-height:1.2;margin-bottom:16px;}
+.section-desc{font-size:16px;color:var(--muted);max-width:560px;line-height:1.7;}
+.section-dark .section-desc{color:rgba(255,255,255,.5);}
+.section-header{text-align:center;margin-bottom:60px;}
+.section-header .section-desc{margin:0 auto;}
+
+/* PRODUCTS GRID */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.product-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .3s;cursor:pointer;}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--blue);}
+.product-img{height:220px;background-size:cover;background-position:center;}
+.product-body{padding:20px;}
+.product-cat{font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.product-name{font-size:18px;font-weight:600;color:var(--text);margin-bottom:10px;}
+.product-action{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--blue);transition:gap .2s;}
+.product-action:hover{gap:10px;}
+
+/* CONSULT BANNER */
+.consult-banner{margin-top:40px;background:var(--navy);border-radius:12px;padding:32px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.consult-banner-text{color:rgba(255,255,255,.8);font-size:15px;max-width:520px;}
+.consult-banner-text strong{color:#fff;}
+@media(max-width:600px){.consult-banner{padding:24px;flex-direction:column;text-align:center;}}
+
+/* CALZADO */
+.calzado-marcas{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+.calzado-marca{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:28px 20px;text-align:center;transition:all .3s;}
+.calzado-marca:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:var(--shadow);}
+.calzado-logo{max-height:48px;max-width:160px;object-fit:contain;margin-bottom:12px;}
+.calzado-marca-name{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:8px;}
+.calzado-marca-fallback{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:8px;}
+.calzado-marca-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.calzado-cta{text-align:center;padding:32px;background:rgba(37,99,176,.04);border:1px solid rgba(37,99,176,.12);border-radius:12px;}
+.calzado-cta-text{font-size:15px;color:var(--muted);margin-bottom:20px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.7;}
+.calzado-cta-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+@media(max-width:768px){.calzado-marcas{grid-template-columns:1fr 1fr;}.calzado-cta-buttons{flex-direction:column;align-items:center;}}
+@media(max-width:480px){.calzado-marcas{grid-template-columns:1fr;}}
+
+/* PROCESS */
+.process-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+.process-image{border-radius:16px;overflow:hidden;height:480px;}
+.process-image img{width:100%;height:100%;object-fit:cover;}
+.process-steps-list{display:flex;flex-direction:column;gap:32px;}
+.process-step{display:flex;gap:20px;align-items:flex-start;}
+.process-num{width:48px;height:48px;flex-shrink:0;background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--sky);}
+.process-title{font-size:16px;font-weight:600;color:#fff;margin-bottom:4px;}
+.process-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;}
+@media(max-width:768px){.process-layout{grid-template-columns:1fr;}.process-image{height:280px;}}
+
+/* COTIZADOR TALLES */
+.talle-card{border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color .2s;}
+.talle-card.complete{border-color:var(--success);}
+.talle-card.error{border-color:var(--danger);}
+.talle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px;}
+.talle-product{font-weight:700;font-size:15px;color:var(--text);}
+.talle-badge{font-family:'DM Mono',monospace;font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;}
+.talle-badge.ok{background:rgba(22,163,74,.1);color:var(--success);}
+.talle-badge.pending{background:rgba(37,99,176,.08);color:var(--blue);}
+.talle-badge.over{background:rgba(217,48,37,.08);color:var(--danger);}
+.talle-custom{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.talle-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;}
+.talle-item{text-align:center;}
+.talle-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.3px;margin-bottom:4px;font-weight:500;}
+.talle-input{width:100%;padding:10px 2px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;text-align:center;font-weight:600;color:var(--text);transition:all .2s;background:var(--white);-moz-appearance:textfield;}
+.talle-input::-webkit-outer-spin-button,.talle-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.talle-input:focus{border-color:var(--orange);outline:none;box-shadow:0 0 0 3px rgba(232,99,26,.1);}
+.talle-input.has-value{border-color:var(--orange);background:rgba(232,99,26,.03);}
+.talle-summary{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:10px;font-size:12px;font-family:'DM Mono',monospace;}
+.talle-summary.ok{color:var(--success);}
+.talle-summary.warn{color:var(--danger);}
+.talle-validation{padding:14px 18px;border-radius:10px;margin-bottom:20px;font-size:13px;display:flex;align-items:center;gap:10px;}
+.talle-validation.error{background:rgba(217,48,37,.06);border:1px solid rgba(217,48,37,.15);color:var(--danger);}
+.talle-validation.success{background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.15);color:var(--success);}
+.talle-note{font-size:12px;color:var(--muted);margin-top:16px;padding:10px 14px;background:rgba(37,99,176,.03);border:1px solid rgba(37,99,176,.1);border-radius:8px;}
+@media(max-width:600px){.talle-grid{grid-template-columns:repeat(4,1fr);}.talle-header{flex-direction:column;align-items:flex-start;}}
+@media(max-width:380px){.talle-grid{grid-template-columns:repeat(3,1fr);}}.summary-talles{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;margin-bottom:6px;}
+
+/* COTIZADOR */
+.cot-hero{background:linear-gradient(135deg,#7c2d12 0%,var(--orange-dark) 40%,var(--orange) 100%);border-radius:16px;padding:48px;margin-bottom:40px;position:relative;overflow:hidden;}
+.cot-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none;}
+.cot-hero::after{content:'';position:absolute;top:0;right:0;width:40%;height:100%;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 0v60M0 30h60' stroke='rgba(255,255,255,.05)' stroke-width='.5'/%3E%3C/svg%3E");opacity:.6;}
+.cot-hero-content{position:relative;z-index:1;max-width:660px;}
+.cot-hero-title{font-family:'DM Serif Display',serif;font-size:clamp(32px,5vw,48px);color:#fff;line-height:1.15;margin-bottom:16px;}
+.cot-hero-sub{font-size:16px;color:rgba(255,255,255,.8);line-height:1.7;margin-bottom:28px;}
+.cot-hero-features{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:28px;}
+.cot-hero-feat{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.85);font-weight:500;}
+.cot-hero-feat-icon{font-size:16px;}
+.cot-hero-promise{display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:18px 22px;backdrop-filter:blur(4px);}
+.cot-hero-promise-icon{font-size:26px;flex-shrink:0;line-height:1;margin-top:2px;}
+.cot-hero-promise-text strong{display:block;color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;}
+.cot-hero-promise-text span{font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;}
+@media(max-width:768px){.cot-hero{padding:32px 24px;}.cot-hero-features{flex-direction:column;gap:12px;}}
+
+.cotizador-wrap{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border-top:3px solid var(--orange);}
+.cotizador-header{background:linear-gradient(135deg,var(--orange-dark) 0%,var(--orange) 100%);padding:32px 40px;color:#fff;}
+.cotizador-header h3{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:4px;}
+.cotizador-header p{font-size:13px;color:rgba(255,255,255,.65);}
+.cotizador-body{padding:40px;}
+.cotizador-steps{display:flex;gap:0;margin-bottom:40px;border-bottom:2px solid var(--gray-300);}
+.cot-step{flex:1;padding:12px 16px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;color:var(--muted);text-align:center;position:relative;cursor:pointer;transition:color .2s;}
+.cot-step.active{color:var(--orange-dark);font-weight:600;}
+.cot-step.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--orange);}
+.cot-step.done{color:var(--orange);}
+.cot-panel{display:none;}.cot-panel.active{display:block;}
+.cat-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
+.cat-select-card{padding:0;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:all .2s;overflow:hidden;}
+.cat-select-card:hover{border-color:var(--blue);}
+.cat-select-card.selected{border-color:var(--blue);background:rgba(37,99,176,.04);}
+.cat-select-img-wrap{height:130px;overflow:hidden;background:var(--gray-100);}
+.cat-select-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.cat-select-no-img{height:130px;background:var(--gray-100);}
+.cat-select-info{padding:12px 16px;}
+.cat-select-name{font-size:13px;font-weight:600;text-transform:uppercase;}
+.cat-select-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;}
+.col-prod-img{width:70px;}
+.prod-img-thumb{width:62px;height:62px;border-radius:8px;object-fit:cover;display:block;cursor:zoom-in;transition:opacity .15s;}
+.prod-img-thumb:hover{opacity:.85;}
+.prod-img-empty{width:62px;height:62px;border-radius:8px;background:var(--gray-100);display:block;}
+.prod-desc-small{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.img-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;}
+.img-lightbox.open{display:flex;}
+.img-lightbox img{max-width:90vw;max-height:88vh;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+@media(max-width:600px){.col-prod-img{width:54px;}.prod-img-thumb{width:48px;height:48px;}.items-table thead{display:none;}.items-table,.items-table tbody{display:block;width:100%;}.items-table tr{display:flex;flex-wrap:wrap;align-items:center;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;gap:6px;}.items-table td{border:none;padding:0;}.items-table td:nth-child(1){width:24px;flex-shrink:0;}.items-table td:nth-child(2){width:52px;flex-shrink:0;}.items-table td:nth-child(3){flex:1;min-width:0;}.items-table td:nth-child(4){width:100%;display:flex;flex-direction:column;gap:4px;}.items-table td:nth-child(5){flex:1;display:flex;flex-direction:column;gap:4px;}.items-table td:nth-child(6){flex:2;display:flex;flex-direction:column;gap:4px;}.items-table td[data-label]::before{content:attr(data-label);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}.item-qty,.item-custom{width:100%!important;box-sizing:border-box;}.item-color{width:100%!important;box-sizing:border-box;}}
+.items-table{width:100%;border-collapse:collapse;}
+.items-table th{text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--gray-300);}
+.items-table td{padding:12px;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px;vertical-align:middle;}
+.items-table tr:hover{background:rgba(37,99,176,.02);}
+.item-check{width:18px;height:18px;accent-color:var(--orange);cursor:pointer;}
+.item-qty{width:70px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;text-align:center;}
+.item-qty:focus{border-color:var(--blue);outline:none;}
+.item-custom{padding:5px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}.form-group.full{grid-column:1/-1;}
+.form-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);}
+.form-input,.form-textarea,.form-select{padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--white);transition:border-color .2s;}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(37,99,176,.08);}
+.form-textarea{resize:vertical;min-height:100px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}.cotizador-body{padding:24px;}.cotizador-header{padding:24px;}.summary-item{flex-direction:column;gap:2px;}.summary-item-value{text-align:left;}.cot-actions{flex-direction:column;}.cot-actions .btn{width:100%;justify-content:center;}.cot-step{padding:8px 4px;font-size:10px;letter-spacing:0;}}
+.cot-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);}
+.btn-back{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+.btn-back:hover{color:var(--text);border-color:var(--muted);}
+.summary-section{background:rgba(37,99,176,.03);border:1px solid rgba(37,99,176,.12);border-radius:10px;padding:20px;margin-bottom:16px;}
+.summary-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:12px;}
+.summary-item{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;}
+.summary-item-label{color:var(--muted);}.summary-item-value{font-weight:600;}
+.cot-success{text-align:center;padding:60px 20px;}
+.cot-success-icon{width:72px;height:72px;margin:0 auto 20px;background:rgba(22,163,74,.1);border:2px solid rgba(22,163,74,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.cot-success-icon svg{width:32px;height:32px;stroke:var(--success);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.cot-success h3{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:8px;}
+.cot-success p{color:var(--muted);font-size:14px;}
+
+/* QTY TOTAL COUNTER */
+.qty-total-bar{margin-top:20px;padding:16px 20px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:14px;gap:16px;}
+.qty-total-bar.ok{background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.15);color:var(--success);}
+.qty-total-bar.warn{background:rgba(217,48,37,.06);border:1px solid rgba(217,48,37,.15);color:var(--danger);}
+.qty-total-num{font-family:'DM Mono',monospace;font-weight:600;font-size:16px;}
+
+/* WA redirect inside cotizador */
+.cot-wa-banner{margin-top:24px;padding:16px 20px;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.18);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.cot-wa-banner p{font-size:13px;color:var(--text);max-width:400px;}
+.cot-wa-banner p strong{font-weight:600;}
+.btn-wa-sm{padding:9px 18px;font-size:13px;border-radius:8px;background:#25d366;color:#fff;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .2s;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-wa-sm:hover{background:#20bd5a;}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.about-feature{display:flex;gap:16px;margin-bottom:28px;}
+.about-feature-icon{width:44px;height:44px;flex-shrink:0;background:rgba(37,99,176,.08);border:1px solid rgba(37,99,176,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.about-feature-icon svg{width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.about-feature h4{font-size:15px;font-weight:600;margin-bottom:4px;}
+.about-feature p{font-size:13px;color:var(--muted);line-height:1.6;}
+.about-visual{background:linear-gradient(135deg,var(--navy),var(--navy-mid));border-radius:16px;padding:48px;display:flex;flex-direction:column;gap:24px;}
+.about-stat-row{display:flex;gap:24px;}
+.about-stat{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:20px;}
+.about-stat-num{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;}
+.about-stat-label{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr;gap:40px;}}
+
+/* FOOTER */
+.footer{background:var(--navy);padding:60px 0 32px;color:rgba(255,255,255,.5);}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.footer-logo{font-family:'DM Serif Display',serif;font-size:22px;color:#fff;letter-spacing:3px;margin-bottom:12px;}
+.footer-desc{font-size:13px;line-height:1.7;max-width:320px;}
+.footer-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:16px;}
+.footer-links{list-style:none;}.footer-links li{margin-bottom:10px;}
+.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:13px;transition:color .2s;}
+.footer-links a:hover{color:#fff;}
+.footer-contact-item{display:flex;gap:10px;margin-bottom:12px;font-size:13px;align-items:center;}
+.footer-contact-item svg{width:16px;height:16px;stroke:rgba(255,255,255,.4);fill:none;stroke-width:2;flex-shrink:0;}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-family:'DM Mono',monospace;}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr;gap:32px;}}
+
+/* WA FLOAT */
+.whatsapp-float{position:fixed;bottom:24px;right:24px;z-index:900;width:56px;height:56px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,.35);text-decoration:none;transition:all .3s;}
+.whatsapp-float:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(37,211,102,.45);}
+.whatsapp-float svg{width:28px;height:28px;fill:#fff;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--navy);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;z-index:2000;box-shadow:0 8px 32px rgba(0,0,0,.2);transition:transform .4s cubic-bezier(.16,1,.3,1);pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}.toast.error{background:var(--danger);}
+
+/* ANIM */
+.fade-up{opacity:0;transform:translateY(24px);transition:all .6s cubic-bezier(.16,1,.3,1);}
+.fade-up.visible{opacity:1;transform:translateY(0);}
+.qty-warning{color:var(--danger);font-size:11px;font-family:'DM Mono',monospace;display:none;margin-top:2px;}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KPHKLNCQ"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<!-- NAV -->
+<nav class="nav-bar" id="navbar">
+  <div class="nav-inner">
+    <a href="#inicio" class="nav-logo"><div><div class="nav-logo-text">SAGUMA</div><div class="nav-logo-sub">Indumentaria laboral</div></div></a>
+    <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="#inicio" class="active">Inicio</a>
+      <a href="#catalogo">Productos</a>
+      <a href="#proceso">Cómo trabajamos</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#cotizador" class="nav-cta">Cotizar pedido</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-slideshow">
+    <div class="hero-slide active"></div>
+    <div class="hero-slide"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grid-pattern"></div>
+  <div class="hero-content">
+    <div>
+      <div class="hero-badge">Fabricación al por mayor</div>
+      <h1>Indumentaria de trabajo <em>a medida</em></h1>
+      <p class="hero-sub">Soluciones en indumentaria laboral personalizada para empresas de todos los rubros. Bordado, estampado y producción confiable.</p>
+      <div class="hero-actions">
+        <a href="#cotizador" class="btn btn-primary" style="padding:16px 36px;font-size:17px;">Cotizar pedido &#8594;</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-stats">
+        <div class="stat-card"><div class="stat-number">30+</div><div class="stat-label">Prendas mínimo</div></div>
+        <div class="stat-card"><div class="stat-number">100%</div><div class="stat-label">A medida</div></div>
+        <div class="stat-card"><div class="stat-number">&#10003;</div><div class="stat-label">Envíos a todo el país</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOGO -->
+<section class="section section-white" id="catalogo">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Campaña de invierno</div>
+      <div class="section-title">Temporada de invierno</div>
+      <p class="section-desc">Camperas, buzos, chalecos y camperones para equipar a tu equipo esta temporada.</p>
+    </div>
+    <div class="products-grid fade-up">
+      <div class="product-card" onclick="scrollToCotizador('Camperas')">
+        <div class="product-img" style="background-image:url('/images/campera_de_trabajo-1.png')"></div>
+        <div class="product-body"><div class="product-cat">Campaña invierno</div><div class="product-name">Camperas de trabajo</div><span class="product-action">Solicitar cotización &#8594;</span></div>
+      </div>
+      <div class="product-card" onclick="scrollToCotizador('Buzos')">
+        <div class="product-img" style="background-image:url('/images/uniformes_seguridad.png')"></div>
+        <div class="product-body"><div class="product-cat">Campaña invierno</div><div class="product-name">Buzos de trabajo</div><span class="product-action">Solicitar cotización &#8594;</span></div>
+      </div>
+      <div class="product-card" onclick="scrollToCotizador('Chalecos')">
+        <div class="product-img" style="background-image:url('/images/Chalecos_de_trabajo.png')"></div>
+        <div class="product-body"><div class="product-cat">Campaña invierno</div><div class="product-name">Chalecos de trabajo</div><span class="product-action">Solicitar cotización &#8594;</span></div>
+      </div>
+      <div class="product-card" onclick="scrollToCotizador('Camperón')">
+        <div class="product-img" style="background-image:url('/images/campera_de_trabajo-1.png');filter:brightness(.85)"></div>
+        <div class="product-body"><div class="product-cat">Campaña invierno</div><div class="product-name">Camperones</div><span class="product-action">Solicitar cotización &#8594;</span></div>
+      </div>
+    </div>
+    <!-- Consult banner -->
+    <div class="consult-banner fade-up">
+      <p class="consult-banner-text"><strong>¿No encontrás lo que buscás?</strong> Consultanos por cualquier prenda que no esté en el catálogo. Trabajamos a medida.</p>
+      <a href="https://wa.me/5491161125719?text=Hola,%20quiero%20consultar%20por%20una%20prenda%20que%20no%20est%C3%A1%20en%20el%20cat%C3%A1logo" target="_blank" class="btn-wa-sm">Consultar por WhatsApp &#8594;</a>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- COTIZADOR -->
+<section class="section" id="cotizador" style="background:var(--gray-100);padding-top:60px;">
+  <div class="container">
+    <!-- Banner llamativo -->
+    <div class="cot-hero fade-up">
+      <div class="cot-hero-content">
+        <div class="section-label" style="color:rgba(255,255,255,.65);font-size:12px;letter-spacing:3px;">Cotizador online</div>
+        <h2 class="cot-hero-title">Cotiza tu pedido en minutos</h2>
+        <p class="cot-hero-sub">Seleccioná las prendas, indicá cantidades y personalización. Completá el formulario y recibís tu presupuesto por mail.</p>
+        <div class="cot-hero-features">
+          <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#9889;</span><span>Rápido y fácil</span></div>
+          <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#128196;</span><span>Presupuesto por mail</span></div>
+          <div class="cot-hero-feat"><span class="cot-hero-feat-icon">&#128274;</span><span>Sin compromiso de compra</span></div>
+        </div>
+        <div class="cot-hero-promise">
+          <span class="cot-hero-promise-icon">&#128231;</span>
+          <div class="cot-hero-promise-text">
+            <strong>Recibís al instante el presupuesto completo en tu mail</strong>
+            <span>Con el precio de cada prenda, cantidades, talles y personalización.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Cotizador -->
+    <div class="cotizador-wrap fade-up">
+      <div class="cotizador-header"><h3>Nueva solicitud de cotización</h3><p>Mínimo 30 unidades por producto &middot; Mínimo 30 prendas en total</p></div>
+      <div class="cotizador-body">
+        <div class="cotizador-steps">
+          <div class="cot-step active" data-step="1">1. Categoría</div>
+          <div class="cot-step" data-step="2">2. Productos</div>
+          <div class="cot-step" data-step="3">3. Talles</div>
+          <div class="cot-step" data-step="4">4. Datos</div>
+          <div class="cot-step" data-step="5">5. Resumen</div>
+        </div>
+        <div class="cot-panel active" id="cot-panel-1">
+          <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Seleccioná una o más categorías de productos:</p>
+          <div class="cat-select-grid" id="cot-cat-grid"></div>
+          <div class="cot-actions"><button class="btn btn-primary" onclick="cotNext(2)">Siguiente &#8594;</button></div>
+        </div>
+        <div class="cot-panel" id="cot-panel-2">
+          <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Seleccioná productos e indicá cantidad y tipo de personalización:</p>
+          <div style="overflow-x:auto">
+            <table class="items-table"><thead><tr><th style="width:30px"></th><th class="col-prod-img"></th><th>Producto</th><th style="width:90px">Color</th><th style="width:80px">Cantidad</th><th style="width:130px">Personalización</th></tr></thead>
+            <tbody id="cot-items-tbody"></tbody></table>
+          </div>
+          <div id="qty-total-bar"></div>
+          <div style="margin-top:12px;padding:10px 14px;background:#fef9ec;border:1px solid #fcd34d;border-radius:6px;font-size:12px;color:#92400e;line-height:1.6">
+            <strong>Nota sobre personalización:</strong> Los costos de bordado y estampado indicados son orientativos. Diseños de gran tamaño o alta complejidad podrán requerir un ajuste en el precio, sujeto a evaluación previa por parte de nuestro equipo.
+          </div>
+          <div class="cot-wa-banner">
+            <p><strong>¿Necesitás otra prenda?</strong> Si buscás un producto que no está en el listado, consultanos directamente.</p>
+            <a href="https://wa.me/5491161125719?text=Hola,%20quiero%20consultar%20por%20un%20producto%20que%20no%20est%C3%A1%20en%20el%20cotizador" target="_blank" class="btn-wa-sm">Consultar por WhatsApp &#8594;</a>
+          </div>
+          <div class="cot-actions"><button class="btn btn-back" onclick="cotNext(1)">&#8592; Volver</button><button class="btn btn-primary" onclick="cotNext(3)">Siguiente &#8594;</button></div>
+        </div>
+        <div class="cot-panel" id="cot-panel-3">
+          <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Indicá la distribución de talles para cada producto seleccionado:</p>
+          <div id="cot-talles-container"></div>
+          <div id="cot-talles-validation"></div>
+          <div class="talle-note">Los talles 3XL, 4XL y 5XL tienen un recargo del 12% sobre el precio unitario.</div>
+          <div class="cot-actions"><button class="btn btn-back" onclick="cotNext(2)">&#8592; Volver</button><button class="btn btn-primary" id="btn-talles-next" onclick="cotNext(4)">Siguiente &#8594;</button></div>
+        </div>
+        <div class="cot-panel" id="cot-panel-4">
+          <div class="form-grid">
+            <div class="form-group full"><label class="form-label">Empresa / Razón social *</label><input class="form-input" type="text" id="cot-empresa" placeholder="Nombre de la empresa"></div>
+            <div class="form-group"><label class="form-label">Nombre y apellido *</label><input class="form-input" type="text" id="cot-nombre" placeholder="Tu nombre completo"></div>
+            <div class="form-group"><label class="form-label">Cargo / Área</label><input class="form-input" type="text" id="cot-cargo" placeholder="Ej: Compras, RRHH"></div>
+            <div class="form-group"><label class="form-label">Email *</label><input class="form-input" type="email" id="cot-email" placeholder="mail@empresa.com"></div>
+            <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" type="tel" id="cot-tel" placeholder="+54 11 xxxx xxxx"></div>
+            <div class="form-group full"><label class="form-label">Observaciones / Detalles adicionales</label><textarea class="form-textarea" id="cot-notas" placeholder="Colores, logos, plazos, u otra información relevante..."></textarea></div>
+          </div>
+          <div class="cot-actions"><button class="btn btn-back" onclick="cotNext(3)">&#8592; Volver</button><button class="btn btn-primary" onclick="cotNext(5)">Ver resumen &#8594;</button></div>
+        </div>
+        <div class="cot-panel" id="cot-panel-5">
+          <div id="cot-summary"></div>
+          <div class="cot-actions"><button class="btn btn-back" onclick="cotNext(4)">&#8592; Volver</button><button class="btn btn-primary" onclick="enviarCotizacion()" id="btn-enviar">Enviar solicitud &#8594;</button></div>
+        </div>
+        <div class="cot-panel" id="cot-panel-success">
+          <div class="cot-success">
+            <div class="cot-success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <h3>Solicitud enviada</h3>
+            <p>Recibimos tu pedido de cotización. En breve te contactaremos al mail indicado con el presupuesto.</p>
+            <p style="font-size:14px;font-weight:600;color:#b45309;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;margin-top:16px;">⚠️ Si no recibís el mail en tu bandeja principal, revisá la carpeta de <strong>correo no deseado o SPAM</strong>.</p>
+            <br><button class="btn btn-primary" onclick="resetCotizador()">Nueva cotización</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO TRABAJAMOS -->
+<section class="section section-dark" id="proceso">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Proceso</div>
+      <div class="section-title" style="color:#fff">Cómo trabajamos</div>
+      <p class="section-desc">Un proceso simple de principio a fin, con un solo punto de contacto.</p>
+    </div>
+    <div class="process-layout fade-up">
+      <div class="process-image">
+        <img src="/images/como_trabajamos-scaled.jpg" alt="Proceso de trabajo SAGUMA" loading="lazy">
+      </div>
+      <div class="process-steps-list">
+        <div class="process-step"><div class="process-num">01</div><div><div class="process-title">Nos enviás tu consulta</div><div class="process-desc">Completas el cotizador indicando producto, cantidades y personalización.</div></div></div>
+        <div class="process-step"><div class="process-num">02</div><div><div class="process-title">Cotizamos el pedido</div><div class="process-desc">Lo recibimos, cotizamos y te respondemos con el presupuesto final por mail.</div></div></div>
+        <div class="process-step"><div class="process-num">03</div><div><div class="process-title">Lo producimos</div><div class="process-desc">Fabricamos según los talles y especificaciones de tu empresa.</div></div></div>
+        <div class="process-step"><div class="process-num">04</div><div><div class="process-title">Te lo entregamos</div><div class="process-desc">Despacho en todo el país o retiro en punto acordado.</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOSOTROS -->
+<section class="section section-white" id="nosotros" style="background:var(--gray-100)">
+  <div class="container">
+    <div class="about-grid">
+      <div class="fade-up">
+        <div class="section-label">Quiénes somos</div>
+        <div class="section-title">Especialistas en indumentaria laboral</div>
+        <p class="section-desc" style="margin-bottom:32px">Gestión simple y entregas confiables. Un solo punto de contacto de principio a fin.</p>
+        <div class="about-feature">
+          <div class="about-feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
+          <div><h4>Pedidos 100% a medida</h4><p>Vos enviás tu necesidad, nosotros gestionamos todo: toma de requerimientos, cotización, armado del pedido, control de fabricación y entrega.</p></div>
+        </div>
+        <div class="about-feature">
+          <div class="about-feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+          <div><h4>Producción confiable</h4><p>Trabajamos con talleres especializados y procesos de control que aseguran calidad en cada prenda. Tiempos realistas y cumplimiento.</p></div>
+        </div>
+        <div class="about-feature">
+          <div class="about-feature-icon"><svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div><h4>Bordado y estampado</h4><p>Personalización de prendas con bordado y estampado de alta calidad. Tu marca en cada prenda.</p></div>
+        </div>
+      </div>
+      <div class="about-visual fade-up">
+        <div style="text-align:center;margin-bottom:8px">
+          <div style="font-family:'DM Serif Display',serif;font-size:36px;color:#fff;letter-spacing:4px">SAGUMA</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Indumentaria laboral</div>
+        </div>
+        <div class="about-stat-row">
+          <div class="about-stat"><div class="about-stat-num">30+</div><div class="about-stat-label">Prendas mínimo por pedido</div></div>
+          <div class="about-stat"><div class="about-stat-num">100%</div><div class="about-stat-label">Pedidos a medida</div></div>
+        </div>
+        <div class="about-stat-row">
+          <div class="about-stat"><div class="about-stat-num">1</div><div class="about-stat-label">Un solo contacto</div></div>
+          <div class="about-stat"><div class="about-stat-num">&#10003;</div><div class="about-stat-label">Envíos a todo el país</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><div class="footer-logo">SAGUMA</div><p class="footer-desc">Indumentaria de trabajo al por mayor. Soluciones en indumentaria laboral a medida para empresas de todos los rubros.</p></div>
+      <div>
+        <div class="footer-title">Navegación</div>
+        <ul class="footer-links"><li><a href="#inicio">Inicio</a></li><li><a href="#productos">Productos</a></li><li><a href="#proceso">Cómo trabajamos</a></li><li><a href="#nosotros">Nosotros</a></li><li><a href="#cotizador">Cotizador</a></li></ul>
+      </div>
+      <div>
+        <div class="footer-title">Contacto</div>
+        <div class="footer-contact-item"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:ventas@saguma.com.ar" style="color:inherit;text-decoration:none;">ventas@saguma.com.ar</a></div>
+        <div class="footer-contact-item"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg><a href="https://wa.me/5491161125719" target="_blank" style="color:inherit;text-decoration:none;">+54 11 6112 5719</a></div>
+        <div class="footer-contact-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Buenos Aires, Argentina</div>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>&copy; 2026 SAGUMA. Todos los derechos reservados.</span><span>Indumentaria laboral</span></div>
+  </div>
+</footer>
+
+<div class="img-lightbox" id="img-lightbox" onclick="cerrarLightbox()"><img id="img-lightbox-src" src="" alt=""></div>
+
+<a href="https://wa.me/5491161125719?text=Hola,%20vi%20la%20web%20de%20Saguma%20y%20quiero%20hacer%20una%20consulta" target="_blank" class="whatsapp-float" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const API_URL = 'https://saguma.com.ar/crm/api.php';
+const WA_URL = 'https://wa.me/5491161125719';
+const MIN_PER_PRODUCT = 30;
+const MIN_TOTAL = 30;
+
+let _productos = [];
+let _categorias = [];
+let _selectedCats = new Set();
+let _cotizItems = {};
+let _currentStep = 1;
+
+// Hero slideshow
+let _slideIndex = 0;
+const slides = document.querySelectorAll('.hero-slide');
+setInterval(() => {
+  slides[_slideIndex].classList.remove('active');
+  _slideIndex = (_slideIndex + 1) % slides.length;
+  slides[_slideIndex].classList.add('active');
+}, 5000);
+
+async function loadProductos() {
+  try {
+    const res = await fetch(`${API_URL}?tabla=productos`);
+    _productos = await res.json();
+    // Categorías: solo las que tienen al menos 1 producto visible en web y no son Adicionales
+    const INVIERNO = ['Camperas','Buzos','Chalecos','Chaleco','Camperón','CAMPERÓN'];
+    _categorias = [...new Set(_productos.filter(p => {
+      return (p.categoria||'').toLowerCase() !== 'adicionales' && parseInt(p.visible_web) === 1;
+    }).map(p => p.categoria).filter(Boolean))].sort((a,b) => {
+      const ai = INVIERNO.indexOf(a), bi = INVIERNO.indexOf(b);
+      if (ai !== -1 && bi !== -1) return ai - bi;
+      if (ai !== -1) return -1;
+      if (bi !== -1) return 1;
+      return a.localeCompare(b);
+    });
+    renderCotCats();
+  } catch (e) { console.error('Error loading products:', e); }
+}
+
+function scrollToCotizador(cat) {
+  if (cat) { _selectedCats.clear(); _selectedCats.add(cat); renderCotCats(); }
+  document.getElementById('cotizador').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Imágenes por categoría — completar con URLs cuando estén disponibles
+const CAT_IMAGES = {
+  'Remeras':    '/images/Categorias_cotizador/remeras_cotizador.png',
+  'Camisas':    '/images/Categorias_cotizador/camisas_cotizador.png',
+  'Chombas':    '/images/Categorias_cotizador/chombas_cotizador.png',
+  'Pantalones': '/images/Categorias_cotizador/pantalones_cotizador.png',
+  'Camperas':   '/images/Categorias_cotizador/camperas_cotizador.png',
+  'Chalecos':   '/images/Categorias_cotizador/chalecos_cotizador.png',
+  'Chaleco':    '/images/Categorias_cotizador/chalecos_cotizador.png',
+  'Ambos':      '/images/Categorias_cotizador/ambos_cotizador.png',
+  'Mamelucos':  '/images/Categorias_cotizador/mamelucos_cotizador.png',
+  'Mameluco':   '/images/Categorias_cotizador/mamelucos_cotizador.png',
+  'Buzos':      '/images/Categorias_cotizador/buzos_cotizador.png',
+  'Zapatos de seguridad': '/images/Categorias_cotizador/zapatos_cotizador.png',
+  'Camperón':  '/images/Categorias_cotizador/camperon_cotizador.png',
+  'CAMPERÓN':  '/images/Categorias_cotizador/camperon_cotizador.png',
+};
+
+function renderCotCats() {
+  const grid = document.getElementById('cot-cat-grid');
+  grid.innerHTML = _categorias.map(cat => {
+    const count  = _productos.filter(p => p.categoria === cat && parseInt(p.visible_web) === 1).length;
+    const sel    = _selectedCats.has(cat) ? 'selected' : '';
+    const imgUrl = CAT_IMAGES[cat] || CAT_IMAGES[cat.charAt(0).toUpperCase()+cat.slice(1).toLowerCase()] || Object.entries(CAT_IMAGES).find(([k])=>k.toLowerCase()===cat.toLowerCase())?.[1] || '';
+    const imgHtml = imgUrl
+      ? `<div class="cat-select-img-wrap"><img src="${imgUrl}" alt="${cat}" loading="lazy"></div>`
+      : `<div class="cat-select-no-img"></div>`;
+    return `<div class="cat-select-card ${sel}" onclick="toggleCotCat('${cat}', this)">${imgHtml}<div class="cat-select-info"><div class="cat-select-name">${cat}</div><div class="cat-select-count">${count} producto${count !== 1 ? 's' : ''}</div></div></div>`;
+  }).join('');
+}
+
+function toggleCotCat(cat, el) {
+  if (_selectedCats.has(cat)) _selectedCats.delete(cat); else _selectedCats.add(cat);
+  el.classList.toggle('selected');
+}
+
+function getSelectedItems() {
+  return Object.entries(_cotizItems).filter(([_, v]) => v.checked);
+}
+
+function getTotalQty() {
+  return getSelectedItems().reduce((sum, [_, v]) => sum + (v.qty || 0), 0);
+}
+
+function updateQtyBar() {
+  const total = getTotalQty();
+  const bar = document.getElementById('qty-total-bar');
+  if (!bar) return;
+  const ok = total >= MIN_TOTAL;
+  bar.className = 'qty-total-bar ' + (ok ? 'ok' : 'warn');
+  bar.innerHTML = `<span>${ok ? 'Pedido valido' : 'Faltan prendas para alcanzar el minimo'} &middot; Minimo ${MIN_TOTAL} prendas en total</span><span class="qty-total-num">${total} un.</span>`;
+}
+
+function renderCotItems() {
+  const filtered = _productos.filter(p => _selectedCats.has(p.categoria)).filter(p => {
+    return (p.categoria||'').toLowerCase() !== 'adicionales' && parseInt(p.visible_web) === 1;
+  });
+  // Agrupar por categoría y ordenar por precio dentro de cada grupo
+  const catOrder = [..._selectedCats];
+  filtered.sort((a,b) => {
+    const catA = catOrder.indexOf(a.categoria);
+    const catB = catOrder.indexOf(b.categoria);
+    if (catA !== catB) return catA - catB;
+    return (parseFloat(a.precio)||0) - (parseFloat(b.precio)||0);
+  });
+  const tbody = document.getElementById('cot-items-tbody');
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted)">No hay productos en las categorías seleccionadas.</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(p => {
+    if (!_cotizItems[p.id]) _cotizItems[p.id] = { checked: false, qty: MIN_PER_PRODUCT, custom: 'Sin personalizar', color: '', _pid: p.id, _cat: p.categoria, _tela: p.tela, _marca: p.marca, _precio: p.precio, _img_url: p.img_url||'', _descripcion: p.descripcion||'' };
+    const state   = _cotizItems[p.id];
+    const imgHtml = p.img_url
+      ? `<img src="${p.img_url}" class="prod-img-thumb" alt="${p.tela||''}" loading="lazy" onclick="abrirLightbox('${p.img_url}')">`
+      : `<span class="prod-img-empty"></span>`;
+    const descHtml = p.descripcion
+      ? `<div class="prod-desc-small">${p.descripcion}</div>` : '';
+    return `<tr>
+      <td><input type="checkbox" class="item-check" ${state.checked?'checked':''} onchange="toggleItem(${p.id}, this.checked)"></td>
+      <td class="col-prod-img">${imgHtml}</td>
+      <td><div style="font-size:13px"><span style="font-weight:600">${(p.categoria||'').toUpperCase()}</span> <span>${p.tela||'-'}</span></div>${descHtml}</td>
+      <td data-label="Color"><input type="text" class="item-color" value="${state.color||''}" placeholder="Opcional" onchange="updateItemColor(${p.id}, this.value)" ${state.checked?'':'disabled'} style="width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;"></td>
+      <td data-label="Cantidad"><input type="number" class="item-qty" value="${state.qty}" min="${MIN_PER_PRODUCT}" step="1" onchange="updateItemQty(${p.id}, this.value)" ${state.checked?'':'disabled'}><div class="qty-warning" id="qw-${p.id}">Min. ${MIN_PER_PRODUCT} unidades</div></td>
+      <td data-label="Personalización"><select class="item-custom" onchange="updateItemCustom(${p.id}, this.value)" ${state.checked?'':'disabled'}><option ${state.custom==='Sin personalizar'?'selected':''}>Sin personalizar</option><option ${state.custom==='Bordado'?'selected':''}>Bordado</option><option ${state.custom==='Estampado'?'selected':''}>Estampado</option></select></td>
+    </tr>`;
+  }).join('');
+  updateQtyBar();
+}
+
+function toggleItem(id, checked) {
+  if (!_cotizItems[id]) _cotizItems[id] = { checked: false, qty: MIN_PER_PRODUCT, custom: 'Sin personalizar', color: '' };
+  _cotizItems[id].checked = checked;
+  const row = event.target.closest('tr');
+  row.querySelectorAll('.item-qty, .item-custom, .item-color').forEach(el => el.disabled = !checked);
+  updateQtyBar();
+}
+function updateItemQty(id, val) {
+  const qty = parseInt(val)||0; _cotizItems[id].qty = qty;
+  const w = document.getElementById('qw-'+id);
+  if(w) w.style.display = qty<MIN_PER_PRODUCT?'block':'none';
+  updateQtyBar();
+}
+function updateItemCustom(id, val) { _cotizItems[id].custom = val; }
+function updateItemColor(id, val) { _cotizItems[id].color = val; }
+
+function abrirLightbox(src) {
+  document.getElementById('img-lightbox-src').src = src;
+  document.getElementById('img-lightbox').classList.add('open');
+}
+function cerrarLightbox() {
+  document.getElementById('img-lightbox').classList.remove('open');
+}
+
+const TALLES = ['S','M','L','XL','XXL','3XL','4XL','5XL'];
+const TALLES_RECARGO = ['3XL','4XL','5XL'];
+const RECARGO_PCT = 0.12;
+
+function renderTalles() {
+  const sel = getSelectedItems();
+  const container = document.getElementById('cot-talles-container');
+  container.innerHTML = sel.map(([id, v]) => {
+    if (!v.talles) v.talles = {};
+    TALLES.forEach(t => { if (v.talles[t] === undefined) v.talles[t] = 0; });
+    const assigned = TALLES.reduce((s, t) => s + (parseInt(v.talles[t]) || 0), 0);
+    const total = v.qty;
+    const isComplete = assigned === total;
+    const isOver = assigned > total;
+    const cardClass = isComplete ? 'complete' : (isOver ? 'error' : '');
+    const badgeClass = isComplete ? 'ok' : (isOver ? 'over' : 'pending');
+    const badgeText = `${assigned} / ${total}` + (isComplete ? ' ✓' : '');
+    const customLabel = v.custom !== 'Sin personalizar' ? `Personalización: ${v.custom}` : '';
+    const summaryClass = isComplete ? 'ok' : 'warn';
+    const summaryText = isComplete ? '✓ Distribución completa' : (isOver ? `⚠ Excedés por ${assigned - total} unidades` : `⚠ Faltan ${total - assigned} unidades por asignar`);
+
+    const talleImgHtml  = v._img_url ? `<img src="${v._img_url}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;" loading="lazy">` : '';
+    const talleDescHtml = v._descripcion ? `<div class="prod-desc-small" style="margin-top:3px">${v._descripcion}</div>` : '';
+    return `<div class="talle-card ${cardClass}" data-id="${id}">
+      <div class="talle-header">
+        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">${talleImgHtml}<div><div class="talle-product">${(v._cat||'').toUpperCase()} ${v._tela||''}</div>${talleDescHtml}</div></div>
+        <div class="talle-badge ${badgeClass}">${badgeText}</div>
+      </div>
+      ${customLabel ? `<div class="talle-custom">${customLabel}</div>` : ''}
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;">Color:</label>
+        <input type="text" class="form-input" style="padding:5px 10px;font-size:13px;width:160px;border-radius:6px;" placeholder="Ej: Azul, Negro..." value="${v.color||''}" onchange="updateColor('${id}',this.value)">
+      </div>
+      <div class="talle-grid">
+        ${TALLES.map(t => `<div class="talle-item">
+          <div class="talle-label">${t}</div>
+          <input type="number" class="talle-input ${(parseInt(v.talles[t])||0) > 0 ? 'has-value' : ''}" value="${v.talles[t]||0}" min="0" inputmode="numeric" pattern="[0-9]*"
+            onfocus="this.select()"
+            onkeydown="return event.key==='Backspace'||event.key==='Tab'||event.key==='ArrowLeft'||event.key==='ArrowRight'||event.key==='Delete'||/^[0-9]$/.test(event.key)"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'');updateTalle('${id}','${t}',this.value);this.classList.toggle('has-value',parseInt(this.value)>0)">
+        </div>`).join('')}
+      </div>
+      <div class="talle-summary ${summaryClass}">${summaryText}</div>
+    </div>`;
+  }).join('');
+  validateTalles();
+}
+
+function updateTalle(id, talle, val) {
+  if (!_cotizItems[id]) return;
+  if (!_cotizItems[id].talles) _cotizItems[id].talles = {};
+  _cotizItems[id].talles[talle] = parseInt(val) || 0;
+  // Solo actualizar badge y validación sin re-renderizar inputs
+  updateTalleBadge(id);
+  validateTalles();
+}
+
+function updateTalleBadge(id) {
+  const v = _cotizItems[id];
+  if (!v || !v.talles) return;
+  const assigned = TALLES.reduce((s, t) => s + (parseInt(v.talles[t]) || 0), 0);
+  const total = v.qty;
+  const isComplete = assigned === total;
+  const isOver = assigned > total;
+
+  // Buscar la tarjeta por data attribute
+  const card = document.querySelector(`.talle-card[data-id="${id}"]`);
+  if (!card) return;
+
+  card.classList.remove('complete','error');
+  if (isComplete) card.classList.add('complete');
+  else if (isOver) card.classList.add('error');
+
+  const badge = card.querySelector('.talle-badge');
+  if (badge) {
+    badge.textContent = `${assigned} / ${total}` + (isComplete ? ' ✓' : '');
+    badge.className = 'talle-badge ' + (isComplete ? 'ok' : (isOver ? 'over' : 'pending'));
+  }
+
+  const summary = card.querySelector('.talle-summary');
+  if (summary) {
+    summary.className = 'talle-summary ' + (isComplete ? 'ok' : 'warn');
+    summary.textContent = isComplete ? '✓ Distribución completa' : (isOver ? `⚠ Excedés por ${assigned - total} unidades` : `⚠ Faltan ${total - assigned} unidades por asignar`);
+  }
+}
+
+function updateColor(id, val) {
+  if (!_cotizItems[id]) return;
+  _cotizItems[id].color = val;
+}
+
+function validateTalles() {
+  const sel = getSelectedItems();
+  const errors = [];
+  sel.forEach(([id, v]) => {
+    const assigned = TALLES.reduce((s, t) => s + (parseInt(v.talles?.[t]) || 0), 0);
+    if (assigned !== v.qty) {
+      errors.push(`<b>${(v._cat||'').toUpperCase()} ${v._tela||''}</b>: ${assigned}/${v.qty}`);
+    }
+  });
+  const valDiv = document.getElementById('cot-talles-validation');
+  const btn = document.getElementById('btn-talles-next');
+  if (errors.length) {
+    valDiv.innerHTML = `<div class="talle-validation error">⚠ Completá la distribución de talles de todos los productos antes de continuar. ${errors.join(', ')}</div>`;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+  } else {
+    valDiv.innerHTML = `<div class="talle-validation success">✓ Todos los productos tienen la distribución de talles completa.</div>`;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+}
+
+function cotNext(step) {
+  if (step===2 && _currentStep===1) {
+    if(_selectedCats.size===0){toast('Seleccioná al menos una categoría.',true);return;}
+    renderCotItems();
+  }
+  if (step===3 && _currentStep===2) {
+    const sel = getSelectedItems();
+    if(!sel.length){toast('Seleccioná al menos un producto.',true);return;}
+    const invalidProd = sel.find(([_,v])=>v.qty<MIN_PER_PRODUCT);
+    if(invalidProd){toast(`La cantidad mínima por producto es ${MIN_PER_PRODUCT} unidades.`,true);return;}
+    const total = getTotalQty();
+    if(total<MIN_TOTAL){toast(`El pedido mínimo es de ${MIN_TOTAL} prendas en total. Llevás ${total}.`,true);return;}
+    renderTalles();
+  }
+  if (step===4 && _currentStep===3) {
+    // Validate talles
+    const sel = getSelectedItems();
+    const invalid = sel.find(([id, v]) => {
+      const assigned = TALLES.reduce((s, t) => s + (parseInt(v.talles?.[t]) || 0), 0);
+      return assigned !== v.qty;
+    });
+    if(invalid){toast('Completá la distribución de talles de todos los productos.',true);return;}
+  }
+  if (step===5 && _currentStep===4) {
+    const e=document.getElementById('cot-empresa').value.trim(),n=document.getElementById('cot-nombre').value.trim(),m=document.getElementById('cot-email').value.trim();
+    if(!e){toast('Ingresá el nombre de la empresa.',true);return;}
+    if(!n){toast('Ingresá tu nombre.',true);return;}
+    if(!m||!m.includes('@')){toast('Ingresá un email válido.',true);return;}
+    renderSummary();
+  }
+  _currentStep = step;
+  document.querySelectorAll('.cot-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('cot-panel-'+step).classList.add('active');
+  document.querySelectorAll('.cot-step').forEach(s=>{ const ss=parseInt(s.dataset.step); s.classList.remove('active','done'); if(ss===step) s.classList.add('active'); else if(ss<step) s.classList.add('done'); });
+  // Scroll al tope del cotizador (con offset para la nav fija)
+  setTimeout(()=>{
+    const el = document.querySelector('.cotizador-header');
+    const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
+    window.scrollTo({top:y, behavior:'smooth'});
+  }, 50);
+}
+
+function renderSummary() {
+  const btnE = document.getElementById('btn-enviar');
+  if(btnE){ btnE.disabled=false; btnE.innerHTML='Enviar solicitud &#8594;'; }
+  const items = getSelectedItems().map(([id,v])=>{ return {...v, producto:v._tela||'-', categoria:v._cat||''}; });
+  const empresa=document.getElementById('cot-empresa').value.trim(), nombre=document.getElementById('cot-nombre').value.trim(), email=document.getElementById('cot-email').value.trim(), tel=document.getElementById('cot-tel').value.trim(), notas=document.getElementById('cot-notas').value.trim();
+  const totalQty = items.reduce((s,it)=>s+it.qty,0);
+  let html = `<div class="summary-section"><div class="summary-title">Datos de contacto</div>
+    <div class="summary-item"><span class="summary-item-label">Empresa</span><span class="summary-item-value">${empresa}</span></div>
+    <div class="summary-item"><span class="summary-item-label">Contacto</span><span class="summary-item-value">${nombre}</span></div>
+    <div class="summary-item"><span class="summary-item-label">Email</span><span class="summary-item-value">${email}</span></div>
+    ${tel?`<div class="summary-item"><span class="summary-item-label">Teléfono</span><span class="summary-item-value">${tel}</span></div>`:''}</div>
+    <div class="summary-section"><div class="summary-title">Productos solicitados (${items.length} productos · ${totalQty} prendas)</div>
+    ${items.map(it=>{
+      const tallesStr = TALLES.filter(t=>(it.talles?.[t]||0)>0).map(t=>`${t}:${it.talles[t]}`).join(' · ');
+      const colorStr = it.color ? ` · Color: ${it.color}` : '';
+      return `<div class="summary-item"><span class="summary-item-label">${it.categoria} - ${it.producto}</span><span class="summary-item-value">${it.qty} un. / ${it.custom}</span></div><div class="summary-talles">${tallesStr}${colorStr}</div>`;
+    }).join('')}</div>
+    ${notas?`<div class="summary-section"><div class="summary-title">Observaciones</div><p style="font-size:13px;color:var(--muted)">${notas}</p></div>`:''}`;
+  document.getElementById('cot-summary').innerHTML = html;
+}
+
+async function enviarCotizacion() {
+  const btn = document.getElementById('btn-enviar'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Enviando...';
+  const adicionales = _productos.filter(p=>(p.categoria||'').toLowerCase()==='adicionales');
+  const costoBordado = parseFloat((adicionales.find(p=>(p.tela||'').toLowerCase().includes('bordado'))||{}).precio)||0;
+  const costoEstampado = parseFloat((adicionales.find(p=>(p.tela||'').toLowerCase().includes('estampado'))||{}).precio)||0;
+
+  // Generar una línea por cada talle con cantidad > 0
+  const items = [];
+  getSelectedItems().forEach(([id,v])=>{
+    const cat=v._cat||''; const tela=v._tela||'';
+    let precioBase=parseFloat(v._precio)||0;
+    const custom=v.custom||'Sin personalizar';
+    const color=v.color||'';
+    let costoCustom=0;
+    if(custom==='Bordado') costoCustom=costoBordado;
+    else if(custom==='Estampado') costoCustom=costoEstampado;
+    else if(custom==='Ambos') costoCustom=costoBordado+costoEstampado;
+    const precioNormal=precioBase+costoCustom;
+
+    const marca=v._marca||'';
+    let desc=cat+' '+tela.toLowerCase()+(marca?' ('+marca.toLowerCase()+')':'');
+    if(custom==='Bordado') desc+=' c/ bordado';
+    else if(custom==='Estampado') desc+=' c/ estampado';
+    else if(custom==='Ambos') desc+=' c/ bordado y estampado';
+
+    const talles = v.talles || {};
+    TALLES.forEach(t => {
+      const cant = parseInt(talles[t]) || 0;
+      if (cant <= 0) return;
+      const esRecargo = TALLES_RECARGO.includes(t);
+      const precio = esRecargo ? precioNormal * (1 + RECARGO_PCT) : precioNormal;
+      items.push({
+        producto_id:id, producto:tela, categoria:cat, marca:v._marca||'',
+        cantidad:cant, personalizacion:custom,
+        desc:desc.trim(), cant:cant, precio:precio,
+        talle:t, color:color
+      });
+    });
+  });
+
+  const data = { cliente:document.getElementById('cot-empresa').value.trim(), contacto:document.getElementById('cot-nombre').value.trim(), mail:document.getElementById('cot-email').value.trim(), telefono:document.getElementById('cot-tel').value.trim(), notas:document.getElementById('cot-notas').value.trim(), cargo:document.getElementById('cot-cargo').value.trim(), items_json:JSON.stringify(items), estado:'Web', numero:'WEB-'+Date.now(), fecha:new Date().toISOString().split('T')[0], origen:'cotizador-web' };
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 40000);
+    const res = await fetch(`${API_URL}?tabla=cotizaciones`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data), signal:ctrl.signal });
+    clearTimeout(timer);
+    const result = await res.json();
+    if (result.ok||result.id) { document.querySelectorAll('.cot-panel').forEach(p=>p.classList.remove('active')); document.getElementById('cot-panel-success').classList.add('active'); document.querySelectorAll('.cot-step').forEach(s=>s.classList.add('done')); toast('Solicitud enviada con éxito.'); }
+    else throw new Error(result.error||'Error al enviar');
+  } catch(e) { console.error('Submit error:',e); toast(e.name==='AbortError'?'El servidor tardó demasiado. Intentá de nuevo.':'Hubo un error al enviar. Intenta nuevamente.',true); }
+  btn.disabled=false; btn.innerHTML='Enviar solicitud &#8594;';
+}
+
+function resetCotizador() {
+  _selectedCats.clear(); _cotizItems={}; _currentStep=1;
+  document.querySelectorAll('.cot-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('cot-panel-1').classList.add('active');
+  document.querySelectorAll('.cot-step').forEach(s=>{s.classList.remove('active','done');});
+  document.querySelector('.cot-step[data-step="1"]').classList.add('active');
+  renderCotCats();
+  ['cot-empresa','cot-nombre','cot-email','cot-tel','cot-cargo','cot-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+function toggleMenu(){document.getElementById('nav-links').classList.toggle('open');}
+const sections=['inicio','catalogo','cotizador','proceso','nosotros'];
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY+100;
+  document.getElementById('navbar').classList.toggle('scrolled',y>50);
+  let current='inicio'; sections.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=y)current=id;});
+  document.querySelectorAll('.nav-links a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current);});
+  document.getElementById('nav-links').classList.remove('open');
+});
+document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',()=>{document.getElementById('nav-links').classList.remove('open');});});
+
+const observer = new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.fade-up').forEach(el=>observer.observe(el));
+
+loadProductos();
+</script>
+</body>
+</html>

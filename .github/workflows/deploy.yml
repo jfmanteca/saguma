@@ -35,6 +35,7 @@ jobs:
             ('crm/enviar_cotizacion.php', f'{base}/crm/enviar_cotizacion.php'),
             ('crm/index.html',           f'{base}/crm/index.html'),
             ('index.html',               f'{base}/index.html'),
+            ('inverno/index.html',       f'{base}/inverno/index.html'),
           ]
 
           if not host or not user or not key_str:
@@ -71,6 +72,12 @@ jobs:
               sys.exit(1)
 
           sftp = paramiko.SFTPClient.from_transport(transport)
+
+          # Crear carpetas remotas si no existen
+          dirs = set(os.path.dirname(r) for _, r in files)
+          for d in sorted(dirs):
+              try: sftp.mkdir(d)
+              except: pass
 
           for local, remote in files:
               print(f'Subiendo {local} → {remote}')
