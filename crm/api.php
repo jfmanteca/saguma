@@ -76,6 +76,10 @@ try {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
+    // ── MIGRATION: columna origen en cotizaciones ─────────────
+    try { $pdo->exec("ALTER TABLE cotizaciones ADD COLUMN origen VARCHAR(10) NOT NULL DEFAULT 'CRM'"); } catch (PDOException $e) { /* ya existe */ }
+    $pdo->exec("UPDATE cotizaciones SET origen='WEB' WHERE numero='C01-00254' AND origen='CRM'");
+
     // ── GET especial: compras (con JOINs) ─────────────────────
     if ($method === 'GET' && $tabla === 'compras') {
         $stmt = $pdo->query("SELECT c.*,
@@ -155,8 +159,8 @@ try {
                     }
                 }
 
-                $sql = "INSERT INTO cotizaciones (numero,fecha,cliente,contacto,telefono,mail,fecha_sol,valida,plazo,estado,monto,notas,items_json)
-                        VALUES (:numero,:fecha,:cliente,:contacto,:telefono,:mail,:fecha_sol,:valida,:plazo,:estado,:monto,:notas,:items_json)";
+                $sql = "INSERT INTO cotizaciones (numero,fecha,cliente,contacto,telefono,mail,fecha_sol,valida,plazo,estado,monto,notas,items_json,origen)
+                        VALUES (:numero,:fecha,:cliente,:contacto,:telefono,:mail,:fecha_sol,:valida,:plazo,:estado,:monto,:notas,:items_json,:origen)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     'numero'     => $numero_cot,
@@ -172,6 +176,7 @@ try {
                     'monto'      => $monto,
                     'notas'      => $body['notas'] ?? '',
                     'items_json' => $body['items_json'] ?? null,
+                    'origen'     => $es_web ? 'WEB' : 'CRM',
                 ]);
                 $cot_id = $pdo->lastInsertId();
 

@@ -1838,13 +1838,14 @@ function renderCotizaciones(data) {
     return 0;
   });
   const thead=document.querySelector('#page-cotizaciones thead tr');
-  if(thead) thead.innerHTML=[['numero','N°'],['fecha','Fecha'],['cliente','Cliente'],['estado','Estado'],['monto','Monto'],['observaciones','Seguimiento'],[null,'Acciones']].map(([col,label])=>col?`<th class="sortable cotiz-th ${_cotizSort.col===col?_cotizSort.dir:''}" data-col="${col}" onclick="sortCotiz('${col}')">${label}<span class="sort-arrow"></span></th>`:`<th>${label}</th>`).join('');
+  if(thead) thead.innerHTML=[['numero','N°'],['fecha','Fecha'],['cliente','Cliente'],['estado','Estado'],['origen','Origen'],['monto','Monto'],['observaciones','Seguimiento'],[null,'Acciones']].map(([col,label])=>col?`<th class="sortable cotiz-th ${_cotizSort.col===col?_cotizSort.dir:''}" data-col="${col}" onclick="sortCotiz('${col}')">${label}<span class="sort-arrow"></span></th>`:`<th>${label}</th>`).join('');
   document.getElementById('cotiz-tbody').innerHTML = data.length ? data.map(co=>`
     <tr>
       <td class="mono">${co.numero}</td>
       <td>${fmtDate(co.fecha)}</td>
       <td><b>${co.cliente}</b>${co.contacto?`<br><span style="font-size:11px;color:var(--muted)">${co.contacto}</span>`:''}</td>
       <td>${statusPill(co.estado)}</td>
+      <td style="text-align:center">${(co.origen||'CRM')==='WEB'?'<span style="background:#dcfce7;color:#16a34a;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:monospace">WEB</span>':'<span style="background:#f1f3f5;color:#6b7a99;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:monospace">CRM</span>'}</td>
       <td class="mono">${co.monto?fmtARS(co.monto):'—'}</td>
       <td style="font-size:11px;color:var(--muted);max-width:180px">${co.observaciones ? co.observaciones.split(' | ').pop() : '—'}</td>
       <td style="white-space:nowrap">
@@ -1854,7 +1855,7 @@ function renderCotizaciones(data) {
         <button class="btn btn-ghost btn-sm" onclick="exportarCotizPDF(${co.id})" style="margin-left:2px;font-size:11px;padding:3px 6px" title="PDF">📄</button>
         <button class="btn btn-danger btn-sm" onclick="eliminar('cotizaciones',${co.id})" style="margin-left:2px;font-size:11px;padding:3px 6px">✕</button>
       </td>
-    </tr>`).join('') : '<tr><td colspan="7" class="empty">No hay cotizaciones.</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="8" class="empty">No hay cotizaciones.</td></tr>';
 }
 function filterCotiz(){
   const q=document.getElementById('cotiz-search').value.toLowerCase();
@@ -2553,6 +2554,46 @@ function drawSVGLineChart(containerId, months, grouped, color, fmtShort) {
   </svg>`;
 }
 
+function drawDualLineChart(containerId, months, g1, color1, lbl1, g2, color2, lbl2, fmtShort) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const d1 = months.map(m=>({label:m.label,value:g1[m.key]||0}));
+  const d2 = months.map(m=>({label:m.label,value:g2[m.key]||0}));
+  const maxVal = Math.max(...d1.map(d=>d.value),...d2.map(d=>d.value),1);
+  const VW=700,VH=160,pL=8,pR=8,pT=36,pB=32;
+  const cW=VW-pL-pR,cH=VH-pT-pB,n=months.length;
+  const xs=i=>pL+(i/(n-1))*cW, ys=v=>pT+(1-v/maxVal)*cH;
+  const gridLines=[0.25,0.5,0.75,1].map(f=>{
+    const y=ys(f*maxVal).toFixed(1);
+    return `<line x1="${pL}" y1="${y}" x2="${VW-pR}" y2="${y}" stroke="#edf0f5" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="${pL-2}" y="${(parseFloat(y)+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#c0c8d8" font-family="monospace">${fmtShort(f*maxVal)}</text>`;
+  }).join('');
+  const makePts=data=>data.map((d,i)=>`${xs(i).toFixed(1)},${ys(d.value).toFixed(1)}`);
+  const makeArea=(pts)=>`M${xs(0).toFixed(1)},${(VH-pB).toFixed(1)} ${pts.map(p=>`L${p}`).join(' ')} L${xs(n-1).toFixed(1)},${(VH-pB).toFixed(1)} Z`;
+  const pts1=makePts(d1),pts2=makePts(d2);
+  const makeDots=(data,color,offset)=>data.map((d,i)=>{
+    const cx=xs(i).toFixed(1),cy=ys(d.value).toFixed(1);
+    return `<circle cx="${cx}" cy="${cy}" r="3.5" fill="${color}" stroke="#fff" stroke-width="1.5"/>
+      ${d.value>0?`<text x="${cx}" y="${(parseFloat(cy)-7+offset).toFixed(1)}" text-anchor="middle" font-size="8" fill="${color}" font-family="monospace" font-weight="700">${fmtShort(d.value)}</text>`:''}`;
+  }).join('');
+  const xLabels=months.map((m,i)=>`<text x="${xs(i).toFixed(1)}" y="${(VH-pB+18).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9aa3b5" font-family="monospace">${m.label}</text>`).join('');
+  const legend=`<circle cx="10" cy="10" r="4" fill="${color1}"/><text x="18" y="14" font-size="9" fill="${color1}" font-family="monospace" font-weight="700">${lbl1}</text>
+    <circle cx="58" cy="10" r="4" fill="${color2}"/><text x="66" y="14" font-size="9" fill="${color2}" font-family="monospace" font-weight="700">${lbl2}</text>`;
+  const gid1=`lcg_${containerId}_1`,gid2=`lcg_${containerId}_2`;
+  el.innerHTML=`<svg viewBox="0 0 ${VW} ${VH}" width="100%" style="display:block;overflow:visible">
+    <defs>
+      <linearGradient id="${gid1}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color1}" stop-opacity="0.15"/><stop offset="100%" stop-color="${color1}" stop-opacity="0.01"/></linearGradient>
+      <linearGradient id="${gid2}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color2}" stop-opacity="0.12"/><stop offset="100%" stop-color="${color2}" stop-opacity="0.01"/></linearGradient>
+    </defs>
+    ${legend}${gridLines}
+    <path d="${makeArea(pts1)}" fill="url(#${gid1})"/>
+    <path d="${makeArea(pts2)}" fill="url(#${gid2})"/>
+    <polyline points="${pts1.join(' ')}" fill="none" stroke="${color1}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${pts2.join(' ')}" fill="none" stroke="${color2}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,3"/>
+    ${makeDots(d1,color1,0)}${makeDots(d2,color2,10)}${xLabels}
+  </svg>`;
+}
+
 function _renderOneLineChart(chartId) {
   const months = _monthsForOffset(_lcOffsets[chartId]);
   const rangeEl = document.getElementById(`lc-range-${chartId}`);
@@ -2561,8 +2602,9 @@ function _renderOneLineChart(chartId) {
     const g = {}; _data.consultas.forEach(x=>{ const k=_itemDateKey(x); if(k) g[k]=(g[k]||0)+1; });
     drawSVGLineChart('lc-consultas', months, g, '#2563b0', v=>v);
   } else if (chartId === 'cotizaciones') {
-    const g = {}; _data.cotizaciones.forEach(x=>{ const k=_itemDateKey(x); if(k) g[k]=(g[k]||0)+1; });
-    drawSVGLineChart('lc-cotizaciones', months, g, '#16a34a', v=>v);
+    const gWeb={}, gCrm={};
+    _data.cotizaciones.forEach(x=>{ const k=_itemDateKey(x); if(!k) return; if((x.origen||'CRM').toUpperCase()==='WEB') gWeb[k]=(gWeb[k]||0)+1; else gCrm[k]=(gCrm[k]||0)+1; });
+    drawDualLineChart('lc-cotizaciones', months, gWeb, '#16a34a', 'WEB', gCrm, '#6b7a99', 'CRM', v=>v);
   } else if (chartId === 'ventas') {
     const g = {}; _data.ventas.forEach(x=>{ const k=_itemDateKey(x); if(k) g[k]=(g[k]||0)+(parseFloat(x.ingreso_neto)||0); });
     const fmtV = v=>v>=1000000?'$'+(v/1000000).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+Math.round(v);

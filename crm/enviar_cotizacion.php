@@ -242,15 +242,15 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
         $rows .= "<tr>
           <td style=\"{$bg}text-align:center;width:{$W[0]};{$td}\">{$n}</td>
           <td style=\"{$bg}width:{$W[1]};{$td}\">" . $esc($desc) . "</td>
-          <td style=\"{$bg}width:{$W[2]};{$td}\">{$talle}</td>
+          <td style=\"{$bg}text-align:center;width:{$W[2]};{$td}\">{$talle}</td>
           <td style=\"{$bg}width:{$W[3]};{$td}\">{$color}</td>
           <td style=\"{$bg}text-align:center;width:{$W[4]};{$td}\">{$cant}</td>";
         if ($hay_precios) {
             $rows .=
-              "<td style=\"{$bg}text-align:right;width:{$W[5]};{$td}\">" . $fmt($it['_pu']) . "</td>" .
-              "<td style=\"{$bg}text-align:right;width:{$W[6]};{$td}\">" . $fmt($it['_sub']) . "</td>" .
-              "<td style=\"{$bg}text-align:right;width:{$W[7]};{$td}\">" . $fmt($it['_iva']) . "</td>" .
-              "<td style=\"{$bg}text-align:right;width:{$W[8]};{$td}\">" . $fmt($it['_tot']) . "</td>";
+              "<td style=\"{$bg}text-align:center;width:{$W[5]};{$td}\">" . $fmt($it['_pu']) . "</td>" .
+              "<td style=\"{$bg}text-align:center;width:{$W[6]};{$td}\">" . $fmt($it['_sub']) . "</td>" .
+              "<td style=\"{$bg}text-align:center;width:{$W[7]};{$td}\">" . $fmt($it['_iva']) . "</td>" .
+              "<td style=\"{$bg}text-align:center;width:{$W[8]};{$td}\">" . $fmt($it['_tot']) . "</td>";
         } else {
             $rows .= "<td colspan=\"4\" style=\"{$bg}{$td}\"></td>";
         }
@@ -272,9 +272,9 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
       <td style=\"{$tfoot}\"></td>";
     if ($hay_precios) {
         $rows .=
-          "<td style=\"{$tfoot};text-align:right;width:{$W[6]}\">" . $fmt($subtotal_gen) . "</td>" .
-          "<td style=\"{$tfoot};text-align:right;width:{$W[7]}\">" . $fmt($iva_gen) . "</td>" .
-          "<td style=\"{$tfoot};text-align:right;width:{$W[8]}\">" . $fmt($total_gen) . "</td>";
+          "<td style=\"{$tfoot};text-align:center;width:{$W[6]}\">" . $fmt($subtotal_gen) . "</td>" .
+          "<td style=\"{$tfoot};text-align:center;width:{$W[7]}\">" . $fmt($iva_gen) . "</td>" .
+          "<td style=\"{$tfoot};text-align:center;width:{$W[8]}\">" . $fmt($total_gen) . "</td>";
     } else {
         $rows .= "<td colspan=\"3\" style=\"{$tfoot}\"></td>";
     }
@@ -285,13 +285,13 @@ function _generarPDFCRM($data, $items, $numero, $fecha) {
   <thead><tr>
     <th style=\"{$th};text-align:center;width:{$W[0]}\">#</th>
     <th style=\"{$th};text-align:left;width:{$W[1]}\">DESCRIPCI&#211;N</th>
-    <th style=\"{$th};text-align:left;width:{$W[2]}\">TALLE</th>
+    <th style=\"{$th};text-align:center;width:{$W[2]}\">TALLE</th>
     <th style=\"{$th};text-align:left;width:{$W[3]}\">COLOR</th>
     <th style=\"{$th};text-align:center;width:{$W[4]}\">CANT.</th>
-    <th style=\"{$th};text-align:right;width:{$W[5]}\">P.UNIT S/IVA</th>
-    <th style=\"{$th};text-align:right;width:{$W[6]}\">SUBTOTAL</th>
-    <th style=\"{$th};text-align:right;width:{$W[7]}\">IVA 21%</th>
-    <th style=\"{$th};text-align:right;width:{$W[8]}\">TOTAL C/IVA</th>
+    <th style=\"{$th};text-align:center;width:{$W[5]}\">P.UNIT S/IVA</th>
+    <th style=\"{$th};text-align:center;width:{$W[6]}\">SUBTOTAL</th>
+    <th style=\"{$th};text-align:center;width:{$W[7]}\">IVA 21%</th>
+    <th style=\"{$th};text-align:center;width:{$W[8]}\">TOTAL C/IVA</th>
   </tr></thead>
   <tbody>{$rows}</tbody>
 </table>";
