@@ -2554,43 +2554,44 @@ function drawSVGLineChart(containerId, months, grouped, color, fmtShort) {
   </svg>`;
 }
 
-function drawDualLineChart(containerId, months, g1, color1, lbl1, g2, color2, lbl2, fmtShort) {
+function drawStackedBarChart(containerId, months, gBottom, colorBottom, lblBottom, gTop, colorTop, lblTop) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  const d1 = months.map(m=>({label:m.label,value:g1[m.key]||0}));
-  const d2 = months.map(m=>({label:m.label,value:g2[m.key]||0}));
-  const maxVal = Math.max(...d1.map(d=>d.value),...d2.map(d=>d.value),1);
-  const VW=700,VH=160,pL=8,pR=8,pT=36,pB=32;
-  const cW=VW-pL-pR,cH=VH-pT-pB,n=months.length;
-  const xs=i=>pL+(i/(n-1))*cW, ys=v=>pT+(1-v/maxVal)*cH;
+  const dB = months.map(m=>({label:m.label,key:m.key,v:gBottom[m.key]||0}));
+  const dT = months.map(m=>({label:m.label,key:m.key,v:gTop[m.key]||0}));
+  const totals = dB.map((d,i)=>d.v+dT[i].v);
+  const maxVal = Math.max(...totals, 1);
+  const VW=700,VH=160,pL=12,pR=12,pT=28,pB=32;
+  const cH=VH-pT-pB, n=months.length;
+  const slot=( VW-pL-pR)/n;
+  const bW=slot*0.55;
+  const bX=i=>(pL+i*slot+slot/2-bW/2).toFixed(1);
+  const bH=v=>((v/maxVal)*cH).toFixed(1);
+  const bY=v=>(pT+cH-(v/maxVal)*cH).toFixed(1);
   const gridLines=[0.25,0.5,0.75,1].map(f=>{
-    const y=ys(f*maxVal).toFixed(1);
-    return `<line x1="${pL}" y1="${y}" x2="${VW-pR}" y2="${y}" stroke="#edf0f5" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="${pL-2}" y="${(parseFloat(y)+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#c0c8d8" font-family="monospace">${fmtShort(f*maxVal)}</text>`;
+    const y=(pT+(1-f)*cH).toFixed(1);
+    return `<line x1="${pL}" y1="${y}" x2="${VW-pR}" y2="${y}" stroke="#edf0f5" stroke-width="1" stroke-dasharray="4,3"/>`;
   }).join('');
-  const makePts=data=>data.map((d,i)=>`${xs(i).toFixed(1)},${ys(d.value).toFixed(1)}`);
-  const makeArea=(pts)=>`M${xs(0).toFixed(1)},${(VH-pB).toFixed(1)} ${pts.map(p=>`L${p}`).join(' ')} L${xs(n-1).toFixed(1)},${(VH-pB).toFixed(1)} Z`;
-  const pts1=makePts(d1),pts2=makePts(d2);
-  const makeDots=(data,color,offset)=>data.map((d,i)=>{
-    const cx=xs(i).toFixed(1),cy=ys(d.value).toFixed(1);
-    return `<circle cx="${cx}" cy="${cy}" r="3.5" fill="${color}" stroke="#fff" stroke-width="1.5"/>
-      ${d.value>0?`<text x="${cx}" y="${(parseFloat(cy)-7+offset).toFixed(1)}" text-anchor="middle" font-size="8" fill="${color}" font-family="monospace" font-weight="700">${fmtShort(d.value)}</text>`:''}`;
+  const bars = dB.map((d,i)=>{
+    const vB=d.v, vT=dT[i].v, total=vB+vT;
+    const x=bX(i), w=bW.toFixed(1);
+    const hB=parseFloat(bH(vB)), hT=parseFloat(bH(vT));
+    const yB=(pT+cH-hB).toFixed(1);
+    const yT=(pT+cH-hB-hT).toFixed(1);
+    const cx=(parseFloat(x)+parseFloat(w)/2).toFixed(1);
+    const bottomBar = vB>0 ? `<rect x="${x}" y="${yB}" width="${w}" height="${hB.toFixed(1)}" fill="${colorBottom}" opacity="0.85"><title>${lblBottom}: ${vB}</title></rect>` : '';
+    const topBar    = vT>0 ? `<rect x="${x}" y="${yT}" width="${w}" height="${hT.toFixed(1)}" fill="${colorTop}" rx="2" ry="2"><title>${lblTop}: ${vT}</title></rect>` : '';
+    const topY      = total>0 ? (vT>0?parseFloat(yT):parseFloat(yB)) : pT;
+    const totalLbl  = total>0 ? `<text x="${cx}" y="${(topY-4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#4a5568" font-family="monospace" font-weight="700">${total}</text>` : '';
+    const xLbl      = `<text x="${cx}" y="${(VH-pB+14).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9aa3b5" font-family="monospace">${d.label}</text>`;
+    return bottomBar+topBar+totalLbl+xLbl;
   }).join('');
-  const xLabels=months.map((m,i)=>`<text x="${xs(i).toFixed(1)}" y="${(VH-pB+18).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9aa3b5" font-family="monospace">${m.label}</text>`).join('');
-  const legend=`<circle cx="10" cy="10" r="4" fill="${color1}"/><text x="18" y="14" font-size="9" fill="${color1}" font-family="monospace" font-weight="700">${lbl1}</text>
-    <circle cx="58" cy="10" r="4" fill="${color2}"/><text x="66" y="14" font-size="9" fill="${color2}" font-family="monospace" font-weight="700">${lbl2}</text>`;
-  const gid1=`lcg_${containerId}_1`,gid2=`lcg_${containerId}_2`;
+  const legend=`<rect x="8" y="5" width="10" height="8" fill="${colorBottom}" rx="1" opacity="0.85"/>
+    <text x="22" y="13" font-size="9" fill="${colorBottom}" font-family="monospace" font-weight="700">${lblBottom}</text>
+    <rect x="64" y="5" width="10" height="8" fill="${colorTop}" rx="1"/>
+    <text x="78" y="13" font-size="9" fill="${colorTop}" font-family="monospace" font-weight="700">${lblTop}</text>`;
   el.innerHTML=`<svg viewBox="0 0 ${VW} ${VH}" width="100%" style="display:block;overflow:visible">
-    <defs>
-      <linearGradient id="${gid1}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color1}" stop-opacity="0.15"/><stop offset="100%" stop-color="${color1}" stop-opacity="0.01"/></linearGradient>
-      <linearGradient id="${gid2}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color2}" stop-opacity="0.12"/><stop offset="100%" stop-color="${color2}" stop-opacity="0.01"/></linearGradient>
-    </defs>
-    ${legend}${gridLines}
-    <path d="${makeArea(pts1)}" fill="url(#${gid1})"/>
-    <path d="${makeArea(pts2)}" fill="url(#${gid2})"/>
-    <polyline points="${pts1.join(' ')}" fill="none" stroke="${color1}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <polyline points="${pts2.join(' ')}" fill="none" stroke="${color2}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,3"/>
-    ${makeDots(d1,color1,0)}${makeDots(d2,color2,10)}${xLabels}
+    ${legend}${gridLines}${bars}
   </svg>`;
 }
 
@@ -2604,7 +2605,7 @@ function _renderOneLineChart(chartId) {
   } else if (chartId === 'cotizaciones') {
     const gWeb={}, gCrm={};
     _data.cotizaciones.forEach(x=>{ const k=_itemDateKey(x); if(!k) return; if((x.origen||'CRM').toUpperCase()==='WEB') gWeb[k]=(gWeb[k]||0)+1; else gCrm[k]=(gCrm[k]||0)+1; });
-    drawDualLineChart('lc-cotizaciones', months, gWeb, '#16a34a', 'WEB', gCrm, '#6b7a99', 'CRM', v=>v);
+    drawStackedBarChart('lc-cotizaciones', months, gCrm, '#6b7a99', 'CRM', gWeb, '#16a34a', 'WEB');
   } else if (chartId === 'ventas') {
     const g = {}; _data.ventas.forEach(x=>{ const k=_itemDateKey(x); if(k) g[k]=(g[k]||0)+(parseFloat(x.ingreso_neto)||0); });
     const fmtV = v=>v>=1000000?'$'+(v/1000000).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+Math.round(v);
