@@ -131,16 +131,29 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 @media(max-width:768px){.calzado-marcas{grid-template-columns:1fr 1fr;}.calzado-cta-buttons{flex-direction:column;align-items:center;}}
 @media(max-width:480px){.calzado-marcas{grid-template-columns:1fr;}}
 
-/* PROCESS */
-.process-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
-.process-image{border-radius:16px;overflow:hidden;height:480px;}
-.process-image img{width:100%;height:100%;object-fit:cover;}
-.process-steps-list{display:flex;flex-direction:column;gap:32px;}
-.process-step{display:flex;gap:20px;align-items:flex-start;}
-.process-num{width:48px;height:48px;flex-shrink:0;background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--sky);}
-.process-title{font-size:16px;font-weight:600;color:#fff;margin-bottom:4px;}
-.process-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;}
-@media(max-width:768px){.process-layout{grid-template-columns:1fr;}.process-image{height:280px;}}
+/* PROCESS TIMELINE */
+.ptl-outer{display:flex;align-items:flex-start;padding-top:16px;}
+.ptl-step{flex:1;position:relative;}
+.ptl-top{display:flex;align-items:center;margin-bottom:28px;}
+.ptl-dot{width:48px;height:48px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;position:relative;z-index:2;}
+.ptl-dot.active{background:var(--orange);color:#fff;box-shadow:0 4px 20px rgba(184,92,36,.4);}
+.ptl-dot.inactive{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);color:rgba(255,255,255,.4);}
+.ptl-connector{flex:1;height:2px;margin:0 2px;}
+.ptl-connector.orange{background:var(--orange);}
+.ptl-connector.dim{background:rgba(255,255,255,.1);}
+.ptl-body{padding-right:28px;}
+.ptl-step:last-child .ptl-body{padding-right:0;}
+.ptl-step-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.3;}
+.ptl-step-desc{font-size:13px;color:rgba(255,255,255,.42);line-height:1.65;margin-bottom:10px;}
+.ptl-step-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--orange-light);opacity:.85;}
+@media(max-width:768px){
+  .ptl-outer{flex-direction:column;gap:0;}
+  .ptl-step{display:flex;gap:16px;align-items:flex-start;width:100%;padding-bottom:24px;}
+  .ptl-top{margin-bottom:0;flex-shrink:0;flex-direction:column;align-items:center;gap:0;}
+  .ptl-connector{width:2px;height:24px;margin:2px 0;flex:none;}
+  .ptl-step:last-child .ptl-top .ptl-connector{display:none;}
+  .ptl-body{padding-right:0;padding-top:4px;}
+}
 
 /* COTIZADOR TALLES */
 .talle-card{border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color .2s;}
@@ -258,18 +271,31 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .btn-wa-sm:hover{background:#20bd5a;}
 
 /* ABOUT */
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
-.about-feature{display:flex;gap:16px;margin-bottom:28px;}
-.about-feature-icon{width:44px;height:44px;flex-shrink:0;background:rgba(37,99,176,.08);border:1px solid rgba(37,99,176,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;}
-.about-feature-icon svg{width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.about-feature h4{font-size:15px;font-weight:600;margin-bottom:4px;}
-.about-feature p{font-size:13px;color:var(--muted);line-height:1.6;}
-.about-visual{background:linear-gradient(135deg,var(--navy),var(--navy-mid));border-radius:16px;padding:48px;display:flex;flex-direction:column;gap:24px;}
-.about-stat-row{display:flex;gap:24px;}
-.about-stat{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:20px;}
-.about-stat-num{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;}
-.about-stat-label{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;}
-@media(max-width:768px){.about-grid{grid-template-columns:1fr;gap:40px;}}
+.about-new-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.about-photo-col{position:relative;}
+.about-photo-stack{position:relative;padding-bottom:48px;padding-right:32px;}
+.about-photo-main{border-radius:16px;overflow:hidden;height:440px;box-shadow:0 20px 60px rgba(10,30,61,.13);}
+.about-photo-main img{width:100%;height:100%;object-fit:cover;}
+.about-photo-secondary{position:absolute;bottom:0;right:0;width:190px;height:150px;border-radius:12px;overflow:hidden;border:4px solid var(--white);box-shadow:0 12px 40px rgba(10,30,61,.18);}
+.about-photo-secondary img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.about-photo-badge{position:absolute;bottom:56px;left:-16px;background:var(--orange);color:#fff;border-radius:10px;padding:14px 18px;box-shadow:0 8px 32px rgba(184,92,36,.35);min-width:160px;}
+.about-badge-num{font-family:'DM Serif Display',serif;font-size:28px;line-height:1;}
+.about-badge-txt{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;opacity:.8;margin-top:5px;line-height:1.4;}
+.about-text-col{}
+.about-feats-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 28px;margin-top:8px;}
+.about-feat-item{display:flex;gap:12px;align-items:flex-start;}
+.about-feat-icon{width:36px;height:36px;flex-shrink:0;background:rgba(37,99,176,.07);border:1px solid rgba(37,99,176,.14);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.about-feat-icon svg{stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.about-feat-item h4{font-size:13.5px;font-weight:600;margin-bottom:3px;color:var(--text);}
+.about-feat-item p{font-size:12.5px;color:var(--muted);line-height:1.55;}
+@media(max-width:768px){
+  .about-new-grid{grid-template-columns:1fr;gap:48px;}
+  .about-photo-stack{padding-right:16px;padding-bottom:40px;}
+  .about-photo-main{height:300px;}
+  .about-photo-secondary{width:140px;height:110px;right:0;}
+  .about-photo-badge{left:0;bottom:50px;}
+  .about-feats-grid{grid-template-columns:1fr;}
+}
 
 /* FOOTER */
 .footer{background:var(--navy);padding:60px 0 32px;color:rgba(255,255,255,.5);}
@@ -502,56 +528,96 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="container">
     <div class="section-header fade-up">
       <div class="section-label">Proceso</div>
-      <div class="section-title" style="color:#fff">Cómo trabajamos</div>
-      <p class="section-desc">Un proceso simple de principio a fin, con un solo punto de contacto.</p>
+      <div class="section-title" style="color:#fff">Cómo trabajamos.</div>
+      <p class="section-desc">De principio a fin, en cuatro pasos claros. Vos te ocupás de tu negocio, nosotros del resto.</p>
     </div>
-    <div class="process-layout fade-up">
-      <div class="process-image">
-        <img src="images/como_trabajamos-scaled.jpg" alt="Proceso de trabajo SAGUMA" loading="lazy">
+    <div class="ptl-outer fade-up">
+      <div class="ptl-step">
+        <div class="ptl-top">
+          <div class="ptl-dot active">01</div>
+          <div class="ptl-connector orange"></div>
+        </div>
+        <div class="ptl-body">
+          <div class="ptl-step-title">Nos enviás tu consulta</div>
+          <div class="ptl-step-desc">Completás el cotizador online indicando producto, cantidades y personalización.</div>
+          <span class="ptl-step-tag">↳ LLEVA 5 MINUTOS</span>
+        </div>
       </div>
-      <div class="process-steps-list">
-        <div class="process-step"><div class="process-num">01</div><div><div class="process-title">Nos enviás tu consulta</div><div class="process-desc">Completas el cotizador indicando producto, cantidades y personalización.</div></div></div>
-        <div class="process-step"><div class="process-num">02</div><div><div class="process-title">Cotizamos el pedido</div><div class="process-desc">Lo recibimos, cotizamos y te respondemos con el presupuesto final por mail.</div></div></div>
-        <div class="process-step"><div class="process-num">03</div><div><div class="process-title">Lo producimos</div><div class="process-desc">Fabricamos según los talles y especificaciones de tu empresa.</div></div></div>
-        <div class="process-step"><div class="process-num">04</div><div><div class="process-title">Te lo entregamos</div><div class="process-desc">Despacho en todo el país o retiro en punto acordado.</div></div></div>
+      <div class="ptl-step">
+        <div class="ptl-top">
+          <div class="ptl-dot inactive">02</div>
+          <div class="ptl-connector dim"></div>
+        </div>
+        <div class="ptl-body">
+          <div class="ptl-step-title">Cotizamos el pedido</div>
+          <div class="ptl-step-desc">Lo recibimos, revisamos y te respondemos con el presupuesto final por mail.</div>
+          <span class="ptl-step-tag">↳ RECIBÍ TU RESPUESTA AL INSTANTE</span>
+        </div>
+      </div>
+      <div class="ptl-step">
+        <div class="ptl-top">
+          <div class="ptl-dot inactive">03</div>
+          <div class="ptl-connector dim"></div>
+        </div>
+        <div class="ptl-body">
+          <div class="ptl-step-title">Lo producimos</div>
+          <div class="ptl-step-desc">Fabricamos según los talles y especificaciones de tu empresa, con control de calidad.</div>
+        </div>
+      </div>
+      <div class="ptl-step">
+        <div class="ptl-top">
+          <div class="ptl-dot inactive">04</div>
+        </div>
+        <div class="ptl-body">
+          <div class="ptl-step-title">Te lo entregamos</div>
+          <div class="ptl-step-desc">Despacho a todo el país o retiro en punto acordado, con seguimiento del envío.</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- NOSOTROS -->
-<section class="section section-white" id="nosotros" style="background:var(--gray-100)">
+<section class="section section-white" id="nosotros" style="background:var(--white)">
   <div class="container">
-    <div class="about-grid">
-      <div class="fade-up">
-        <div class="section-label">Quiénes somos</div>
-        <div class="section-title">Especialistas en indumentaria laboral</div>
-        <p class="section-desc" style="margin-bottom:32px">Gestión simple y entregas confiables. Un solo punto de contacto de principio a fin.</p>
-        <div class="about-feature">
-          <div class="about-feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
-          <div><h4>Pedidos 100% a medida</h4><p>Vos enviás tu necesidad, nosotros gestionamos todo: toma de requerimientos, cotización, armado del pedido, control de fabricación y entrega.</p></div>
-        </div>
-        <div class="about-feature">
-          <div class="about-feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-          <div><h4>Producción confiable</h4><p>Trabajamos con talleres especializados y procesos de control que aseguran calidad en cada prenda. Tiempos realistas y cumplimiento.</p></div>
-        </div>
-        <div class="about-feature">
-          <div class="about-feature-icon"><svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div><h4>Bordado y estampado</h4><p>Personalización de prendas con bordado y estampado de alta calidad. Tu marca en cada prenda.</p></div>
+    <div class="about-new-grid">
+      <!-- Fotos -->
+      <div class="about-photo-col fade-up">
+        <div class="about-photo-stack">
+          <div class="about-photo-main">
+            <img src="images/indumentaria_quienes_somos-scaled.jpg" alt="Equipo SAGUMA" loading="lazy">
+          </div>
+          <div class="about-photo-secondary">
+            <img src="images/ropa_de_trabajo_3-scaled.jpg" alt="Producción SAGUMA" loading="lazy">
+          </div>
+          <div class="about-photo-badge">
+            <div class="about-badge-num">+10 años</div>
+            <div class="about-badge-txt">Vistiendo empresas<br>argentinas</div>
+          </div>
         </div>
       </div>
-      <div class="about-visual fade-up">
-        <div style="text-align:center;margin-bottom:8px">
-          <div style="font-family:'DM Serif Display',serif;font-size:36px;color:#fff;letter-spacing:4px">SAGUMA</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Indumentaria laboral</div>
-        </div>
-        <div class="about-stat-row">
-          <div class="about-stat"><div class="about-stat-num">30+</div><div class="about-stat-label">Prendas mínimo por pedido</div></div>
-          <div class="about-stat"><div class="about-stat-num">100%</div><div class="about-stat-label">Pedidos a medida</div></div>
-        </div>
-        <div class="about-stat-row">
-          <div class="about-stat"><div class="about-stat-num">1</div><div class="about-stat-label">Un solo contacto</div></div>
-          <div class="about-stat"><div class="about-stat-num">&#10003;</div><div class="about-stat-label">Envíos a todo el país</div></div>
+      <!-- Texto -->
+      <div class="about-text-col fade-up">
+        <div class="section-label">Quiénes somos</div>
+        <div class="section-title">Especialistas en indumentaria laboral, hace más de una década.</div>
+        <p class="section-desc" style="margin-bottom:36px">SAGUMA es un taller-comercializador argentino que diseña, produce y entrega uniformes laborales a medida para empresas de cualquier rubro. Gestión simple y entregas confiables.</p>
+        <div class="about-feats-grid">
+          <div class="about-feat-item">
+            <div class="about-feat-icon"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
+            <div><h4>100% a medida</h4><p>De los requerimientos a la entrega, todo coordinado por nosotros.</p></div>
+          </div>
+          <div class="about-feat-item">
+            <div class="about-feat-icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+            <div><h4>Producción confiable</h4><p>Talleres especializados y procesos de control en cada lote.</p></div>
+          </div>
+          <div class="about-feat-item">
+            <div class="about-feat-icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div><h4>Bordado y estampado</h4><p>Personalización con tu marca en cada prenda.</p></div>
+          </div>
+          <div class="about-feat-item">
+            <div class="about-feat-icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+            <div><h4>Envíos a todo el país</h4><p>Logística coordinada, con seguimiento de cada entrega.</p></div>
+          </div>
         </div>
       </div>
     </div>
