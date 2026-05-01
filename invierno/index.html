@@ -77,7 +77,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--cream);
 .btn-wa:hover{background:#20bd5a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(37,211,102,.3);}
 .hero-visual{display:flex;justify-content:center;align-items:center;}
 .hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:480px;}
-.stat-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:24px 20px;text-align:center;transition:all .3s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.stat-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:24px 20px;text-align:center;transition:all .3s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:110px;position:relative;}
 .stat-card:hover{background:rgba(255,255,255,.2);transform:translateY(-2px);}
 .stat-number{font-family:'DM Serif Display',serif;font-size:36px;color:#fff;line-height:1;}
 .stat-label{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.7);letter-spacing:1px;text-transform:uppercase;margin-top:8px;}
@@ -367,7 +367,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="hero-visual">
       <div class="hero-stats">
-        <div class="stat-card"><div class="stat-label" style="margin-bottom:2px">Pedido mínimo:</div><div class="stat-number">30</div><div class="stat-label" style="margin-top:2px">prendas</div></div>
+        <div class="stat-card"><div class="stat-label" style="position:absolute;top:14px;left:0;right:0">Pedido mínimo:</div><div class="stat-number">30</div><div class="stat-label">prendas</div></div>
         <div class="stat-card"><div class="stat-number">100%</div><div class="stat-label">A medida</div></div>
         <div class="stat-card"><div class="stat-number">&#10003;</div><div class="stat-label">Envíos a todo el país</div></div>
       </div>
